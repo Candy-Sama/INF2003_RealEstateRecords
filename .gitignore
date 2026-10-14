@@ -25,3 +25,7 @@ dist/
 .DS_Store
 .vscode/
 .idea/
+
+# Ignore generated cleaned data (keep samples only)
+data/cleaned/*
+!data/cleaned/.gitkeep
