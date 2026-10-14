@@ -1,0 +1,30 @@
+# Data (raw, geo, cleaned)
+data/raw/*
+data/geo/*
+data/cleaned/*
+!data/raw/.gitkeep
+!data/geo/.gitkeep
+!data/cleaned/.gitkeep
+
+# Secrets (do NOT commit)
+.env
+*.env
+credentials.json
+scripts/data_prep/00_get_token.py
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+build/
+dist/
+*.egg-info/
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
