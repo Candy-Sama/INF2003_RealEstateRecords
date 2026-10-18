@@ -24,7 +24,7 @@ USE `mydb` ;
 DROP TABLE IF EXISTS `mydb`.`STATIONS` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`STATIONS` (
-  `station_id` VARCHAR(20) NOT NULL,
+  `station_id` VARCHAR(20) NOT NULL auto_increment,
   `station_code` VARCHAR(45) NOT NULL,
   `station_name` VARCHAR(45) NOT NULL,
   `line_name` VARCHAR(45) NOT NULL,
@@ -42,7 +42,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`PLACE` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`PLACE` (
-  `block_id` VARCHAR(20) NOT NULL,
+  `block_id` VARCHAR(20) NOT NULL auto_increment,
   `block_number` VARCHAR(45) NOT NULL,
   `road_name` VARCHAR(45) NOT NULL,
   `postal` VARCHAR(45) NOT NULL,
@@ -59,7 +59,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`FLAT` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`FLAT` (
-  `flat_id` INT NOT NULL,
+  `flat_id` INT NOT NULL auto_increment,
   `flat_type` VARCHAR(45) NOT NULL,
   `flat_model` VARCHAR(45) NOT NULL,
   `storey_range` VARCHAR(45) NOT NULL,
@@ -120,7 +120,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`AGENTS` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`AGENTS` (
-  `agent_id` INT NOT NULL,
+  `agent_id` INT NOT NULL auto_increment,
   `name` VARCHAR(45) NOT NULL,
   `email` VARCHAR(45) NOT NULL,
   `phone_number` VARCHAR(45) NOT NULL,
