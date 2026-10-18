@@ -20,7 +20,8 @@ df = df.rename(columns={
 })
 
 # 2. Convert month (YYYY-MM) to a proper date
-df["transaction_date"] = pd.to_datetime(df["transaction_date"], format="%Y-%m")
+#df["transaction_date"] = pd.to_datetime(df["transaction_date"], format="%Y-%m") OLD_Unused
+df["transaction_date"] = pd.to_datetime(df["transaction_date"], format="%Y-%m").dt.to_period("M")
 
 # 3. Create a full address column for geocoding later
 df["full_address"] = df["block_number"].astype(str) + " " + df["street_name"]
