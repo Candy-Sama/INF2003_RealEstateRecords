@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`FLAT` (
   `storey_range` VARCHAR(45) NOT NULL,
   `floor_area_sqm` INT NOT NULL,
   `block_id` INT NOT NULL,
-  `lease_commence_date` YEAR NOT NULL,
+  `lease_commence_date` INT NOT NULL,
   `remaining_lease_months` INT NOT NULL,
   PRIMARY KEY (`flat_id`),
   INDEX `fk_RESALE_TRANSACTION_BLOCK1_idx` (`block_id` ASC) VISIBLE,
