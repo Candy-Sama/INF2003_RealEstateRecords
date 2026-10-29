@@ -6,7 +6,7 @@ import pandas as pd
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "your_password",
+    "password": "musRootPw",
     "database": "mydb",
 }
 
@@ -29,7 +29,9 @@ def main():
         print("Importing into 'place' table...")
         start_table = time.time()
 
-        place_df = pd.read_csv("places_for_mysql.csv")
+        place_df = pd.read_csv(
+           "places_for_mysql.csv"
+        )
         place_query = """
             INSERT INTO place (block_id, block_number, road_name, postal, latitude, longtitude, town)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
