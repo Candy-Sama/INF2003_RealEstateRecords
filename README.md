@@ -21,6 +21,10 @@ property data; MongoDB stores each agent's saved searches.
 
 1. Start your local MySQL and MongoDB servers.
 2. Create and activate a Python virtual environment.
+   ```powershell
+      python -m venv .venv
+      .\.venv\Scripts\Activate.ps1
+   ```
 3. Install dependencies:
 
    ```powershell
