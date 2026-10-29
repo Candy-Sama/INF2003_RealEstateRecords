@@ -1,7 +1,12 @@
 """Database connection factories configured through environment variables."""
 
 import os
+from pathlib import Path
 
+from dotenv import load_dotenv
+
+
+load_dotenv(Path(__file__).with_name(".env"), override=False)
 
 def get_mysql_connection():
     """Connect to the configured MySQL schema."""

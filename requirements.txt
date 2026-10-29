@@ -1,3 +1,4 @@
 streamlit>=1.37,<2.0
 mysql-connector-python>=8.4,<10.0
 pymongo>=4.8,<5.0
+python-dotenv>=1.0,<2.0

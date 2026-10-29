@@ -16,19 +16,6 @@ CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8mb3 ;
 USE `mydb` ;
 
 -- -----------------------------------------------------
--- Table `mydb`.`nosql`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`nosql` ;
-
-CREATE TABLE IF NOT EXISTS `mydb`.`nosql` (
-  `idNoSQL` INT NOT NULL,
-  `NoSQLData` JSON NULL DEFAULT NULL,
-  PRIMARY KEY (`idNoSQL`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
 -- Table `mydb`.`agents`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `mydb`.`agents` ;
@@ -39,13 +26,8 @@ CREATE TABLE IF NOT EXISTS `mydb`.`agents` (
   `email` VARCHAR(45) NOT NULL,
   `phone_number` VARCHAR(45) NOT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
-  `NoSQL_idNoSQL` INT NOT NULL,
   PRIMARY KEY (`agent_id`),
-  UNIQUE INDEX `agent_id_UNIQUE` (`agent_id` ASC) VISIBLE,
-  INDEX `fk_AGENTS_NoSQL1_idx` (`NoSQL_idNoSQL` ASC) VISIBLE,
-  CONSTRAINT `fk_AGENTS_NoSQL1`
-    FOREIGN KEY (`NoSQL_idNoSQL`)
-    REFERENCES `mydb`.`nosql` (`idNoSQL`))
+  UNIQUE INDEX `agent_id_UNIQUE` (`agent_id` ASC) VISIBLE)
 ENGINE = InnoDB
 AUTO_INCREMENT = 2
 DEFAULT CHARACTER SET = utf8mb3;
@@ -92,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`flat` (
     FOREIGN KEY (`block_id`)
     REFERENCES `mydb`.`place` (`block_id`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 242635
+AUTO_INCREMENT = 485269
 DEFAULT CHARACTER SET = utf8mb3;
 
 
@@ -115,10 +97,9 @@ CREATE TABLE IF NOT EXISTS `mydb`.`stations` (
   INDEX `fk_stations_place1_idx` (`place_block_id` ASC) VISIBLE,
   CONSTRAINT `fk_stations_place1`
     FOREIGN KEY (`place_block_id`)
-    REFERENCES `mydb`.`place` (`block_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    REFERENCES `mydb`.`place` (`block_id`))
 ENGINE = InnoDB
+AUTO_INCREMENT = 204
 DEFAULT CHARACTER SET = utf8mb3;
 
 
@@ -139,6 +120,19 @@ CREATE TABLE IF NOT EXISTS `mydb`.`nearby` (
   CONSTRAINT `fk_STATIONS_has_PLACE_STATIONS1`
     FOREIGN KEY (`STATIONS_station_id`)
     REFERENCES `mydb`.`stations` (`station_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`nosql`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`nosql` ;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`nosql` (
+  `idNoSQL` INT NOT NULL,
+  `NoSQLData` JSON NULL DEFAULT NULL,
+  PRIMARY KEY (`idNoSQL`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 

@@ -31,33 +31,39 @@ property data; MongoDB stores each agent's saved searches.
    python -m pip install -r requirements.txt
    ```
 
-4. Configure the MySQL connection in PowerShell (replace values for your setup):
+4. Create your local environment file from the example:
 
    ```powershell
-   $env:MYSQL_HOST = "localhost"
-   $env:MYSQL_PORT = "3306"
-   $env:MYSQL_DATABASE = "mydb"
-   $env:MYSQL_USER = "root"
-   $env:MYSQL_PASSWORD = "your_mysql_password"
+   Copy-Item .env.example .env
    ```
 
-5. Configure MongoDB if it differs from the defaults (`mongodb://localhost:27017`
-   and database `estate_records`):
+   Edit `.env` and set `MYSQL_DATABASE`, `MYSQL_USER`, and `MYSQL_PASSWORD` to
+   your MySQL schema and credentials. Change the MongoDB settings if your local
+   server differs from the defaults.
 
-   ```powershell
-   $env:MONGODB_URI = "mongodb://localhost:27017"
-   $env:MONGODB_DATABASE = "estate_records"
-   ```
-
-6. Launch the application:
+5. Launch the application:
 
    ```powershell
    streamlit run app.py
    ```
 
-The variables set in PowerShell apply to that terminal session. Keep credentials
-out of source control; configure them as environment variables in your deployment
-environment as well.
+`database.py` loads `.env` from the project directory. Environment variables
+already set by your shell or deployment take precedence over values in `.env`.
+The real `.env` file is ignored by Git; do not commit credentials.
+
+## Tests
+
+Run the local unit tests with:
+
+```powershell
+python -m unittest test_repository test_security
+```
+
+`test_repository.py` checks that transaction search filters are passed to SQL
+as parameters rather than inserted into the query text. It uses a fake
+connection, so it does not connect to or change your MySQL database.
+`test_security.py` checks password hashing and verification locally. These
+tests do not start the app, connect to either database, or affect normal use.
 
 ## Expected MySQL schema
 
@@ -75,12 +81,11 @@ The queries follow the names and columns visible in the supplied ER diagram:
 should have a unique constraint. `agents.password_hash` should hold at least 100
 characters (the scrypt hash is 86 characters).
 
-The diagram also shows `agents.NoSQL_idNoSQL` referencing a relational `nosql`
-table. Since this app stores saved searches directly in MongoDB, its MongoDB
-documents use `agent_id` as their owner key instead. For registration to work,
-make `NoSQL_idNoSQL` nullable or give it a default, and ensure the
-`agents` insert does not require a separate `nosql` row. Do not try to enforce a
-MySQL foreign key to a MongoDB document.
+The `nosql` box in the EER drawing is illustrative, not a MySQL table. You do
+not need a `NoSQL_idNoSQL` column in `agents` for this design. Each saved-search
+document in MongoDB stores the owning MySQL `agent_id`; the app uses that value
+to retrieve only the signed-in agent's saved searches. This is an application-
+level reference, not a relational foreign key between MySQL and MongoDB.
 
 ## Notes
 
