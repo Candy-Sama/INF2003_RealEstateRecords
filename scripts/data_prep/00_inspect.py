@@ -2,7 +2,6 @@ import pandas as pd
 
 files = {
     "HDB RESALE": "data/raw/hdb_resale_transactions.csv",
-    "MRT LOCATIONS": "data/raw/mrt_station_locations.csv",
     "MRT FULL LIST": "data/raw/mrt_lrt_full_list.csv",
 }
 

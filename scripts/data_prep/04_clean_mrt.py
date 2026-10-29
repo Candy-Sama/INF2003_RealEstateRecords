@@ -1,17 +1,17 @@
 import pandas as pd
 
 print("Loading MRT location data...")
-df = pd.read_csv("data/raw/mrt_station_locations.csv")
+df = pd.read_csv("data/raw/mrt_lrt_full_list.csv")
 
 # 1. Clean column names (strip spaces, uppercase)
 df.columns = df.columns.str.strip().str.upper()
 
 # 2. Rename to match our ERD
 df = df.rename(columns={
-    "STATION_NAME": "station_name",
-    "TYPE": "transport_type",
-    "LAT": "latitude",
-    "LNG": "longitude"
+    "STATION_NAME_ENGLISH": "station_name",
+    "TRANSPORT_TYPE": "transport_type",
+    "LATITUDE": "latitude",
+    "LONGITUDE": "longitude"
 })
 
 # 3. Keep only the columns we need
