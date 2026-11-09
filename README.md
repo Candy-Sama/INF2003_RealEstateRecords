@@ -81,11 +81,17 @@ The queries follow the names and columns visible in the supplied ER diagram:
 should have a unique constraint. `agents.password_hash` should hold at least 100
 characters (the scrypt hash is 86 characters).
 
+<<<<<<< Updated upstream
 The `nosql` box in the EER drawing is illustrative, not a MySQL table. You do
 not need a `NoSQL_idNoSQL` column in `agents` for this design. Each saved-search
 document in MongoDB stores the owning MySQL `agent_id`; the app uses that value
 to retrieve only the signed-in agent's saved searches. This is an application-
 level reference, not a relational foreign key between MySQL and MongoDB.
+=======
+Saved searches are stored directly in MongoDB, and MongoDB documents use
+`agent_id` as their owner key. The MySQL `agents` table does not require a
+relational `nosql` table or a `NoSQL_idNoSQL` column.
+>>>>>>> Stashed changes
 
 ## Notes
 
