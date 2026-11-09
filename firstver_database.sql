@@ -5,40 +5,41 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 -- -----------------------------------------------------
--- Schema mydb
+-- Schema estateRecordsDB
 -- -----------------------------------------------------
-DROP SCHEMA IF EXISTS `mydb` ;
+DROP SCHEMA IF EXISTS `estateRecordsDB` ;
 
 -- -----------------------------------------------------
--- Schema mydb
+-- Schema estateRecordsDB
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8mb3 ;
-USE `mydb` ;
+CREATE SCHEMA IF NOT EXISTS `estateRecordsDB` DEFAULT CHARACTER SET utf8mb3 ;
+USE `estateRecordsDB` ;
 
 -- -----------------------------------------------------
--- Table `mydb`.`agents`
+-- Table `estateRecordsDB`.`agents`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`agents` ;
+DROP TABLE IF EXISTS `estateRecordsDB`.`agents` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`agents` (
+CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`agents` (
   `agent_id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `email` VARCHAR(45) NOT NULL,
   `phone_number` VARCHAR(45) NOT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`agent_id`),
-  UNIQUE INDEX `agent_id_UNIQUE` (`agent_id` ASC) VISIBLE)
+  UNIQUE INDEX `agent_id_UNIQUE` (`agent_id` ASC) VISIBLE,
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE)
 ENGINE = InnoDB
 AUTO_INCREMENT = 2
 DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`place`
+-- Table `estateRecordsDB`.`place`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`place` ;
+DROP TABLE IF EXISTS `estateRecordsDB`.`place` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`place` (
+CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`place` (
   `block_id` INT NOT NULL AUTO_INCREMENT,
   `block_number` VARCHAR(45) NOT NULL,
   `road_name` VARCHAR(45) NOT NULL,
@@ -54,11 +55,11 @@ DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`flat`
+-- Table `estateRecordsDB`.`flat`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`flat` ;
+DROP TABLE IF EXISTS `estateRecordsDB`.`flat` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`flat` (
+CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`flat` (
   `flat_id` INT NOT NULL AUTO_INCREMENT,
   `flat_type` VARCHAR(45) NOT NULL,
   `flat_model` VARCHAR(45) NOT NULL,
@@ -72,18 +73,18 @@ CREATE TABLE IF NOT EXISTS `mydb`.`flat` (
   INDEX `fk_RESALE_TRANSACTION_BLOCK1_idx` (`block_id` ASC) VISIBLE,
   CONSTRAINT `fk_RESALE_TRANSACTION_BLOCK1`
     FOREIGN KEY (`block_id`)
-    REFERENCES `mydb`.`place` (`block_id`))
+    REFERENCES `estateRecordsDB`.`place` (`block_id`))
 ENGINE = InnoDB
 AUTO_INCREMENT = 485269
 DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`stations`
+-- Table `estateRecordsDB`.`stations`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`stations` ;
+DROP TABLE IF EXISTS `estateRecordsDB`.`stations` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`stations` (
+CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`stations` (
   `station_id` INT NOT NULL AUTO_INCREMENT,
   `station_code` VARCHAR(45) NOT NULL,
   `station_name` VARCHAR(45) NOT NULL,
@@ -97,18 +98,20 @@ CREATE TABLE IF NOT EXISTS `mydb`.`stations` (
   INDEX `fk_stations_place1_idx` (`place_block_id` ASC) VISIBLE,
   CONSTRAINT `fk_stations_place1`
     FOREIGN KEY (`place_block_id`)
-    REFERENCES `mydb`.`place` (`block_id`))
+    REFERENCES `estateRecordsDB`.`place` (`block_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB
 AUTO_INCREMENT = 204
 DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`nearby`
+-- Table `estateRecordsDB`.`nearby`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`nearby` ;
+DROP TABLE IF EXISTS `estateRecordsDB`.`nearby` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`nearby` (
+CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`nearby` (
   `STATIONS_station_id` INT NOT NULL,
   `PLACE_block_id` INT NOT NULL,
   PRIMARY KEY (`STATIONS_station_id`, `PLACE_block_id`),
@@ -116,33 +119,20 @@ CREATE TABLE IF NOT EXISTS `mydb`.`nearby` (
   INDEX `fk_STATIONS_has_PLACE_STATIONS1_idx` (`STATIONS_station_id` ASC) VISIBLE,
   CONSTRAINT `fk_STATIONS_has_PLACE_PLACE1`
     FOREIGN KEY (`PLACE_block_id`)
-    REFERENCES `mydb`.`place` (`block_id`),
+    REFERENCES `estateRecordsDB`.`place` (`block_id`),
   CONSTRAINT `fk_STATIONS_has_PLACE_STATIONS1`
     FOREIGN KEY (`STATIONS_station_id`)
-    REFERENCES `mydb`.`stations` (`station_id`))
+    REFERENCES `estateRecordsDB`.`stations` (`station_id`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`nosql`
+-- Table `estateRecordsDB`.`resale_transaction`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`nosql` ;
+DROP TABLE IF EXISTS `estateRecordsDB`.`resale_transaction` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`nosql` (
-  `idNoSQL` INT NOT NULL,
-  `NoSQLData` JSON NULL DEFAULT NULL,
-  PRIMARY KEY (`idNoSQL`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
--- Table `mydb`.`resale_transaction`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`resale_transaction` ;
-
-CREATE TABLE IF NOT EXISTS `mydb`.`resale_transaction` (
+CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`resale_transaction` (
   `FLAT_flat_id` INT NOT NULL,
   `AGENTS_agent_id` INT NOT NULL,
   `transaction_date` DATE NOT NULL,
@@ -152,10 +142,10 @@ CREATE TABLE IF NOT EXISTS `mydb`.`resale_transaction` (
   INDEX `fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx` (`FLAT_flat_id` ASC) VISIBLE,
   CONSTRAINT `fk_RESALE_TRANSACTION_has_AGENTS_AGENTS1`
     FOREIGN KEY (`AGENTS_agent_id`)
-    REFERENCES `mydb`.`agents` (`agent_id`),
+    REFERENCES `estateRecordsDB`.`agents` (`agent_id`),
   CONSTRAINT `fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1`
     FOREIGN KEY (`FLAT_flat_id`)
-    REFERENCES `mydb`.`flat` (`flat_id`))
+    REFERENCES `estateRecordsDB`.`flat` (`flat_id`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
