@@ -124,7 +124,7 @@ def search_transactions(connection: Any, filters: dict[str, Any]) -> list[dict[s
             parameters.append(value)
 
     query = (
-        "SELECT rt.transaction_date, rt.resale_price, "
+        "SELECT rt.transacton_date, rt.resale_price, "
         "f.flat_id, f.flat_type, f.flat_model, f.storey_range, "
         "f.floor_area_sqm, f.remaining_lease_months, "
         "p.block_number, p.road_name, p.town, p.postal "
