@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`agents` (
   `password_hash` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`agent_id`),
   UNIQUE INDEX `agent_id_UNIQUE` (`agent_id` ASC) VISIBLE,
-  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE))
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE)
 ENGINE = InnoDB
 AUTO_INCREMENT = 2
 DEFAULT CHARACTER SET = utf8mb3;
