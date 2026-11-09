@@ -6,7 +6,7 @@ import pandas as pd
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "meeplepw",
+    "password": "200096",
     "database": "estateRecordsDB",
 }
 
@@ -153,7 +153,7 @@ def main():
         start_table = time.time()
 
         resale_query = """
-            INSERT INTO resale_transaction (FLAT_flat_id, AGENTS_agent_id, transacton_date, resale_price)
+            INSERT INTO resale_transaction (FLAT_flat_id, AGENTS_agent_id, transaction_date, resale_price)
             VALUES (%s, %s, %s, %s);
         """
         

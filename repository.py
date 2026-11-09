@@ -1,13 +1,11 @@
-"""MySQL queries matching the real-estate schema shown in the project diagram."""
-
 from typing import Any
 
 
 def find_agent_by_email(connection: Any, email: str) -> dict[str, Any] | None:
-    with connection.cursor(dictionary=True) as cursor:
+    with connection.cursor(dictionary=True, buffered=True) as cursor:
         cursor.execute(
             "SELECT agent_id, name, email, phone_number, password_hash "
-            "FROM `agents` WHERE email = %s",
+            "FROM `agents` WHERE email = %s LIMIT 1",
             (email,),
         )
         return cursor.fetchone()
@@ -124,7 +122,7 @@ def search_transactions(connection: Any, filters: dict[str, Any]) -> list[dict[s
             parameters.append(value)
 
     query = (
-        "SELECT rt.transacton_date, rt.resale_price, "
+        "SELECT rt.transaction_date, rt.resale_price, "
         "f.flat_id, f.flat_type, f.flat_model, f.storey_range, "
         "f.floor_area_sqm, f.remaining_lease_months, "
         "p.block_number, p.road_name, p.town, p.postal "
@@ -137,3 +135,15 @@ def search_transactions(connection: Any, filters: dict[str, Any]) -> list[dict[s
     with connection.cursor(dictionary=True) as cursor:
         cursor.execute(query, tuple(parameters))
         return cursor.fetchall()
+
+
+def list_flat_options(connection: Any) -> dict[str, list[str]]:
+    options: dict[str, list[str]] = {}
+    with connection.cursor(buffered=True) as cursor:
+        # Column names are fixed constants, never user input.
+        for column in ("flat_type", "flat_model", "storey_range"):
+            cursor.execute(
+                f"SELECT DISTINCT `{column}` FROM `flat` ORDER BY `{column}`"
+            )
+            options[column] = [row[0] for row in cursor.fetchall()]
+    return options

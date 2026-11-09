@@ -135,7 +135,7 @@ DROP TABLE IF EXISTS `estateRecordsDB`.`resale_transaction` ;
 CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`resale_transaction` (
   `FLAT_flat_id` INT NOT NULL,
   `AGENTS_agent_id` INT NOT NULL,
-  `transacton_date` DATE NOT NULL,
+  `transaction_date` DATE NOT NULL,
   `resale_price` FLOAT NOT NULL,
   PRIMARY KEY (`FLAT_flat_id`, `AGENTS_agent_id`),
   INDEX `fk_RESALE_TRANSACTION_has_AGENTS_AGENTS1_idx` (`AGENTS_agent_id` ASC) VISIBLE,
