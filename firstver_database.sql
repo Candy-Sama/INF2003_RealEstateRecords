@@ -16,19 +16,11 @@ CREATE SCHEMA IF NOT EXISTS `estateRecordsDB` DEFAULT CHARACTER SET utf8mb3 ;
 USE `estateRecordsDB` ;
 
 -- -----------------------------------------------------
-<<<<<<< Updated upstream
--- Table `mydb`.`agents`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`agents` ;
-
-CREATE TABLE IF NOT EXISTS `mydb`.`agents` (
-=======
 -- Table `estateRecordsDB`.`agents`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `estateRecordsDB`.`agents` ;
 
 CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`agents` (
->>>>>>> Stashed changes
   `agent_id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `email` VARCHAR(45) NOT NULL,
@@ -105,13 +97,9 @@ CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`stations` (
   INDEX `fk_stations_place1_idx` (`place_block_id` ASC) VISIBLE,
   CONSTRAINT `fk_stations_place1`
     FOREIGN KEY (`place_block_id`)
-<<<<<<< Updated upstream
-    REFERENCES `mydb`.`place` (`block_id`))
-=======
     REFERENCES `estateRecordsDB`.`place` (`block_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
->>>>>>> Stashed changes
 ENGINE = InnoDB
 AUTO_INCREMENT = 204
 DEFAULT CHARACTER SET = utf8mb3;
@@ -139,24 +127,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
-<<<<<<< Updated upstream
--- Table `mydb`.`nosql`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`nosql` ;
-
-CREATE TABLE IF NOT EXISTS `mydb`.`nosql` (
-  `idNoSQL` INT NOT NULL,
-  `NoSQLData` JSON NULL DEFAULT NULL,
-  PRIMARY KEY (`idNoSQL`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
--- Table `mydb`.`resale_transaction`
-=======
 -- Table `estateRecordsDB`.`resale_transaction`
->>>>>>> Stashed changes
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `estateRecordsDB`.`resale_transaction` ;
 
