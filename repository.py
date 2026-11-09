@@ -1,13 +1,11 @@
-"""MySQL queries matching the real-estate schema shown in the project diagram."""
-
 from typing import Any
 
 
 def find_agent_by_email(connection: Any, email: str) -> dict[str, Any] | None:
-    with connection.cursor(dictionary=True) as cursor:
+    with connection.cursor(dictionary=True, buffered=True) as cursor:
         cursor.execute(
             "SELECT agent_id, name, email, phone_number, password_hash "
-            "FROM `agents` WHERE email = %s",
+            "FROM `agents` WHERE email = %s LIMIT 1",
             (email,),
         )
         return cursor.fetchone()
