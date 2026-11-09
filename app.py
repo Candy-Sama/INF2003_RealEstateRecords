@@ -181,6 +181,7 @@ def render_authentication() -> None:
 
 def flat_values_form(
     places: list[dict[str, Any]],
+    options: dict[str, list[str]], 
     prefix: str,
     initial: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -196,15 +197,22 @@ def flat_values_form(
     selected_block = initial.get("block_id")
     block_index = place_ids.index(selected_block) if selected_block in place_ids else 0
 
+    def index_of(field: str) -> int:
+        choices = options[field]
+        return choices.index(initial[field]) if initial.get(field) in choices else 0
+
     left, right = st.columns(2)
-    flat_type = left.text_input(
-        "Flat type", value=initial.get("flat_type", ""), key=f"{prefix}_flat_type"
+    flat_type = left.selectbox(
+        "Flat type", options["flat_type"],
+        index=index_of("flat_type"), key=f"{prefix}_flat_type",
     )
-    flat_model = right.text_input(
-        "Flat model", value=initial.get("flat_model", ""), key=f"{prefix}_flat_model"
+    flat_model = right.selectbox(
+        "Flat model", options["flat_model"],
+        index=index_of("flat_model"), key=f"{prefix}_flat_model",
     )
-    storey_range = left.text_input(
-        "Storey range", value=initial.get("storey_range", ""), key=f"{prefix}_storey"
+    storey_range = left.selectbox(
+        "Storey range", options["storey_range"],
+        index=index_of("storey_range"), key=f"{prefix}_storey",
     )
     floor_area = right.number_input(
         "Floor area (sqm)",
@@ -236,9 +244,9 @@ def flat_values_form(
         key=f"{prefix}_remaining",
     )
     return {
-        "flat_type": flat_type.strip(),
-        "flat_model": flat_model.strip(),
-        "storey_range": storey_range.strip(),
+        "flat_type": flat_type,
+        "flat_model": flat_model,
+        "storey_range": storey_range,
         "floor_area_sqm": floor_area,
         "block_id": block_id,
         "lease_commence_date": lease_start,
@@ -250,6 +258,7 @@ def render_flat_management(connection: Any) -> None:
     st.subheader("Manage flat records")
     flats = repository.list_flats(connection)
     places = repository.list_places(connection)
+    flat_options = repository.list_flat_options(connection)
     if flats:
         st.dataframe(flats, use_container_width=True, hide_index=True)
     else:
@@ -261,7 +270,7 @@ def render_flat_management(connection: Any) -> None:
             st.warning("Add records to the `place` table before creating a flat.")
         else:
             with st.form("create_flat_form"):
-                values = flat_values_form(places, "create")
+                values = flat_values_form(places, flat_options, "create")
                 submitted = st.form_submit_button("Create flat", type="primary")
             if submitted:
                 if not all(
@@ -283,7 +292,7 @@ def render_flat_management(connection: Any) -> None:
             selected_id = st.selectbox("Flat record", flat_ids, key="edit_flat_id")
             selected_flat = next(flat for flat in flats if flat["flat_id"] == selected_id)
             with st.form(f"edit_flat_form_{selected_id}"):
-                values = flat_values_form(places, "edit", selected_flat)
+                values = flat_values_form(places, flat_options, "edit", selected_flat)
                 submitted = st.form_submit_button("Save changes", type="primary")
             if submitted:
                 if not all(

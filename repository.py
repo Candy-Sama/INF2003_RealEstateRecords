@@ -135,3 +135,15 @@ def search_transactions(connection: Any, filters: dict[str, Any]) -> list[dict[s
     with connection.cursor(dictionary=True) as cursor:
         cursor.execute(query, tuple(parameters))
         return cursor.fetchall()
+
+
+def list_flat_options(connection: Any) -> dict[str, list[str]]:
+    options: dict[str, list[str]] = {}
+    with connection.cursor(buffered=True) as cursor:
+        # Column names are fixed constants, never user input.
+        for column in ("flat_type", "flat_model", "storey_range"):
+            cursor.execute(
+                f"SELECT DISTINCT `{column}` FROM `flat` ORDER BY `{column}`"
+            )
+            options[column] = [row[0] for row in cursor.fetchall()]
+    return options
