@@ -6,8 +6,8 @@ import pandas as pd
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "musRootPw",
-    "database": "mydb",
+    "password": "meeplepw",
+    "database": "estateRecordsDB",
 }
 
 
@@ -58,20 +58,15 @@ def main():
         )
 
         # ==========================================
-        # 2. CREATE DEPENDENCIES ('nosql' & 'agents')
+        # 2. CREATE DEFAULT AGENT
         # ==========================================
-        print("Inserting default John Doe agent dependencies...")
+        print("Inserting default John Doe agent...")
         start_table = time.time()
-
-        # Insert parent nosql record first to satisfy agents foreign key constraint
-        cursor.execute(
-            "INSERT IGNORE INTO nosql (idNoSQL, NoSQLData) VALUES (1, '{}');"
-        )
 
         # Insert John Doe agent
         agent_query = """
-            INSERT INTO agents (agent_id, name, email, phone_number, password_hash, NoSQL_idNoSQL)
-            VALUES (1, 'John Doe', 'john_doe@example.com', '91234567', 'placeholder_hash', 1)
+            INSERT INTO agents (agent_id, name, email, phone_number, password_hash)
+            VALUES (1, 'John Doe', 'john_doe@example.com', '91234567', 'placeholder_hash')
             ON DUPLICATE KEY UPDATE agent_id=agent_id;
         """
         cursor.execute(agent_query)
