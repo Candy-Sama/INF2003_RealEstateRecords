@@ -39,3 +39,8 @@ def get_mongodb_client():
 def get_mongodb_database_name() -> str:
     """Return the MongoDB database that stores saved-search documents."""
     return os.getenv("MONGODB_DATABASE", "estate_records")
+
+
+def get_flat_record_admin_email() -> str:
+    """Return the configured email allowed to create and edit flat records."""
+    return os.getenv("FLAT_RECORD_ADMIN_EMAIL", "").strip().lower()

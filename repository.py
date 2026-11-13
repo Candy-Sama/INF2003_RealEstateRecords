@@ -38,16 +38,50 @@ def list_places(connection: Any) -> list[dict[str, Any]]:
         return cursor.fetchall()
 
 
-def list_flats(connection: Any) -> list[dict[str, Any]]:
+def count_flats(connection: Any) -> int:
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM `flat`")
+        return int(cursor.fetchone()[0])
+
+
+def list_flats(
+    connection: Any, limit: int = 100, offset: int = 0
+) -> list[dict[str, Any]]:
     with connection.cursor(dictionary=True) as cursor:
         cursor.execute(
             "SELECT f.flat_id, f.flat_type, f.flat_model, f.storey_range, "
             "f.floor_area_sqm, f.block_id, f.lease_commence_date, "
             "f.remaining_lease_months, p.block_number, p.road_name, p.town "
             "FROM `flat` AS f JOIN `place` AS p ON p.block_id = f.block_id "
-            "ORDER BY p.town, p.road_name, p.block_number, f.flat_id"
+            "ORDER BY f.flat_id DESC LIMIT %s OFFSET %s",
+            (limit, offset),
         )
         return cursor.fetchall()
+
+
+def get_flat(connection: Any, flat_id: int) -> dict[str, Any] | None:
+    with connection.cursor(dictionary=True, buffered=True) as cursor:
+        cursor.execute(
+            "SELECT f.flat_id, f.flat_type, f.flat_model, f.storey_range, "
+            "f.floor_area_sqm, f.block_id, f.lease_commence_date, "
+            "f.remaining_lease_months, p.block_number, p.road_name, p.town "
+            "FROM `flat` AS f JOIN `place` AS p ON p.block_id = f.block_id "
+            "WHERE f.flat_id = %s",
+            (flat_id,),
+        )
+        return cursor.fetchone()
+
+
+def list_flat_types(connection: Any) -> list[str]:
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT DISTINCT flat_type FROM `flat` ORDER BY flat_type")
+        return [row[0] for row in cursor.fetchall()]
+
+
+def list_towns(connection: Any) -> list[str]:
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT DISTINCT town FROM `place` ORDER BY town")
+        return [row[0] for row in cursor.fetchall()]
 
 
 def create_flat(connection: Any, values: dict[str, Any]) -> None:
@@ -91,10 +125,97 @@ def update_flat(connection: Any, flat_id: int, values: dict[str, Any]) -> None:
     connection.commit()
 
 
-def delete_flat(connection: Any, flat_id: int) -> None:
+def list_agent_transactions(
+    connection: Any, agent_id: int, limit: int = 100
+) -> list[dict[str, Any]]:
+    with connection.cursor(dictionary=True) as cursor:
+        cursor.execute(
+            "SELECT rt.FLAT_flat_id AS flat_id, rt.transaction_date, "
+            "rt.resale_price, f.flat_type, f.flat_model, p.block_number, "
+            "p.road_name, p.town "
+            "FROM `resale_transaction` AS rt "
+            "JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id "
+            "JOIN `place` AS p ON p.block_id = f.block_id "
+            "WHERE rt.AGENTS_agent_id = %s "
+            "ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC LIMIT %s",
+            (agent_id, limit),
+        )
+        return cursor.fetchall()
+
+
+def get_agent_transaction(
+    connection: Any, agent_id: int, flat_id: int
+) -> dict[str, Any] | None:
+    with connection.cursor(dictionary=True, buffered=True) as cursor:
+        cursor.execute(
+            "SELECT rt.FLAT_flat_id AS flat_id, rt.transaction_date, "
+            "rt.resale_price, f.flat_type, f.flat_model, p.block_number, "
+            "p.road_name, p.town "
+            "FROM `resale_transaction` AS rt "
+            "JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id "
+            "JOIN `place` AS p ON p.block_id = f.block_id "
+            "WHERE rt.AGENTS_agent_id = %s AND rt.FLAT_flat_id = %s",
+            (agent_id, flat_id),
+        )
+        return cursor.fetchone()
+
+
+def create_agent_transaction(
+    connection: Any,
+    agent_id: int,
+    flat_id: int,
+    transaction_date: Any,
+    resale_price: float,
+) -> None:
     with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM `flat` WHERE flat_id = %s", (flat_id,))
+        cursor.execute(
+            "INSERT INTO `resale_transaction` "
+            "(FLAT_flat_id, AGENTS_agent_id, transaction_date, resale_price) "
+            "VALUES (%s, %s, %s, %s)",
+            (flat_id, agent_id, transaction_date, resale_price),
+        )
     connection.commit()
+
+
+def update_agent_transaction(
+    connection: Any,
+    agent_id: int,
+    original_flat_id: int,
+    flat_id: int,
+    transaction_date: Any,
+    resale_price: float,
+) -> bool:
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "UPDATE `resale_transaction` "
+            "SET FLAT_flat_id = %s, transaction_date = %s, resale_price = %s "
+            "WHERE FLAT_flat_id = %s AND AGENTS_agent_id = %s",
+            (flat_id, transaction_date, resale_price, original_flat_id, agent_id),
+        )
+        updated = cursor.rowcount > 0
+        if not updated:
+            cursor.execute(
+                "SELECT FLAT_flat_id FROM `resale_transaction` "
+                "WHERE FLAT_flat_id = %s AND AGENTS_agent_id = %s",
+                (original_flat_id, agent_id),
+            )
+            updated = cursor.fetchone() is not None
+    connection.commit()
+    return updated
+
+
+def delete_agent_transaction(
+    connection: Any, agent_id: int, flat_id: int
+) -> bool:
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "DELETE FROM `resale_transaction` "
+            "WHERE FLAT_flat_id = %s AND AGENTS_agent_id = %s",
+            (flat_id, agent_id),
+        )
+        deleted = cursor.rowcount > 0
+    connection.commit()
+    return deleted
 
 
 def search_transactions(connection: Any, filters: dict[str, Any]) -> list[dict[str, Any]]:
