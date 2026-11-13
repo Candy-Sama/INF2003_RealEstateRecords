@@ -60,19 +60,19 @@ def main():
         # ==========================================
         # 2. CREATE DEFAULT AGENT
         # ==========================================
-        print("Inserting default John Doe agent...")
+        print("Inserting default admin agent...")
         start_table = time.time()
 
-        # Insert John Doe agent
+        # Insert Admin agent
         agent_query = """
-            INSERT INTO agents (agent_id, name, email, phone_number, password_hash)
-            VALUES (1, 'John Doe', 'john_doe@example.com', '91234567', 'placeholder_hash')
+            INSERT INTO `agents` (`name`, `email`, `phone_number`, `password_hash`)
+            VALUES ('Admin','wq@gmail.com','0000000000','scrypt$16384$8$1$9jN6UUypn1U8i94PGnxDZQ==$rAPbRTC6gbEP76rUCthnHXJe6lRJElcT1_3BxCjFm7E=')
             ON DUPLICATE KEY UPDATE agent_id=agent_id;
         """
         cursor.execute(agent_query)
         conn.commit()
         agent_time = time.time() - start_table
-        print(f"-> Default agent 'John Doe' set up in {agent_time:.2f} seconds.")
+        print(f"-> Default agent 'Admin' set up in {agent_time:.2f} seconds.")
 
         # ==========================================
         # 3. IMPORT INTO 'flat'

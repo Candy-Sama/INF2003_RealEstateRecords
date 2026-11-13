@@ -8,8 +8,11 @@ property data; MongoDB stores each agent's saved searches.
 
 - **Register / log in:** agent accounts use the MySQL `agents` table. Passwords
   are stored as salted scrypt hashes, never as plain text.
-- **Manage flats:** create, list, update, and delete records in `flat`, linked to
-  locations in `place`. Foreign keys can prevent deleting flats with transactions.
+- **Flat records:** every signed-in agent can view flats. Only the email
+  configured in `FLAT_RECORD_ADMIN_EMAIL` can create or update flat records.
+- **My transactions:** agents can create, view, update, and delete their own
+  resale transactions. The signed-in agent ID is assigned by the app; each
+  transaction records the flat ID, transaction date, and resale price.
 - **Search / filter:** search `resale_transaction`, joined to `flat` and `place`,
   by town, flat type, price range, and transaction date. Results are limited to
   1,000 records.
@@ -38,8 +41,11 @@ property data; MongoDB stores each agent's saved searches.
    ```
 
    Edit `.env` and set `MYSQL_DATABASE`, `MYSQL_USER`, and `MYSQL_PASSWORD` to
-   your MySQL schema and credentials. Change the MongoDB settings if your local
-   server differs from the defaults.
+   your MySQL schema and credentials. `FLAT_RECORD_ADMIN_EMAIL` identifies the
+   only account allowed to create or edit flats. Create or provision that admin
+   account in `agents` before use; the public registration form will not let
+   someone claim the reserved address. Change the MongoDB settings if your
+   local server differs from the defaults.
 
 5. Launch the application:
 
@@ -60,8 +66,9 @@ python -m unittest test_repository test_security
 ```
 
 `test_repository.py` checks that transaction search filters are passed to SQL
-as parameters rather than inserted into the query text. It uses a fake
-connection, so it does not connect to or change your MySQL database.
+as parameters, flat listings are bounded, and transaction changes are scoped to
+the signed-in agent. It uses a fake connection, so it does not connect to or
+change your MySQL database.
 `test_security.py` checks password hashing and verification locally. These
 tests do not start the app, connect to either database, or affect normal use.
 
@@ -81,17 +88,9 @@ The queries follow the names and columns visible in the supplied ER diagram:
 should have a unique constraint. `agents.password_hash` should hold at least 100
 characters (the scrypt hash is 86 characters).
 
-<<<<<<< Updated upstream
-The `nosql` box in the EER drawing is illustrative, not a MySQL table. You do
-not need a `NoSQL_idNoSQL` column in `agents` for this design. Each saved-search
-document in MongoDB stores the owning MySQL `agent_id`; the app uses that value
-to retrieve only the signed-in agent's saved searches. This is an application-
-level reference, not a relational foreign key between MySQL and MongoDB.
-=======
-Saved searches are stored directly in MongoDB, and MongoDB documents use
-`agent_id` as their owner key. The MySQL `agents` table does not require a
-relational `nosql` table or a `NoSQL_idNoSQL` column.
->>>>>>> Stashed changes
+Saved searches are stored in MongoDB, with each document's `agent_id` referring
+to the owning MySQL agent. This is an application-level reference; the MySQL
+schema does not require a `nosql` table or a `NoSQL_idNoSQL` column.
 
 ## Notes
 

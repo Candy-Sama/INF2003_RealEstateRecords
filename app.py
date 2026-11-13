@@ -10,6 +10,7 @@ from pymongo import errors as mongo_errors
 
 import repository
 from database import (
+    get_flat_record_admin_email,
     get_mongodb_client,
     get_mongodb_database_name,
     get_mysql_connection,
@@ -151,6 +152,10 @@ def render_authentication() -> None:
                         st.error("Enter your name and phone number.")
                     elif not valid_email(email):
                         st.error("Enter a valid email address.")
+                    elif email.strip().lower() == get_flat_record_admin_email():
+                        st.error(
+                            "The administrator account must be provisioned before it can log in."
+                        )
                     elif len(password) < 8:
                         st.error("Choose a password with at least 8 characters.")
                     elif password != confirm_password:
@@ -254,69 +259,249 @@ def flat_values_form(
     }
 
 
-def render_flat_management(connection: Any) -> None:
-    st.subheader("Manage flat records")
-    flats = repository.list_flats(connection)
-    places = repository.list_places(connection)
-    flat_options = repository.list_flat_options(connection)
+def render_flat_management(connection: Any, is_admin: bool) -> None:
+    st.subheader("Flat records")
+    total_flats = repository.count_flats(connection)
+    page_size = 100
+    page_count = max(1, (total_flats + page_size - 1) // page_size)
+    if st.session_state.get("flat_records_page", 1) > page_count:
+        st.session_state["flat_records_page"] = page_count
+    page = st.number_input(
+        "Flat records page",
+        min_value=1,
+        max_value=page_count,
+        step=1,
+        key="flat_records_page",
+    )
+    flats = repository.list_flats(
+        connection, limit=page_size, offset=(int(page) - 1) * page_size
+    )
     if flats:
+        st.caption(f"Showing page {page} of {page_count} ({total_flats} flat records).")
         st.dataframe(flats, use_container_width=True, hide_index=True)
     else:
         st.info("No flat records are currently available.")
 
-    create_tab, edit_tab, delete_tab = st.tabs(["Create", "Update", "Delete"])
-    with create_tab:
+    if not is_admin:
+        st.info("Flat records are read-only for agent accounts.")
+        with st.form("view_flat_form"):
+            flat_search_id = st.number_input(
+                "Look up a flat by ID",
+                min_value=1,
+                step=1,
+                key="view_flat_search_id",
+            )
+            view_submitted = st.form_submit_button("Find flat")
+        if view_submitted:
+            st.session_state["view_flat_selected_id"] = int(flat_search_id)
+        selected_id = st.session_state.get("view_flat_selected_id")
+        if selected_id is not None:
+            selected_flat = repository.get_flat(connection, selected_id)
+            if selected_flat is None:
+                st.warning("No flat record exists with that ID.")
+            else:
+                st.dataframe([selected_flat], use_container_width=True, hide_index=True)
+        return
+
+    action = st.radio(
+        "Flat record action",
+        ["Create", "Update"],
+        horizontal=True,
+        label_visibility="collapsed",
+        key="flat_management_action",
+    )
+    if action == "Create":
+        places = repository.list_places(connection)
+        flat_options = repository.list_flat_options(connection)
         if not places:
             st.warning("Add records to the `place` table before creating a flat.")
-        else:
-            with st.form("create_flat_form"):
-                values = flat_values_form(places, flat_options, "create")
-                submitted = st.form_submit_button("Create flat", type="primary")
-            if submitted:
-                if not all(
-                    values[field] for field in ("flat_type", "flat_model", "storey_range")
-                ):
-                    st.error("Complete the flat type, model, and storey range.")
-                else:
-                    repository.create_flat(connection, values)
-                    st.success("Flat record created.")
-                    st.rerun()
-
-    with edit_tab:
-        if not flats:
-            st.info("There are no flat records to update.")
-        elif not places:
-            st.warning("No place records are available.")
-        else:
-            flat_ids = [flat["flat_id"] for flat in flats]
-            selected_id = st.selectbox("Flat record", flat_ids, key="edit_flat_id")
-            selected_flat = next(flat for flat in flats if flat["flat_id"] == selected_id)
-            with st.form(f"edit_flat_form_{selected_id}"):
-                values = flat_values_form(places, flat_options, "edit", selected_flat)
-                submitted = st.form_submit_button("Save changes", type="primary")
-            if submitted:
-                if not all(
-                    values[field] for field in ("flat_type", "flat_model", "storey_range")
-                ):
-                    st.error("Complete the flat type, model, and storey range.")
-                else:
-                    repository.update_flat(connection, selected_id, values)
-                    st.success("Flat record updated.")
-                    st.rerun()
-
-    with delete_tab:
-        if not flats:
-            st.info("There are no flat records to delete.")
-        else:
-            flat_ids = [flat["flat_id"] for flat in flats]
-            selected_id = st.selectbox("Flat record to delete", flat_ids, key="delete_flat_id")
-            st.warning(
-                "MySQL foreign-key rules may prevent deleting a flat referenced by resale transactions."
-            )
-            if st.button("Delete flat", type="primary"):
-                repository.delete_flat(connection, selected_id)
-                st.success("Flat record deleted.")
+            return
+        with st.form("create_flat_form"):
+            values = flat_values_form(places, flat_options, "create")
+            submitted = st.form_submit_button("Create flat", type="primary")
+        if submitted:
+            if not all(
+                values[field] for field in ("flat_type", "flat_model", "storey_range")
+            ):
+                st.error("Complete the flat type, model, and storey range.")
+            else:
+                repository.create_flat(connection, values)
+                st.success("Flat record created.")
                 st.rerun()
+        return
+
+    with st.form("find_edit_flat_form"):
+        edit_search_id = st.number_input(
+            "Flat record ID",
+            min_value=1,
+            step=1,
+            key="edit_flat_search_id",
+        )
+        find_edit_submitted = st.form_submit_button("Find record")
+    if find_edit_submitted:
+        st.session_state["edit_flat_selected_id"] = int(edit_search_id)
+
+    selected_id = st.session_state.get("edit_flat_selected_id")
+    if selected_id is None:
+        st.info("Enter a flat record ID to load its editable fields.")
+        return
+    selected_flat = repository.get_flat(connection, selected_id)
+    if selected_flat is None:
+        st.warning("No flat record exists with that ID.")
+        return
+    places = repository.list_places(connection)
+    flat_options = repository.list_flat_options(connection)
+    if not places:
+        st.warning("No place records are available.")
+        return
+    with st.form(f"edit_flat_form_{selected_id}"):
+        values = flat_values_form(
+            places, flat_options, f"edit_{selected_id}", selected_flat
+        )
+        submitted = st.form_submit_button("Save changes", type="primary")
+    if submitted:
+        if not all(
+            values[field] for field in ("flat_type", "flat_model", "storey_range")
+        ):
+            st.error("Complete the flat type, model, and storey range.")
+        else:
+            repository.update_flat(connection, selected_id, values)
+            st.success("Flat record updated.")
+            st.rerun()
+
+
+def render_agent_transactions(connection: Any, agent_id: int) -> None:
+    st.subheader("My resale transactions")
+    transactions = repository.list_agent_transactions(connection, agent_id)
+    if transactions:
+        st.caption("Showing up to 100 of your most recent transactions.")
+        st.dataframe(transactions, use_container_width=True, hide_index=True)
+    else:
+        st.info("You have not recorded any resale transactions.")
+
+    action = st.radio(
+        "Transaction action",
+        ["Create", "Update", "Delete"],
+        horizontal=True,
+        label_visibility="collapsed",
+        key="transaction_action",
+    )
+    if action == "Create":
+        with st.form("create_transaction_form"):
+            flat_id = st.number_input(
+                "Flat ID sold",
+                min_value=1,
+                step=1,
+                key="create_transaction_flat_id",
+            )
+            transaction_date = st.date_input(
+                "Transaction date", value=date.today(), key="create_transaction_date"
+            )
+            resale_price = st.number_input(
+                "Resale price",
+                min_value=0.01,
+                max_value=20_000_000.0,
+                step=1000.0,
+                value=0.01,
+                key="create_transaction_price",
+            )
+            submitted = st.form_submit_button("Create transaction", type="primary")
+        if submitted:
+            flat = repository.get_flat(connection, int(flat_id))
+            if flat is None:
+                st.error("No flat record exists with that ID.")
+            else:
+                try:
+                    repository.create_agent_transaction(
+                        connection, agent_id, int(flat_id), transaction_date, resale_price
+                    )
+                    st.success("Transaction created.")
+                    st.rerun()
+                except mysql.connector.IntegrityError:
+                    st.error("You already recorded a transaction for this flat.")
+        return
+
+    if not transactions:
+        st.info("Enter a transaction's flat ID to update or delete it.")
+    with st.form("find_owned_transaction_form"):
+        transaction_flat_id = st.number_input(
+            "Transaction flat ID",
+            min_value=1,
+            step=1,
+            key="transaction_lookup_flat_id",
+        )
+        lookup_submitted = st.form_submit_button("Find my transaction")
+    if lookup_submitted:
+        st.session_state["selected_transaction_flat_id"] = int(transaction_flat_id)
+
+    selected_flat_id = st.session_state.get("selected_transaction_flat_id")
+    if selected_flat_id is None:
+        return
+    selected_transaction = repository.get_agent_transaction(
+        connection, agent_id, selected_flat_id
+    )
+    if selected_transaction is None:
+        st.warning("That transaction no longer exists in your account.")
+        return
+
+    if action == "Update":
+        with st.form(f"edit_transaction_{selected_flat_id}"):
+            new_flat_id = st.number_input(
+                "Flat ID sold",
+                min_value=1,
+                step=1,
+                value=int(selected_flat_id),
+                key=f"edit_transaction_flat_{selected_flat_id}",
+            )
+            transaction_date = st.date_input(
+                "Transaction date",
+                value=selected_transaction["transaction_date"],
+                key=f"edit_transaction_date_{selected_flat_id}",
+            )
+            resale_price = st.number_input(
+                "Resale price",
+                min_value=0.01,
+                max_value=20_000_000.0,
+                step=1000.0,
+                value=float(selected_transaction["resale_price"]),
+                key=f"edit_transaction_price_{selected_flat_id}",
+            )
+            submitted = st.form_submit_button("Save transaction", type="primary")
+        if submitted:
+            if repository.get_flat(connection, int(new_flat_id)) is None:
+                st.error("No flat record exists with that ID.")
+            else:
+                try:
+                    updated = repository.update_agent_transaction(
+                        connection,
+                        agent_id,
+                        selected_flat_id,
+                        int(new_flat_id),
+                        transaction_date,
+                        resale_price,
+                    )
+                except mysql.connector.IntegrityError:
+                    st.error("You already have a transaction recorded for that flat.")
+                else:
+                    if updated:
+                        st.session_state["selected_transaction_flat_id"] = int(new_flat_id)
+                        st.success("Transaction updated.")
+                        st.rerun()
+                    else:
+                        st.error("The transaction could not be updated.")
+    else:
+        st.write(
+            f'Flat **{selected_flat_id}** — {selected_transaction["flat_type"]}, '
+            f'{selected_transaction["block_number"]} '
+            f'{selected_transaction["road_name"]}, {selected_transaction["town"]}'
+        )
+        if st.button("Delete transaction", type="primary"):
+            if repository.delete_agent_transaction(connection, agent_id, selected_flat_id):
+                st.session_state.pop("selected_transaction_flat_id", None)
+                st.success("Transaction deleted.")
+                st.rerun()
+            else:
+                st.error("The transaction could not be deleted.")
 
 
 def filters_from_form(
@@ -339,10 +524,8 @@ def filters_from_form(
 
 def render_search(connection: Any, mongo_database: Any, agent_id: int) -> None:
     st.subheader("Search resale transactions")
-    places = repository.list_places(connection)
-    flats = repository.list_flats(connection)
-    towns = ["Any", *sorted({place["town"] for place in places if place["town"]})]
-    flat_types = ["Any", *sorted({flat["flat_type"] for flat in flats if flat["flat_type"]})]
+    towns = ["Any", *[town for town in repository.list_towns(connection) if town]]
+    flat_types = ["Any", *[value for value in repository.list_flat_types(connection) if value]]
 
     st.session_state.setdefault("filter_town", "Any")
     st.session_state.setdefault("filter_flat_type", "Any")
@@ -481,6 +664,7 @@ def render_saved_searches(mongo_database: Any, agent_id: int) -> None:
 def render_workspace(agent: dict[str, Any]) -> None:
     pending_filters = st.session_state.pop("pending_search_filters", None)
     if pending_filters is not None:
+        st.session_state["workspace_section"] = "Search & filter"
         st.session_state["filter_town"] = pending_filters.get("town") or "Any"
         st.session_state["filter_flat_type"] = pending_filters.get("flat_type") or "Any"
         st.session_state["filter_min_price"] = pending_filters.get("min_price") or 0
@@ -513,15 +697,33 @@ def render_workspace(agent: dict[str, Any]) -> None:
 
     try:
         with closing(get_mysql_connection()) as connection:
-            with closing(get_mongodb_client()) as mongo_client:
-                mongo_database = mongo_client[get_mongodb_database_name()]
-                tab_names = ["Search & filter", "Manage flats", "Saved searches"]
-                search_tab, flats_tab, saved_tab = st.tabs(tab_names)
-                with search_tab:
+            page = st.radio(
+                "Workspace section",
+                ["Search & filter", "Flat records", "My transactions", "Saved searches"],
+                horizontal=True,
+                label_visibility="collapsed",
+                key="workspace_section",
+            )
+            if page == "Search & filter":
+                with closing(get_mongodb_client()) as mongo_client:
+                    mongo_database = mongo_client[get_mongodb_database_name()]
                     render_search(connection, mongo_database, agent["agent_id"])
-                with flats_tab:
-                    render_flat_management(connection)
-                with saved_tab:
+            elif page == "Flat records":
+                admin_email = get_flat_record_admin_email()
+                is_flat_admin = bool(
+                    admin_email
+                    and agent["email"].strip().lower() == admin_email
+                )
+                if is_flat_admin:
+                    st.caption("Administrator access: you can create and edit flat records.")
+                else:
+                    st.caption("You can view flat records; only the configured admin can edit them.")
+                render_flat_management(connection, is_flat_admin)
+            elif page == "My transactions":
+                render_agent_transactions(connection, agent["agent_id"])
+            else:
+                with closing(get_mongodb_client()) as mongo_client:
+                    mongo_database = mongo_client[get_mongodb_database_name()]
                     render_saved_searches(mongo_database, agent["agent_id"])
     except (mysql.connector.Error, mongo_errors.PyMongoError, ValueError) as error:
         show_database_error(error)
