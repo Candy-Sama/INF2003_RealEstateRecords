@@ -8,7 +8,10 @@ import mysql.connector
 import streamlit as st
 from pymongo import errors as mongo_errors
 
+import nearby_function
 import repository
+from analytics_ui import render_analytics_tab
+from ranking_ui import render_ranking_tab
 from database import (
     get_flat_record_admin_email,
     get_mongodb_client,
@@ -115,7 +118,7 @@ def render_authentication() -> None:
                     email = st.text_input("Email address", placeholder="you@example.com")
                     password = st.text_input("Password", type="password")
                     submitted = st.form_submit_button(
-                        "Log in", type="primary", use_container_width=True
+                        "Log in", type="primary", width="stretch"
                     )
                 if submitted:
                     if not valid_email(email) or not password:
@@ -145,7 +148,7 @@ def render_authentication() -> None:
                     password = st.text_input("Create password", type="password")
                     confirm_password = st.text_input("Confirm password", type="password")
                     submitted = st.form_submit_button(
-                        "Create account", type="primary", use_container_width=True
+                        "Create account", type="primary", width="stretch"
                     )
                 if submitted:
                     if not name.strip() or not phone.strip():
@@ -276,9 +279,21 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
     flats = repository.list_flats(
         connection, limit=page_size, offset=(int(page) - 1) * page_size
     )
+    st.session_state.setdefault("mf_nonce", 0)
     if flats:
         st.caption(f"Showing page {page} of {page_count} ({total_flats} flat records).")
-        st.dataframe(flats, use_container_width=True, hide_index=True)
+        event = st.dataframe(
+            flats, width="stretch",
+            hide_index=True, 
+            on_select="rerun",
+            selection_mode="single-row",
+            key=f'mf_table_{st.session_state["mf_nonce"]}',
+        )
+        st.caption("Select a row to see its nearby MRT / LRT stations.")
+        if event.selection.rows:
+            go_to_nearby(flats[event.selection.rows[0]]["flat_id"], "Manage flats")
+            st.session_state["mf_nonce"] += 1  # reset selection for when you come back
+            st.rerun()
     else:
         st.info("No flat records are currently available.")
 
@@ -300,7 +315,7 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
             if selected_flat is None:
                 st.warning("No flat record exists with that ID.")
             else:
-                st.dataframe([selected_flat], use_container_width=True, hide_index=True)
+                st.dataframe([selected_flat], width="stretch", hide_index=True)
         return
 
     action = st.radio(
@@ -375,7 +390,7 @@ def render_agent_transactions(connection: Any, agent_id: int) -> None:
     transactions = repository.list_agent_transactions(connection, agent_id)
     if transactions:
         st.caption("Showing up to 100 of your most recent transactions.")
-        st.dataframe(transactions, use_container_width=True, hide_index=True)
+        st.dataframe(transactions, width="stretch", hide_index=True)
     else:
         st.info("You have not recorded any resale transactions.")
 
@@ -504,6 +519,280 @@ def render_agent_transactions(connection: Any, agent_id: int) -> None:
                 st.error("The transaction could not be deleted.")
 
 
+NEARBY_PAGE_SIZE = 100
+DISTANCE_BANDS = {"≤ 300 m": 300, "≤ 500 m": 500, "≤ 1 km": 1000}
+CLEAR_FILTERS = "✕ Clear filters"
+CLEAR_SELECTION = "✕ Clear selection"
+FLAT_TABLE_COLUMNS = {
+    "flat_id": st.column_config.NumberColumn("Flat ID"),
+    "flat_type": "Flat type",
+    "storey_range": "Storey",
+    "town": "Town",
+    "block_number": "Block",
+    "road_name": "Road",
+    "station_count": st.column_config.NumberColumn("Stations"),
+    "shared_stations": st.column_config.NumberColumn("Shared stations"),
+    "nearest_m": st.column_config.NumberColumn("Nearest (m)"),
+    "nearby_stations": st.column_config.TextColumn("Nearby stations", width="large"),
+}
+
+
+# ---------------------------------------------------------------------------
+# Address tab: every `place` row with its nearby stations
+# ---------------------------------------------------------------------------
+@st.fragment
+def render_address_tab() -> None:
+    # A fragment reruns on its own, so it opens its own connection.
+    try:
+        with closing(get_mysql_connection()) as connection:
+            render_addresses(connection)
+    except (mysql.connector.Error, ValueError) as error:
+        show_database_error(error)
+
+
+def render_addresses(connection: Any) -> None:
+    title, action = st.columns([3, 1], vertical_alignment="center")
+    title.subheader("Addresses & nearby stations")
+    with action:
+        update_clicked = st.button("Update addresses", type="primary", width="stretch")
+
+    if update_clicked:
+        with st.spinner("Computing station distances for addresses without any..."):
+            result = nearby_function.update_missing(connection)
+        st.success(
+            f'Added {result["total_rows"]:,} nearby rows '
+            f'({result["within_radius_rows"]:,} within {result["radius_m"]} m, '
+            f'{result["fallback_rows"]:,} nearest-station fallbacks) in {result["seconds"]} s.'
+        )
+
+    # Runs whenever this tab is opened: fill `nearby` if it is empty, then check it.
+    if not update_clicked and not nearby_function.is_ready(connection):
+        with st.spinner("`nearby` is empty, filling it now..."):
+            filled = nearby_function.ensure_populated(connection)
+        if filled:
+            st.success(
+                f'`nearby` was empty, so it was filled automatically: '
+                f'{filled["total_rows"]:,} rows in {filled["seconds"]} s.'
+            )
+    check = nearby_function.coverage(connection)
+    if not check["has_column"]:
+        st.warning("`nearby` has no `distance_m` column yet. Click **Update addresses** to set it up.")
+        return
+    if check["stations_total"] == 0:
+        st.warning("The `stations` table is empty. Run `import.py` first.")
+        return
+
+    first, second, third, fourth = st.columns(4)
+    first.metric("Addresses", f'{check["places_total"]:,}')
+    second.metric("With nearby stations", f'{check["places_with_nearby"]:,}')
+    third.metric("Missing", f'{check["places_missing"]:,}')
+    fourth.metric("Flat records affected", f'{check["flats_missing"]:,}')
+    if check["places_missing"]:
+        st.warning(
+            f'{check["places_missing"]:,} address(es) have no nearby stations, which leaves '
+            f'{check["flats_missing"]:,} flat record(s) without any. Click **Update addresses**.'
+        )
+    else:
+        st.success("Every address has at least one nearby station.")
+
+    rows = repository.list_address_stations(connection)
+    st.caption(f"{len(rows):,} addresses")
+    st.dataframe(
+        rows,
+        width="stretch",
+        hide_index=True,
+        column_config={
+            "block_id": st.column_config.NumberColumn("Block ID"),
+            "block_number": "Block",
+            "road_name": "Road",
+            "postal": "Postal",
+            "town": "Town",
+            "station_count": st.column_config.NumberColumn("Stations"),
+            "nearest_m": st.column_config.NumberColumn("Nearest (m)"),
+            "nearby_stations": st.column_config.TextColumn("Nearby stations", width="large"),
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Nearby stations tab
+#   state 0: all flats, no filters
+#   state 1: station filter pills (transport type / line / distance)
+#   state 2: a flat picked on Manage flats
+#   state 3: a flat picked on this tab
+# ---------------------------------------------------------------------------
+def go_to_nearby(flat_id: int, origin: str) -> None:
+    """Focus a flat and ask the main tab bar to switch to Nearby stations."""
+    st.session_state["nearby_focus"] = {"flat_id": int(flat_id), "origin": origin}
+    st.session_state["pending_tab"] = "Nearby stations"
+
+
+def clear_nearby_state() -> None:
+    """Back to state 0. Runs as a callback, so it can reset widget keys."""
+    st.session_state["nb_transport"] = []
+    st.session_state["nb_lines"] = []
+    st.session_state["nb_stations"] = []
+    st.session_state["nb_band"] = None
+    st.session_state["nb_clear"] = None
+    st.session_state.pop("nearby_focus", None)
+    st.session_state["nb_nonce"] = st.session_state.get("nb_nonce", 0) + 1
+
+
+@st.fragment
+def render_nearby_tab() -> None:
+    try:
+        with closing(get_mysql_connection()) as connection:
+            render_nearby_stations(connection)
+    except (mysql.connector.Error, ValueError) as error:
+        show_database_error(error)
+
+
+def render_nearby_stations(connection: Any) -> None:
+    st.session_state.setdefault("nb_nonce", 0)
+    focus = st.session_state.get("nearby_focus")
+
+    title, clear_column = st.columns([3, 1], vertical_alignment="center")
+    title.subheader("Nearby MRT / LRT stations")
+
+    if not nearby_function.is_ready(connection):
+        with st.spinner("`nearby` is empty, filling it now..."):
+            filled = nearby_function.ensure_populated(connection)
+        if filled is None:
+            st.warning("There are no stations loaded to measure against. Run `import.py` first.")
+            return
+        st.success(f'Filled `nearby` with {filled["total_rows"]:,} rows in {filled["seconds"]} s.')
+
+    filters: dict[str, Any] = {}
+    clear_label = None
+    if focus is None:
+        options = repository.list_nearby_filter_options(connection)
+        with st.container(border=True):
+            transport = st.pills(
+                "Transport type", options["transport_type"],
+                selection_mode="multi", key="nb_transport",
+            )
+            lines = st.pills(
+                "Line", options["line_name"], selection_mode="multi", key="nb_lines"
+            )
+            # Individual stations, narrowed by the transport type / line chosen above.
+            station_labels = {
+                item["station_code"]: f'{item["station_code"]} {item["station_name"]}'
+                for item in options["stations"]
+                if (not transport or item["transport_type"] in transport)
+                and (not lines or item["line_name"] in lines)
+            }
+            st.session_state["nb_stations"] = [
+                code for code in st.session_state.get("nb_stations", [])
+                if code in station_labels
+            ]
+            chosen_stations = st.multiselect(
+                "Station", list(station_labels), format_func=station_labels.get,
+                key="nb_stations", placeholder="Search by code or name, e.g. NS10 or Admiralty",
+            )
+            band = st.pills(
+                "Distance to station", list(DISTANCE_BANDS),
+                selection_mode="single", key="nb_band",
+            )
+        filters = {
+            "transport_types": transport or [],
+            "lines": lines or [],
+            "stations": chosen_stations,
+            "max_distance_m": DISTANCE_BANDS.get(band) if band else None,
+        }
+        if transport or lines or chosen_stations or band:
+            clear_label = CLEAR_FILTERS
+    else:
+        clear_label = CLEAR_SELECTION
+
+    if clear_label:
+        with clear_column:
+            st.pills(
+                "Clear", [clear_label], key="nb_clear",
+                on_change=clear_nearby_state, label_visibility="collapsed",
+            )
+
+    station_ids: list[int] = []
+    if focus is None:
+        total = repository.count_nearby_flats(connection, filters)
+        if clear_label:
+            st.caption(f"{total:,} flat(s) near the selected stations or distance.")
+        else:
+            st.caption(f"All flat records · {total:,} flat(s).")
+    else:
+        selected = repository.search_nearby_flats(
+            connection, {"flat_ids": [focus["flat_id"]]}, 1, 0
+        )
+        if not selected:
+            st.warning("The selected flat no longer exists.")
+            st.session_state.pop("nearby_focus", None)
+            return
+        station_ids = repository.get_flat_station_ids(connection, focus["flat_id"])
+        with st.container(border=True):
+            st.markdown(f'**Selected flat** · picked from {focus["origin"]}')
+            st.dataframe(
+                selected, width="stretch", hide_index=True, column_config=FLAT_TABLE_COLUMNS
+            )
+            if not station_ids:
+                st.info(
+                    "This flat's block has no nearby stations yet. Use **Update addresses** "
+                    "on the Address tab."
+                )
+            if focus["origin"] == "Manage flats" and st.button("← Back to Manage flats"):
+                st.session_state["pending_tab"] = "Manage flats"
+                st.rerun()
+        total = repository.count_similar_flats(connection, focus["flat_id"], station_ids)
+        st.markdown("**Flats near the same stations** · most shared stations first")
+
+    # Back to page 1 whenever the filters or the selected flat change.
+    signature = repr((
+        focus["flat_id"] if focus else None,
+        sorted(filters.get("transport_types", [])),
+        sorted(filters.get("lines", [])),
+        sorted(filters.get("stations", [])),
+        filters.get("max_distance_m"),
+    ))
+    if st.session_state.get("nb_signature") != signature:
+        st.session_state["nb_signature"] = signature
+        st.session_state["nb_page"] = 1
+
+    pages = max(1, -(-total // NEARBY_PAGE_SIZE))
+    st.session_state["nb_page"] = min(st.session_state.get("nb_page", 1), pages)
+    info, pager = st.columns([3, 1], vertical_alignment="center")
+    with pager:
+        page = st.number_input("Page", min_value=1, max_value=pages, step=1, key="nb_page")
+    info.caption(f"Page {page} of {pages:,}")
+
+    offset = (page - 1) * NEARBY_PAGE_SIZE
+    if focus is None:
+        rows = repository.search_nearby_flats(connection, filters, NEARBY_PAGE_SIZE, offset)
+    else:
+        rows = repository.search_similar_flats(
+            connection, focus["flat_id"], station_ids, NEARBY_PAGE_SIZE, offset
+        )
+    if not rows:
+        st.info("No flats to show.")
+        return
+
+    event = st.dataframe(
+        rows,
+        width="stretch",
+        hide_index=True,
+        column_config=FLAT_TABLE_COLUMNS,
+        on_select="rerun",
+        selection_mode="single-row",
+        key=f'nb_table_{st.session_state["nb_nonce"]}',
+    )
+    st.caption("Select a row to see flats near the same stations.")
+    if event.selection.rows:
+        picked = rows[event.selection.rows[0]]
+        st.session_state["nearby_focus"] = {
+            "flat_id": int(picked["flat_id"]),
+            "origin": "Nearby stations",
+        }
+        st.session_state["nb_nonce"] += 1  # fresh table, so the old selection can't re-fire
+        st.rerun(scope="fragment")
+
+
 def filters_from_form(
     town: str,
     flat_type: str,
@@ -578,7 +867,7 @@ def render_search(connection: Any, mongo_database: Any, agent_id: int) -> None:
     if "last_search_results" in st.session_state:
         results = st.session_state["last_search_results"]
         st.caption(f'{len(results)} matching transaction(s), up to 1,000 shown.')
-        st.dataframe(results, use_container_width=True, hide_index=True)
+        st.dataframe(results, width="stretch", hide_index=True)
         with st.form("save_search_form"):
             search_name = st.text_input("Name this search", placeholder="e.g. 4-room flats in Tampines")
             save_submitted = st.form_submit_button("Save search")
@@ -620,7 +909,7 @@ def render_saved_searches(mongo_database: Any, agent_id: int) -> None:
             }
             for saved in saved_searches
         ],
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
     saved_ids = [str(saved["_id"]) for saved in saved_searches]
@@ -637,6 +926,7 @@ def render_saved_searches(mongo_database: Any, agent_id: int) -> None:
     with load_col:
         if st.button("Run saved search", type="primary"):
             st.session_state["pending_search_filters"] = selected["filters"]
+            st.session_state["pending_tab"] = "Search & filter"
             st.rerun()
 
     with rename_col:
@@ -697,9 +987,23 @@ def render_workspace(agent: dict[str, Any]) -> None:
 
     try:
         with closing(get_mysql_connection()) as connection:
+            pages = [
+                "Search & filter",
+                "Flat records",
+                "My transactions",
+                "Saved searches",
+                "Address",
+                "Nearby stations",
+                "Analytics",
+                "Ranking",
+            ]
+
+            pending_page = st.session_state.pop("pending_tab", None)
+            if pending_page in pages:
+                st.session_state["workspace_section"] = pending_page
             page = st.radio(
                 "Workspace section",
-                ["Search & filter", "Flat records", "My transactions", "Saved searches"],
+                pages,
                 horizontal=True,
                 label_visibility="collapsed",
                 key="workspace_section",
@@ -721,6 +1025,14 @@ def render_workspace(agent: dict[str, Any]) -> None:
                 render_flat_management(connection, is_flat_admin)
             elif page == "My transactions":
                 render_agent_transactions(connection, agent["agent_id"])
+            elif page == "Address":
+                render_address_tab()
+            elif page == "Nearby stations":
+                render_nearby_tab()
+            elif page == "Analytics":
+                render_analytics_tab()
+            elif page == "Ranking":
+                render_ranking_tab()
             else:
                 with closing(get_mongodb_client()) as mongo_client:
                     mongo_database = mongo_client[get_mongodb_database_name()]
