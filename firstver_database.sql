@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`agents` (
   UNIQUE INDEX `agent_id_UNIQUE` (`agent_id` ASC) VISIBLE,
   UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE)
 ENGINE = InnoDB
-AUTO_INCREMENT = 2
 DEFAULT CHARACTER SET = utf8mb3;
 
 
@@ -50,7 +49,6 @@ CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`place` (
   PRIMARY KEY (`block_id`),
   UNIQUE INDEX `block_id_UNIQUE` (`block_id` ASC) VISIBLE)
 ENGINE = InnoDB
-AUTO_INCREMENT = 9762
 DEFAULT CHARACTER SET = utf8mb3;
 
 
@@ -75,7 +73,6 @@ CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`flat` (
     FOREIGN KEY (`block_id`)
     REFERENCES `estateRecordsDB`.`place` (`block_id`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 485269
 DEFAULT CHARACTER SET = utf8mb3;
 
 
@@ -102,7 +99,6 @@ CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`stations` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
-AUTO_INCREMENT = 204
 DEFAULT CHARACTER SET = utf8mb3;
 
 
