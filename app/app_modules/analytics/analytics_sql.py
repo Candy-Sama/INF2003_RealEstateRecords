@@ -151,13 +151,16 @@ def _normalise(frame: pd.DataFrame) -> pd.DataFrame:
     return frame
 
 
+def bounded_select(sql: str) -> str:
+    return f"SELECT * FROM ({validate_query(sql)}) AS analytics_q LIMIT {MAX_ROWS + 1}"
+
+
 def run_query(connection: Any, sql: str) -> tuple[pd.DataFrame, bool]:
     """
     Validate and run `sql`. Returns (rows as a DataFrame, was_truncated). Note that an
     ORDER BY is only guaranteed to survive the wrapper when it has a LIMIT.
     """
-    safe_sql = validate_query(sql)
-    wrapped = f"SELECT * FROM ({safe_sql}) AS analytics_q LIMIT {MAX_ROWS + 1}"
+    wrapped = bounded_select(sql)
     with connection.cursor() as cursor:
         cursor.execute(f"SET SESSION max_execution_time = {int(TIMEOUT_MS)}")
         connection.start_transaction(readonly=True)

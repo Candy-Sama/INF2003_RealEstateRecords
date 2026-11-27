@@ -1,5 +1,6 @@
 import unittest
 from datetime import date
+from decimal import Decimal
 
 from app import repository
 from app.app_modules.ranking import ranking
@@ -50,6 +51,11 @@ class BoardTests(unittest.TestCase):
         sale = boards()["sales_highest"]["rows"][0]
         self.assertEqual(sale["value"], 1500)
         self.assertEqual(sale["extra"], "5 Room, Mar 2024")
+
+    def test_decimal_values_from_mysql_are_supported(self):
+        sales = [{**SALES[0], "resale_price": Decimal("1500000.25")}]
+        built = {board["id"]: board for board in ranking.build_boards(TOWNS, STATIONS, STREETS, sales)}
+        self.assertAlmostEqual(built["sales_highest"]["rows"][0]["value"], 1500.00025)
 
     def test_empty_inputs_give_empty_boards(self):
         built = ranking.build_boards([], [], [], [])
@@ -112,6 +118,13 @@ class RankingQueryTests(unittest.TestCase):
         query, parameters = connection.log[0]
         self.assertNotIn("f.flat_type = %s", query)
         self.assertEqual(parameters, ())
+
+    def test_top_sales_breaks_price_ties_by_primary_key(self):
+        connection = FakeConnection()
+        repository.top_sales(connection)
+        query, parameters = connection.log[0]
+        self.assertIn("ORDER BY rt.resale_price DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC", query)
+        self.assertEqual(parameters, (10,))
 
 
 if __name__ == "__main__":

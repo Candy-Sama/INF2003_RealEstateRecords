@@ -6,7 +6,7 @@ Estate Records is a Streamlit application for Singapore property agents to maint
 
 ## Run the application
 
-Use Python 3.14, MySQL Server 8.0 or newer, and a running MongoDB server. Use a fresh local MySQL schema and an empty MongoDB database for the grading demo. Run the following commands from the repository root in PowerShell.
+Use Python 3.14, MySQL Server 8.0.18 or newer, and a running MongoDB server. Use a fresh local MySQL schema and an empty MongoDB database for the grading demo. Run the following commands from the repository root in PowerShell.
 
 1. **Install Python dependencies and create the local configuration.**
 
@@ -41,7 +41,7 @@ Use Python 3.14, MySQL Server 8.0 or newer, and a running MongoDB server. Use a 
 
    On macOS or Linux, use `.venv/bin/python` for the Python commands and `cp .env.example .env` to create the configuration file.
 
-If you already have a populated Estate Records schema, configure `.env` for that instance and skip the CSV import. Run the distance builder if the `nearby` data still need to be generated.
+For a populated Estate Records schema, configure `.env` for that instance and follow the [MySQL upgrade guide](setup/mysql_upgrade.md#upgrade-an-existing-schema). The migration retains the catalogue and transactions. Use the distance builder if the `nearby` data still need to be generated.
 
 ### Configuration
 
@@ -82,15 +82,17 @@ erDiagram
 | Table | Role and constraints |
 | --- | --- |
 | `agents` | Agent profile with a generated integer ID, unique email, and salted scrypt password hash. |
-| `place` | Address and coordinates keyed by `block_id`. The SQL column `longtitude` uses the spelling in the project schema. |
-| `flat` | Flat attributes and lease information. `block_id` is a foreign key to `place`. |
+| `place` | Address and `DECIMAL(18,15)` coordinates keyed by `block_id`. The SQL column `longtitude` uses the spelling in the project schema. |
+| `flat` | Flat attributes, `DECIMAL(7,2)` floor area, and lease information. `block_id` is a foreign key to `place`. |
 | `stations` | Rail stop and line details. Each station code is unique and references its location in `place`. |
 | `nearby` | Many-to-many association between places and stations. The composite key identifies the pair and `distance_m` stores its distance. |
-| `resale_transaction` | Sale date and price, with a composite key of flat ID and agent ID. The key allows one transaction per flat per agent. |
+| `resale_transaction` | Sale date and `DECIMAL(12,2)` price, with a composite key of flat ID and agent ID. The key allows one transaction per flat per agent. |
 
 For nearby lookup, MySQL filters candidate locations by a coordinate bounding box and computes straight-line distances with `ST_Distance_Sphere`. A `ROW_NUMBER()` window query picks the closest station for places with no match inside the default 1 km radius. The ranking queries use grouping and aggregate measures such as sales count and average resale price per square metre. Station catchments can overlap.
 
 The application binds transaction search parameters and scopes transaction edits and deletions to the signed-in agent. Analytics validates a single `SELECT` or `WITH` query, runs it in a read-only transaction, and returns at most 5,000 rows. The Analytics page caches query results for ten minutes or until refreshed.
+
+The [MySQL upgrade and benchmark guide](setup/mysql_upgrade.md) explains the B+ tree indexes, their query plans, and how to reproduce the measurements.
 
 ### MongoDB
 
@@ -123,9 +125,9 @@ The scripts in `data/scripts/data_prep/` inspect the raw CSVs, clean the HDB and
 | [app/streamlit_app.py](app/streamlit_app.py) | Login, registration, page navigation, flat and transaction management, and saved search UI. |
 | [app/repository.py](app/repository.py) | SQL access for agent, flat, transaction, address, nearby, and ranking queries. |
 | [app/app_modules/](app/app_modules/) | Database connections, password helpers, station distance generation, ranking, and analytics. The analytics package includes the query builder, validation, storage, default cards, and charts. |
-| [setup/](setup/) | MySQL schema, import module, the full dataset, and import guide. |
+| [setup/](setup/) | MySQL schema, migration and benchmark commands, import module, and the full dataset. |
 | [data/](data/) | Preparation scripts, committed samples, and working folders for raw, cleaned, and geocoded CSVs. |
-| [test/](test/) | Unit tests for the SQL repository, password handling, rankings, and analytics. |
+| [test/](test/) | Unit tests for the SQL repository, password handling, rankings, and analytics, plus opt-in MySQL integration tests. |
 | [requirements.txt](requirements.txt) and [.env.example](.env.example) | Python dependencies and local configuration template. |
 
 ## Verification

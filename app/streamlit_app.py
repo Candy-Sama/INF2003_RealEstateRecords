@@ -1,12 +1,19 @@
 import logging
 import re
+import sys
 from contextlib import closing
 from datetime import date
+from pathlib import Path
 from typing import Any
 
 import mysql.connector
 import streamlit as st
 from pymongo import errors as mongo_errors
+
+# Streamlit adds this script's directory to the import path. The app package lives one level up.
+project_root = str(Path(__file__).resolve().parents[1])
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 from app import repository
 from app.app_modules.analytics.analytics_ui import render_analytics_tab
@@ -224,9 +231,11 @@ def flat_values_form(
     )
     floor_area = right.number_input(
         "Floor area (sqm)",
-        min_value=1,
-        max_value=1000,
-        value=int(initial.get("floor_area_sqm") or 1),
+        min_value=0.01,
+        max_value=1000.0,
+        value=float(initial.get("floor_area_sqm") or 1),
+        step=0.01,
+        format="%.2f",
         key=f"{prefix}_area",
     )
     block_id = st.selectbox(
@@ -551,6 +560,9 @@ def render_address_tab() -> None:
 
 
 def render_addresses(connection: Any) -> None:
+    if not nearby_function.has_distance_column(connection):
+        st.warning(nearby_function.MIGRATION_REQUIRED)
+        return
     title, action = st.columns([3, 1], vertical_alignment="center")
     title.subheader("Addresses & nearby stations")
     with action:
@@ -575,9 +587,6 @@ def render_addresses(connection: Any) -> None:
                 f'{filled["total_rows"]:,} rows in {filled["seconds"]} s.'
             )
     check = nearby_function.coverage(connection)
-    if not check["has_column"]:
-        st.warning("`nearby` has no `distance_m` column yet. Click **Update addresses** to set it up.")
-        return
     if check["stations_total"] == 0:
         st.warning(
             "The `stations` table is empty. From the repository root, run "
@@ -651,6 +660,9 @@ def render_nearby_tab() -> None:
 
 
 def render_nearby_stations(connection: Any) -> None:
+    if not nearby_function.has_distance_column(connection):
+        st.warning(nearby_function.MIGRATION_REQUIRED)
+        return
     st.session_state.setdefault("nb_nonce", 0)
     focus = st.session_state.get("nearby_focus")
 
@@ -661,7 +673,7 @@ def render_nearby_stations(connection: Any) -> None:
         with st.spinner("`nearby` is empty, filling it now..."):
             filled = nearby_function.ensure_populated(connection)
         if filled is None:
-            st.warning("There are no stations loaded to measure against. Run `import.py` first.")
+            st.warning("There are no stations loaded. Run `python -m setup.import_data_script.import` first.")
             return
         st.success(f'Filled `nearby` with {filled["total_rows"]:,} rows in {filled["seconds"]} s.')
 

@@ -1,4 +1,7 @@
 import unittest
+from decimal import Decimal
+
+from pandas import DataFrame
 
 from app.app_modules.analytics import analytics_sql, analytics_store
 from app.app_modules.analytics.analytics_defaults import DEFAULT_CARDS
@@ -82,6 +85,11 @@ class FakeConnection:
 
 
 class RunQueryTests(unittest.TestCase):
+    def test_decimal_values_are_numeric_for_charts(self):
+        frame = analytics_sql._normalise(DataFrame({"price": [Decimal("650000.19"), None]}))
+        self.assertEqual(frame["price"].dtype.kind, "f")
+        self.assertAlmostEqual(frame["price"].iloc[0], 650000.19)
+
     def test_runs_read_only_wrapped_and_rolled_back(self):
         conn = FakeConnection(3)
         frame, truncated = analytics_sql.run_query(conn, "SELECT 1 AS a, 2 AS b;")

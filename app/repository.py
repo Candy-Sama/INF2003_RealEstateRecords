@@ -1,4 +1,5 @@
 import re
+from decimal import Decimal
 from typing import Any
 
 
@@ -96,7 +97,7 @@ def create_flat(connection: Any, values: dict[str, Any]) -> None:
                 values["flat_type"],
                 values["flat_model"],
                 values["storey_range"],
-                values["floor_area_sqm"],
+                Decimal(str(values["floor_area_sqm"])),
                 values["block_id"],
                 values["lease_commence_date"],
                 values["remaining_lease_months"],
@@ -116,7 +117,7 @@ def update_flat(connection: Any, flat_id: int, values: dict[str, Any]) -> None:
                 values["flat_type"],
                 values["flat_model"],
                 values["storey_range"],
-                values["floor_area_sqm"],
+                Decimal(str(values["floor_area_sqm"])),
                 values["block_id"],
                 values["lease_commence_date"],
                 values["remaining_lease_months"],
@@ -166,14 +167,14 @@ def create_agent_transaction(
     agent_id: int,
     flat_id: int,
     transaction_date: Any,
-    resale_price: float,
+    resale_price: int | float | Decimal,
 ) -> None:
     with connection.cursor() as cursor:
         cursor.execute(
             "INSERT INTO `resale_transaction` "
             "(FLAT_flat_id, AGENTS_agent_id, transaction_date, resale_price) "
             "VALUES (%s, %s, %s, %s)",
-            (flat_id, agent_id, transaction_date, resale_price),
+            (flat_id, agent_id, transaction_date, Decimal(str(resale_price))),
         )
     connection.commit()
 
@@ -184,14 +185,14 @@ def update_agent_transaction(
     original_flat_id: int,
     flat_id: int,
     transaction_date: Any,
-    resale_price: float,
+    resale_price: int | float | Decimal,
 ) -> bool:
     with connection.cursor() as cursor:
         cursor.execute(
             "UPDATE `resale_transaction` "
             "SET FLAT_flat_id = %s, transaction_date = %s, resale_price = %s "
             "WHERE FLAT_flat_id = %s AND AGENTS_agent_id = %s",
-            (flat_id, transaction_date, resale_price, original_flat_id, agent_id),
+            (flat_id, transaction_date, Decimal(str(resale_price)), original_flat_id, agent_id),
         )
         updated = cursor.rowcount > 0
         if not updated:
@@ -235,7 +236,7 @@ def search_transactions(connection: Any, filters: dict[str, Any]) -> list[dict[s
         value = filters.get(key)
         if value is not None:
             conditions.append(f"rt.resale_price {operator} %s")
-            parameters.append(value)
+            parameters.append(Decimal(str(value)))
 
     for key, operator in (("start_date", ">="), ("end_date", "<=")):
         value = filters.get(key)
@@ -252,7 +253,7 @@ def search_transactions(connection: Any, filters: dict[str, Any]) -> list[dict[s
         "JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id "
         "JOIN `place` AS p ON p.block_id = f.block_id "
         f"WHERE {' AND '.join(conditions)} "
-        "ORDER BY rt.transaction_date DESC LIMIT 1000"
+        "ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT 1000"
     )
     with connection.cursor(dictionary=True) as cursor:
         cursor.execute(query, tuple(parameters))
@@ -453,6 +454,8 @@ RANKING_RADIUS_M = 500
 RANKING_MIN_STATION_SALES = 200
 RANKING_MIN_STREET_SALES = 30
 RANKING_BOARD_SIZE = 10
+# Use the same precision per sale in streaming and temporary-table aggregations.
+_PRICE_PER_SQM = "CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6))"
 
 
 def _flat_type_filter(flat_type: str | None) -> tuple[str, list[Any]]:
@@ -479,12 +482,12 @@ def rank_towns(connection: Any, flat_type: str | None = None) -> list[dict[str, 
     )
     query = (
         "SELECT p.town, COUNT(*) AS sales, "
-        "AVG(rt.resale_price / f.floor_area_sqm) AS avg_psm, "
+        f"AVG({_PRICE_PER_SQM}) AS avg_psm, "
         "AVG(rt.resale_price) AS avg_price, "
         f"SUM(CASE WHEN {recent} THEN 1 ELSE 0 END) AS recent_sales, "
-        f"AVG(CASE WHEN {recent} THEN rt.resale_price / f.floor_area_sqm END) AS recent_psm, "
+        f"AVG(CASE WHEN {recent} THEN {_PRICE_PER_SQM} END) AS recent_psm, "
         f"SUM(CASE WHEN {prior} THEN 1 ELSE 0 END) AS prior_sales, "
-        f"AVG(CASE WHEN {prior} THEN rt.resale_price / f.floor_area_sqm END) AS prior_psm "
+        f"AVG(CASE WHEN {prior} THEN {_PRICE_PER_SQM} END) AS prior_psm "
         "FROM `resale_transaction` AS rt "
         "JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id "
         "JOIN `place` AS p ON p.block_id = f.block_id "
@@ -506,7 +509,7 @@ def rank_stations(
     extra, parameters = _flat_type_filter(flat_type)
     query = (
         "SELECT ns.station_name, MIN(ns.station_code) AS station_code, COUNT(*) AS sales, "
-        "AVG(rt.resale_price / f.floor_area_sqm) AS avg_psm "
+        f"AVG({_PRICE_PER_SQM}) AS avg_psm "
         "FROM `resale_transaction` AS rt "
         "JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id "
         "JOIN (SELECT n.PLACE_block_id AS block_id, s.station_name, "
@@ -552,7 +555,8 @@ def top_sales(
         "FROM `resale_transaction` AS rt "
         "JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id "
         "JOIN `place` AS p ON p.block_id = f.block_id "
-        f"WHERE 1 = 1{extra} ORDER BY rt.resale_price DESC LIMIT %s"
+        f"WHERE 1 = 1{extra} "
+        "ORDER BY rt.resale_price DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT %s"
     )
     with connection.cursor(dictionary=True) as cursor:
         cursor.execute(query, (*parameters, int(limit)))

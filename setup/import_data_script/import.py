@@ -3,6 +3,7 @@
 import os
 import time
 from contextlib import closing
+from decimal import Decimal
 from getpass import getpass
 from pathlib import Path
 
@@ -49,10 +50,16 @@ def get_seed_agent_id(cursor):
 
 def main():
     started = time.perf_counter()
-    places = pd.read_csv(CSV_DIR / "places_for_mysql.csv", dtype={"postal": str})
+    places = pd.read_csv(
+        CSV_DIR / "places_for_mysql.csv",
+        dtype={"postal": str},
+        converters={"latitude": Decimal, "longitude": Decimal},
+    )
     stations = pd.read_csv(CSV_DIR / "mrt_lrt_full_list.csv")
-    hdb = pd.read_csv(CSV_DIR / "hdb_resale_enriched_block_id.csv")
-    hdb["floor_area_sqm"] = hdb["floor_area_sqm"].astype(int)
+    hdb = pd.read_csv(
+        CSV_DIR / "hdb_resale_enriched_block_id.csv",
+        converters={"floor_area_sqm": Decimal, "resale_price": Decimal},
+    )
     transaction_dates = (
         pd.to_datetime(hdb["transaction_date"], format="%m-%Y") + pd.offsets.MonthEnd(0)
     ).dt.date
@@ -60,6 +67,9 @@ def main():
     with closing(get_mysql_connection()) as connection, connection.cursor() as cursor:
         try:
             connection.start_transaction(isolation_level="REPEATABLE READ")
+            cursor.execute("SELECT @@foreign_key_checks, @@unique_checks")
+            if cursor.fetchone() != (1, 1):
+                raise ValueError("Enable foreign_key_checks and unique_checks before importing.")
             cursor.execute("SELECT block_id FROM place LIMIT 1 FOR UPDATE")
             if cursor.fetchone():
                 raise ValueError("The import requires a fresh schema with an empty place table.")

@@ -1,4 +1,5 @@
 import unittest
+from decimal import Decimal
 from typing import Any
 
 from app.repository import (
@@ -70,9 +71,16 @@ class TransactionSearchTests(unittest.TestCase):
         self.assertEqual(results, [{"flat_id": 1}])
         self.assertEqual(
             connection.cursor_instance.parameters,
-            ("4 ROOM", "Tampines", 300000, 600000, "2020-01-01", "2024-12-31"),
+            ("4 ROOM", "Tampines", Decimal("300000"), Decimal("600000"), "2020-01-01", "2024-12-31"),
         )
         self.assertIn("FROM `resale_transaction`", connection.cursor_instance.query)
+
+    def test_decimal_price_bounds_and_stable_date_order(self):
+        connection = FakeConnection()
+        search_transactions(connection, {"min_price": 650000.19, "max_price": Decimal("700001.01")})
+        query, parameters = connection.cursor_instance.calls[0]
+        self.assertEqual(parameters, (Decimal("650000.19"), Decimal("700001.01")))
+        self.assertIn("ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC", query)
 
     def test_user_values_are_not_interpolated_into_sql(self):
         connection = FakeConnection()
@@ -115,11 +123,12 @@ class FlatAndTransactionAccessTests(unittest.TestCase):
     def test_flat_update_has_no_owner_dependency(self):
         connection = FakeConnection()
 
-        update_flat(connection, 42, self.values)
+        update_flat(connection, 42, {**self.values, "floor_area_sqm": 60.3})
 
         query, parameters = connection.cursor_instance.calls[0]
         self.assertIn("WHERE flat_id = %s", query)
         self.assertNotIn("created_by_agent_id", query)
+        self.assertEqual(parameters[3], Decimal("60.3"))
         self.assertEqual(parameters[-1], 42)
 
     def test_own_transaction_listing_is_scoped_to_agent(self):
@@ -133,7 +142,7 @@ class FlatAndTransactionAccessTests(unittest.TestCase):
     def test_create_transaction_uses_session_agent_id(self):
         connection = FakeConnection()
 
-        create_agent_transaction(connection, 17, 42, "2024-01-02", 500000.0)
+        create_agent_transaction(connection, 17, 42, "2024-01-02", 500000.19)
 
         self.assertIn(
             "(FLAT_flat_id, AGENTS_agent_id, transaction_date, resale_price)",
@@ -141,7 +150,7 @@ class FlatAndTransactionAccessTests(unittest.TestCase):
         )
         self.assertEqual(
             connection.cursor_instance.parameters,
-            (42, 17, "2024-01-02", 500000.0),
+            (42, 17, "2024-01-02", Decimal("500000.19")),
         )
 
     def test_transaction_update_is_owner_scoped(self):

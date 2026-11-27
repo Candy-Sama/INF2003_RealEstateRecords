@@ -22,4 +22,4 @@ The import requires an empty `place` table and keeps foreign-key checks active. 
 
 The distance builder populates `nearby` after the CSV import. It rebuilds the distance rows by default. Pass `--only-missing` to fill gaps while retaining existing rows.
 
-The MySQL account in `.env` needs read and write privileges in `estateRecordsDB` and `CREATE TEMPORARY TABLES` for the distance builder. An older schema missing `nearby.distance_m` also needs `ALTER` when the builder adds the column. The main application creates its MongoDB collections and analytics indexes on first use, so the configured MongoDB account needs read and write access to the chosen database.
+The MySQL account in `.env` needs read and write privileges in `estateRecordsDB` and `CREATE TEMPORARY TABLES` for the distance builder. Run the [MySQL migration](../mysql_upgrade.md#upgrade-an-existing-schema) before using an older schema. The main application creates its MongoDB collections and analytics indexes on first use, so the configured MongoDB account needs read and write access to the chosen database.
