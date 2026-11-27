@@ -33,7 +33,7 @@ def build_boards(
     sales: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     by_psm = sorted(towns, key=lambda t: _f(t["avg_psm"]), reverse=True)
-    by_volume = sorted(towns, key=lambda t: int(t["sales"]), reverse=True)
+    by_volume = sorted(towns, key=lambda t: (-int(t["sales"]), t["town"]))
 
     rising = []
     for town in towns:

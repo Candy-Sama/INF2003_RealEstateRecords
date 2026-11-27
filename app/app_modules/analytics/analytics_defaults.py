@@ -7,24 +7,42 @@ _RT_FLAT = (
     "JOIN flat f ON f.flat_id = rt.FLAT_flat_id "
 )
 
+MARKET_OVERVIEW_SEED_KEY = "kpi_overview"
+_MARKET_OVERVIEW_TOTALS = """SELECT COUNT(*) AS transactions,
+       ROUND(AVG(rt.resale_price)) AS avg_price,
+       ROUND(AVG(rt.resale_price / f.floor_area_sqm)) AS avg_price_per_sqm,"""
+
+# Keep the exact old SQL so existing seeded cards can be upgraded safely.
+LEGACY_MARKET_OVERVIEW_SQL = f"""
+{_MARKET_OVERVIEW_TOTALS}
+       (SELECT COUNT(*) FROM resale_transaction
+         WHERE transaction_date = (SELECT MAX(transaction_date) FROM resale_transaction)
+       ) AS latest_month_sales
+{_RT_FLAT}
+""".strip()
+
+MARKET_OVERVIEW_SQL = f"""
+{_MARKET_OVERVIEW_TOTALS}
+       (SELECT COUNT(*)
+        FROM resale_transaction AS monthly
+        CROSS JOIN (SELECT MAX(transaction_date) AS sale_date FROM resale_transaction) AS latest
+        WHERE monthly.transaction_date BETWEEN
+              DATE_SUB(latest.sale_date, INTERVAL (DAYOFMONTH(latest.sale_date) - 1) DAY)
+              AND latest.sale_date
+       ) AS latest_month_sales
+{_RT_FLAT}
+""".strip()
+
 DEFAULT_CARDS: list[dict[str, Any]] = [
     {
-        "seed_key": "kpi_overview",
+        "seed_key": MARKET_OVERVIEW_SEED_KEY,
         "title": "Market overview",
         "description": "Headline numbers across every resale transaction.",
         "display_type": "kpi",
         "width": "full",
         "number_format": "auto",
         "mapping": {},
-        "sql": f"""
-SELECT COUNT(*) AS transactions,
-       ROUND(AVG(rt.resale_price)) AS avg_price,
-       ROUND(AVG(rt.resale_price / f.floor_area_sqm)) AS avg_price_per_sqm,
-       (SELECT COUNT(*) FROM resale_transaction
-         WHERE transaction_date = (SELECT MAX(transaction_date) FROM resale_transaction)
-       ) AS latest_month_sales
-{_RT_FLAT}
-""".strip(),
+        "sql": MARKET_OVERVIEW_SQL,
     },
     {
         "seed_key": "price_trend",

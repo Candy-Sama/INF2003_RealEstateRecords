@@ -1,7 +1,7 @@
 -- MySQL Workbench Forward Engineering
+-- Fresh-install schema for Estate Records. Use setup/mysql_upgrade.md for
+-- upgrading a populated database.
 
-SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 -- -----------------------------------------------------
@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`agents` (
   `phone_number` VARCHAR(45) NOT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`agent_id`),
-  UNIQUE INDEX `agent_id_UNIQUE` (`agent_id` ASC) VISIBLE,
   UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
@@ -34,11 +33,14 @@ CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`place` (
   `block_number` VARCHAR(45) NOT NULL,
   `road_name` VARCHAR(45) NOT NULL,
   `postal` VARCHAR(45) NOT NULL,
-  `latitude` FLOAT NOT NULL,
-  `longtitude` FLOAT NOT NULL,
+  `latitude` DECIMAL(18,15) NOT NULL,
+  `longtitude` DECIMAL(18,15) NOT NULL,
   `town` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`block_id`),
-  UNIQUE INDEX `block_id_UNIQUE` (`block_id` ASC) VISIBLE)
+  INDEX `ix_place_town_address` (`town`, `road_name`, `block_number`),
+  INDEX `ix_place_coords` (`latitude`, `longtitude`),
+  CONSTRAINT `chk_place_coordinates`
+    CHECK (`latitude` BETWEEN -90 AND 90 AND `longtitude` > -180 AND `longtitude` <= 180))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -51,13 +53,15 @@ CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`flat` (
   `flat_type` VARCHAR(45) NOT NULL,
   `flat_model` VARCHAR(45) NOT NULL,
   `storey_range` VARCHAR(45) NOT NULL,
-  `floor_area_sqm` INT NOT NULL,
+  `floor_area_sqm` DECIMAL(7,2) NOT NULL,
   `block_id` INT NOT NULL,
   `lease_commence_date` INT NOT NULL,
   `remaining_lease_months` INT NOT NULL,
   PRIMARY KEY (`flat_id`),
-  UNIQUE INDEX `transaction_id_UNIQUE` (`flat_id` ASC) VISIBLE,
   INDEX `fk_RESALE_TRANSACTION_BLOCK1_idx` (`block_id` ASC) VISIBLE,
+  INDEX `ix_flat_type_block` (`flat_type`, `block_id`),
+  CONSTRAINT `chk_flat_area` CHECK (`floor_area_sqm` > 0),
+  CONSTRAINT `chk_flat_remaining_lease` CHECK (`remaining_lease_months` >= 0),
   CONSTRAINT `fk_RESALE_TRANSACTION_BLOCK1`
     FOREIGN KEY (`block_id`)
     REFERENCES `estateRecordsDB`.`place` (`block_id`))
@@ -77,7 +81,6 @@ CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`stations` (
   `transport_type` ENUM('MRT', 'LRT') NOT NULL,
   `place_block_id` INT NOT NULL,
   PRIMARY KEY (`station_id`),
-  UNIQUE INDEX `station_id_UNIQUE` (`station_id` ASC) VISIBLE,
   UNIQUE INDEX `station_code_UNIQUE` (`station_code` ASC) VISIBLE,
   INDEX `fk_stations_place1_idx` (`place_block_id` ASC) VISIBLE,
   CONSTRAINT `fk_stations_place1`
@@ -95,10 +98,10 @@ DEFAULT CHARACTER SET = utf8mb3;
 CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`nearby` (
   `STATIONS_station_id` INT NOT NULL,
   `PLACE_block_id` INT NOT NULL,
-  `distance_m` INT NOT NULL DEFAULT 0,
+  `distance_m` INT NOT NULL,
   PRIMARY KEY (`STATIONS_station_id`, `PLACE_block_id`),
-  INDEX `fk_STATIONS_has_PLACE_PLACE1_idx` (`PLACE_block_id` ASC) VISIBLE,
-  INDEX `fk_STATIONS_has_PLACE_STATIONS1_idx` (`STATIONS_station_id` ASC) VISIBLE,
+  INDEX `ix_nearby_block_distance` (`PLACE_block_id`, `distance_m`),
+  CONSTRAINT `chk_nearby_distance` CHECK (`distance_m` >= 0),
   CONSTRAINT `fk_STATIONS_has_PLACE_PLACE1`
     FOREIGN KEY (`PLACE_block_id`)
     REFERENCES `estateRecordsDB`.`place` (`block_id`),
@@ -116,10 +119,12 @@ CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`resale_transaction` (
   `FLAT_flat_id` INT NOT NULL,
   `AGENTS_agent_id` INT NOT NULL,
   `transaction_date` DATE NOT NULL,
-  `resale_price` FLOAT NOT NULL,
+  `resale_price` DECIMAL(12,2) NOT NULL,
   PRIMARY KEY (`FLAT_flat_id`, `AGENTS_agent_id`),
-  INDEX `fk_RESALE_TRANSACTION_has_AGENTS_AGENTS1_idx` (`AGENTS_agent_id` ASC) VISIBLE,
-  INDEX `fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx` (`FLAT_flat_id` ASC) VISIBLE,
+  INDEX `ix_rt_agent_date_flat` (`AGENTS_agent_id`, `transaction_date`, `FLAT_flat_id`),
+  INDEX `ix_rt_date` (`transaction_date`),
+  INDEX `ix_rt_price` (`resale_price`),
+  CONSTRAINT `chk_resale_price` CHECK (`resale_price` > 0),
   CONSTRAINT `fk_RESALE_TRANSACTION_has_AGENTS_AGENTS1`
     FOREIGN KEY (`AGENTS_agent_id`)
     REFERENCES `estateRecordsDB`.`agents` (`agent_id`),
@@ -130,6 +135,35 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
 
+-- -----------------------------------------------------
+-- View `estateRecordsDB`.`v_resale_detail`
+-- Projects the sale, flat, and address fields used by Recent comparable sales.
+-- The app applies the selected station radius to both flats in its query.
+-- Keep this projection in sync with CREATE_RESALE_DETAIL_VIEW in migrate_mysql.py.
+-- -----------------------------------------------------
+CREATE OR REPLACE VIEW `estateRecordsDB`.`v_resale_detail` AS
+SELECT
+  rt.`FLAT_flat_id` AS `flat_id`,
+  rt.`transaction_date`,
+  rt.`resale_price`,
+  ROUND(rt.`resale_price` / NULLIF(f.`floor_area_sqm`, 0), 2) AS `price_per_sqm`,
+  f.`flat_type`,
+  f.`flat_model`,
+  f.`storey_range`,
+  f.`floor_area_sqm`,
+  f.`lease_commence_date`,
+  f.`remaining_lease_months`,
+  p.`block_id`,
+  p.`block_number`,
+  p.`road_name`,
+  p.`postal`,
+  p.`town`,
+  p.`latitude`,
+  p.`longtitude`
+FROM `estateRecordsDB`.`resale_transaction` AS rt
+JOIN `estateRecordsDB`.`flat` AS f
+  ON f.`flat_id` = rt.`FLAT_flat_id`
+JOIN `estateRecordsDB`.`place` AS p
+  ON p.`block_id` = f.`block_id`;
+
 SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

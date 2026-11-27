@@ -5,7 +5,12 @@ from datetime import datetime, timezone
 from typing import Any
 
 from . import analytics_builder, analytics_sql
-from .analytics_defaults import DEFAULT_CARDS
+from .analytics_defaults import (
+    DEFAULT_CARDS,
+    LEGACY_MARKET_OVERVIEW_SQL,
+    MARKET_OVERVIEW_SEED_KEY,
+    MARKET_OVERVIEW_SQL,
+)
 
 COLLECTION = "analytics_cards"
 META_COLLECTION = "analytics_meta"
@@ -155,10 +160,25 @@ def ensure_indexes(db: Any) -> None:
 
 
 def list_cards(db: Any, agent_id: int) -> list[dict[str, Any]]:
-    cursor = db[COLLECTION].find({"agent_id": int(agent_id)}).sort(
-        [("position", 1), ("_id", 1)]
-    )
-    return [_public(doc) for doc in cursor]
+    cards = db[COLLECTION]
+    owner_id = int(agent_id)
+    cursor = cards.find({"agent_id": owner_id}).sort([("position", 1), ("_id", 1)])
+    result = []
+    for doc in cursor:
+        if doc.get("seed_key") == MARKET_OVERVIEW_SEED_KEY and doc.get("sql") == LEGACY_MARKET_OVERVIEW_SQL:
+            updated = cards.update_one(
+                {
+                    "_id": doc["_id"],
+                    "agent_id": owner_id,
+                    "seed_key": MARKET_OVERVIEW_SEED_KEY,
+                    "sql": LEGACY_MARKET_OVERVIEW_SQL,
+                },
+                {"$set": {"sql": MARKET_OVERVIEW_SQL}},
+            )
+            if updated.matched_count:
+                doc["sql"] = MARKET_OVERVIEW_SQL
+        result.append(_public(doc))
+    return result
 
 
 def _next_position(db: Any, agent_id: int) -> int:

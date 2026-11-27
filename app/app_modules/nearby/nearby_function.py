@@ -22,45 +22,37 @@ from typing import Any
 from app.app_modules.database.database import get_mysql_connection
 
 DEFAULT_RADIUS_M = 1000
+MIGRATION_REQUIRED = (
+    "The nearby.distance_m column is missing. Run `python -m setup.migrate_mysql --apply`."
+)
 
 # Roughly 110 km per degree; deliberately a little generous so the bounding-box
 # pre-filter never throws away a pair the exact distance check would keep.
 _METRES_PER_DEGREE = 110_000
 
 
-def ensure_distance_column(connection: Any) -> bool:
-    """Add `nearby.distance_m` if missing. Returns True if it was added."""
+def has_distance_column(connection: Any) -> bool:
     with connection.cursor(buffered=True) as cursor:
         cursor.execute(
             "SELECT COUNT(*) FROM information_schema.COLUMNS "
             "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'nearby' "
             "AND COLUMN_NAME = 'distance_m'"
         )
-        exists = cursor.fetchone()[0] > 0
-        if not exists:
-            cursor.execute("ALTER TABLE `nearby` ADD COLUMN `distance_m` INT NOT NULL DEFAULT 0")
-    connection.commit()
-    return not exists
+        return cursor.fetchone()[0] > 0
 
 
 def is_ready(connection: Any) -> bool:
     """True when `distance_m` exists and `nearby` has rows."""
+    if not has_distance_column(connection):
+        return False
     with connection.cursor(buffered=True) as cursor:
-        cursor.execute(
-            "SELECT COUNT(*) FROM information_schema.COLUMNS "
-            "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'nearby' "
-            "AND COLUMN_NAME = 'distance_m'"
-        )
-        if cursor.fetchone()[0] == 0:
-            return False
         cursor.execute("SELECT EXISTS (SELECT 1 FROM `nearby`)")
         return bool(cursor.fetchone()[0])
 
 
 # Every block paired with every station, bounding-box pre-filtered, then exact
 # distance. The derived table lets us filter on the computed alias.
-_WITHIN_RADIUS_SQL = """
-INSERT INTO `nearby` (STATIONS_station_id, PLACE_block_id, distance_m)
+_WITHIN_RADIUS_SELECT = """
 SELECT d.station_id, d.block_id, d.distance_m
 FROM (
     SELECT s.station_id,
@@ -121,21 +113,18 @@ def _collect_missing_blocks(cursor: Any) -> None:
 
 def coverage(connection: Any) -> dict[str, Any]:
     """How complete `nearby` is. Used by the Address tab's check."""
+    has_column = has_distance_column(connection)
     with connection.cursor(buffered=True) as cursor:
         cursor.execute(
-            "SELECT COUNT(*) FROM information_schema.COLUMNS "
-            "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'nearby' "
-            "AND COLUMN_NAME = 'distance_m'"
-        )
-        has_column = cursor.fetchone()[0] > 0
-        cursor.execute(
+            "WITH missing AS ("
+            "SELECT p.block_id FROM `place` AS p WHERE NOT EXISTS "
+            "(SELECT 1 FROM `nearby` AS n WHERE n.PLACE_block_id = p.block_id) "
+            "GROUP BY p.block_id) "
             "SELECT "
             "(SELECT COUNT(*) FROM `place`), "
             "(SELECT COUNT(*) FROM `stations`), "
-            "(SELECT COUNT(*) FROM `place` p WHERE NOT EXISTS "
-            "  (SELECT 1 FROM `nearby` n WHERE n.PLACE_block_id = p.block_id)), "
-            "(SELECT COUNT(*) FROM `flat` f WHERE NOT EXISTS "
-            "  (SELECT 1 FROM `nearby` n WHERE n.PLACE_block_id = f.block_id))"
+            "(SELECT COUNT(*) FROM missing), "
+            "(SELECT COUNT(*) FROM missing AS m JOIN `flat` AS f ON f.block_id = m.block_id)"
         )
         places, stations, places_missing, flats_missing = cursor.fetchone()
     return {
@@ -161,20 +150,24 @@ def populate_nearby(
     """
     if radius_m <= 0:
         raise ValueError("radius_m must be positive.")
+    if not has_distance_column(connection):
+        raise ValueError(MIGRATION_REQUIRED)
 
     started = time.time()
-    column_added = ensure_distance_column(connection)
     degrees = radius_m / _METRES_PER_DEGREE
 
     try:
         with connection.cursor() as cursor:
             if only_missing:
                 _collect_missing_blocks(cursor)
-                within_sql = _WITHIN_RADIUS_SQL.replace("/*MISSING_JOIN*/", _MISSING_JOIN)
+                within_sql = _WITHIN_RADIUS_SELECT.replace("/*MISSING_JOIN*/", _MISSING_JOIN)
             else:
                 cursor.execute("DELETE FROM `nearby`")
-                within_sql = _WITHIN_RADIUS_SQL.replace("/*MISSING_JOIN*/", "")
-            cursor.execute(within_sql, {"deg": degrees, "radius": radius_m})
+                within_sql = _WITHIN_RADIUS_SELECT.replace("/*MISSING_JOIN*/", "")
+            cursor.execute(
+                "INSERT INTO `nearby` (STATIONS_station_id, PLACE_block_id, distance_m) " + within_sql,
+                {"deg": degrees, "radius": radius_m},
+            )
             within_radius = cursor.rowcount
 
             fallback_rows = 0
@@ -190,7 +183,6 @@ def populate_nearby(
 
     return {
         "radius_m": radius_m,
-        "column_added": column_added,
         "within_radius_rows": within_radius,
         "fallback_rows": fallback_rows,
         "total_rows": within_radius + fallback_rows,
@@ -204,7 +196,7 @@ def update_missing(connection: Any, radius_m: int = DEFAULT_RADIUS_M) -> dict[st
 
 
 def ensure_populated(connection: Any, radius_m: int = DEFAULT_RADIUS_M) -> dict[str, Any] | None:
-    """Fill `nearby` automatically if it is empty (or lacks `distance_m`).
+    """Fill `nearby` automatically if it is empty.
 
     Called when the Address and Nearby stations tabs open. Returns the populate
     result when it ran, or None when there was nothing to do (already filled,
@@ -212,7 +204,10 @@ def ensure_populated(connection: Any, radius_m: int = DEFAULT_RADIUS_M) -> dict[
     """
     if is_ready(connection):
         return None
-    if coverage(connection)["stations_total"] == 0:
+    info = coverage(connection)
+    if not info["has_column"]:
+        raise ValueError(MIGRATION_REQUIRED)
+    if info["stations_total"] == 0:
         return None
     return update_missing(connection, radius_m)
 

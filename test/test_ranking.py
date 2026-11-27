@@ -1,5 +1,6 @@
 import unittest
 from datetime import date
+from decimal import Decimal
 
 from app import repository
 from app.app_modules.ranking import ranking
@@ -39,6 +40,11 @@ class BoardTests(unittest.TestCase):
         self.assertEqual(b["stations_busiest"]["rows"][0]["name"], "Bedok (EW5)")
         self.assertEqual([r["rank"] for r in b["towns_priciest"]["rows"]], [1, 2, 3, 4])
 
+    def test_towns_with_equal_sales_are_ranked_alphabetically(self):
+        tied = [town("BEDOK", 6000, 100), town("ANG MO KIO", 5000, 100)]
+        boards = {board["id"]: board for board in ranking.build_boards(tied, [], [], [])}
+        self.assertEqual([row["name"] for row in boards["towns_busiest"]["rows"]], ["ANG MO KIO", "BEDOK"])
+
     def test_rising_needs_enough_sales_in_both_windows(self):
         rows = boards()["towns_rising"]["rows"]
         self.assertNotIn("TINY", [r["name"] for r in rows])
@@ -50,6 +56,11 @@ class BoardTests(unittest.TestCase):
         sale = boards()["sales_highest"]["rows"][0]
         self.assertEqual(sale["value"], 1500)
         self.assertEqual(sale["extra"], "5 Room, Mar 2024")
+
+    def test_decimal_values_from_mysql_are_supported(self):
+        sales = [{**SALES[0], "resale_price": Decimal("1500000.25")}]
+        built = {board["id"]: board for board in ranking.build_boards(TOWNS, STATIONS, STREETS, sales)}
+        self.assertAlmostEqual(built["sales_highest"]["rows"][0]["value"], 1500.00025)
 
     def test_empty_inputs_give_empty_boards(self):
         built = ranking.build_boards([], [], [], [])
@@ -96,9 +107,10 @@ class RankingQueryTests(unittest.TestCase):
         evil = "4 ROOM' OR 1=1 --"
         for call, expected in (
             (lambda c: repository.rank_towns(c, evil), (evil,)),
-            (lambda c: repository.rank_stations(c, evil), (500, evil, 200)),
+            (lambda c: repository.rank_stations(c, evil), (evil, 500, 200)),
             (lambda c: repository.rank_streets(c, evil), (evil, 30, 10)),
             (lambda c: repository.top_sales(c, evil), (evil, 10)),
+            (lambda c: repository.rank_market(c, evil), (evil, 500, 200, 30, 10)),
         ):
             connection = FakeConnection()
             call(connection)
@@ -112,6 +124,13 @@ class RankingQueryTests(unittest.TestCase):
         query, parameters = connection.log[0]
         self.assertNotIn("f.flat_type = %s", query)
         self.assertEqual(parameters, ())
+
+    def test_top_sales_breaks_price_ties_by_primary_key(self):
+        connection = FakeConnection()
+        repository.top_sales(connection)
+        query, parameters = connection.log[0]
+        self.assertIn("ORDER BY rt.resale_price DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC", query)
+        self.assertEqual(parameters, (10,))
 
 
 if __name__ == "__main__":
