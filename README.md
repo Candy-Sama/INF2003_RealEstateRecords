@@ -6,7 +6,7 @@ Estate Records is a Streamlit application for Singapore property agents to maint
 
 ## Run the application
 
-Use Python 3.14, MySQL Server 8.0.18 or newer, and a running MongoDB server. Use a fresh local MySQL schema and an empty MongoDB database for the grading demo. Run the following commands from the repository root in PowerShell.
+Use Python 3.14, MySQL Server 8.0.18 or newer, and a running MongoDB server. Use a fresh local MySQL schema and an empty MongoDB database. Run the following commands from the repository root in PowerShell.
 
 1. **Install Python dependencies and create the local configuration.**
 
@@ -24,7 +24,7 @@ Use Python 3.14, MySQL Server 8.0.18 or newer, and a running MongoDB server. Use
    mysql --host=localhost --port=3306 --user=YOUR_MYSQL_USER -p --execute="SOURCE setup/firstver_database.sql"
    ```
 
-3. **Import the bundled data and build station distances.** The importer prompts for a password of at least eight characters when it creates the demo administrator. Keep that password for the grading walkthrough.
+3. **Import the bundled data and build station distances.** The importer prompts for a password of at least eight characters when it creates the demo administrator. 
 
    ```powershell
    .\.venv\Scripts\python.exe -m setup.import_data_script.import
@@ -65,7 +65,7 @@ For a populated Estate Records schema, configure `.env` for that instance and ap
 
 Environment variables already set in the shell take precedence over `.env`. Keep `.env` local. Public registration reserves the configured administrator email for the seed importer or an existing provisioned account.
 
-## Grading walkthrough
+## walkthrough
 
 1. **Search and filter.** Register a regular agent, then run **Search & filter** for **TAMPINES**, **4 ROOM** and save it as **Tampines 4-room resale**. MySQL joins transactions, flats, and places and displays up to 1,000 matches.
 2. **Joins, comparables, and rankings.** Open **Address** to inspect station coverage. In **Nearby stations**, filter for **≤ 500 m**, select a flat, and open **Recent comparable sales** with the **500 m** catchment. Review the sample count, median price per square metre, chart, and matching sales. Choose **Download comparable sales CSV** to export the displayed rows. Open **Ranking** to compare towns, station areas, streets, and individual sales. Capture market screenshots before adding demonstration sales.
