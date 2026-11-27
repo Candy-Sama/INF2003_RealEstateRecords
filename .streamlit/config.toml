@@ -1,0 +1,17 @@
+[theme]
+showWidgetBorder = true
+
+[theme.light]
+primaryColor = "#176b52"
+backgroundColor = "#f6f8f5"
+secondaryBackgroundColor = "#e8efeb"
+textColor = "#172b2a"
+borderColor = "#6a837a"
+
+[theme.dark]
+primaryColor = "#308267"
+backgroundColor = "#14221f"
+secondaryBackgroundColor = "#1b2d28"
+textColor = "#e8f2ed"
+borderColor = "#70877e"
+linkColor = "#87d3b7"

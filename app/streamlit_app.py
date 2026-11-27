@@ -40,64 +40,77 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    :root {
-        --ink: #172b2a;
-        --muted: #61716d;
-        --green: #176b52;
-        --green-dark: #10553f;
-        --green-tint: #e1eee7;
-        --line: #e4ebe7;
-        --paper: #f6f8f5;
+    .stApp {
+        /* Streamlit sets color-scheme from the active app theme. */
+        --estate-accent: light-dark(#176b52, #87d3b7);
+        --estate-muted: light-dark(#52635e, #a9c2b8);
+        --estate-button: light-dark(#176b52, #308267);
+        --estate-button-hover: light-dark(#10553f, #276950);
+        --estate-border: light-dark(#6a837a, #70877e);
+        --estate-tint: light-dark(#e1eee7, #223b33);
     }
-    html, body, [class*="css"] { font-family: 'DM Sans', 'Segoe UI', sans-serif; color: var(--ink); }
-    .stApp { background: var(--paper); }
     [data-testid="stHeader"] { background: transparent; }
     .block-container { max-width: 1180px; padding-top: 1.4rem; padding-bottom: 3rem; }
     .brand { font-family: 'Manrope', 'Segoe UI', sans-serif; font-size: 1.2rem; font-weight: 800; letter-spacing: -.04em; }
-    .brand-mark { display: inline-grid; place-items: center; width: 2rem; height: 2rem; margin-right: .55rem; color: white; background: var(--green); border-radius: .65rem; vertical-align: middle; }
-    .eyebrow { color: var(--green); font-size: .76rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-    .hero-title { max-width: 690px; margin: .75rem 0 1rem; color: var(--ink); font-family: 'Manrope', 'Segoe UI', sans-serif; font-size: clamp(2.5rem, 5vw, 4.35rem); font-weight: 800; letter-spacing: -.065em; line-height: 1.05; }
-    .hero-copy { max-width: 560px; color: var(--muted); font-size: 1.08rem; line-height: 1.75; }
+    .brand-mark { display: inline-grid; place-items: center; width: 2rem; height: 2rem; margin-right: .55rem; color: white; background: var(--estate-button); border-radius: .65rem; vertical-align: middle; }
+    .eyebrow { color: var(--estate-accent); font-size: .76rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .hero-title { max-width: 690px; margin: .75rem 0 1rem; font-family: 'Manrope', 'Segoe UI', sans-serif; font-size: clamp(2.5rem, 5vw, 4.35rem); font-weight: 800; letter-spacing: -.065em; line-height: 1.05; }
+    .hero-copy { max-width: 560px; color: var(--estate-muted); font-size: 1.08rem; line-height: 1.75; }
     .hero-card { min-height: 320px; padding: 2rem; color: white; border-radius: 1.25rem; background: linear-gradient(145deg, #163d35 0%, #176b52 60%, #74a887 150%); display: flex; flex-direction: column; justify-content: space-between; }
     .hero-card-label { color: #c8e3d3; font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
     .hero-card-title { max-width: 360px; font-family: 'Manrope', 'Segoe UI', sans-serif; font-size: 2rem; font-weight: 700; line-height: 1.2; }
     .hero-card-copy { max-width: 340px; color: #d6e8dc; line-height: 1.65; }
+    .stApp .stTabs [role="tab"]:is([aria-selected="true"], :hover, :focus-visible) {
+        color: var(--estate-accent);
+    }
     .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton) button {
         color: white;
-        background-color: var(--green);
-        border: 1px solid var(--green);
+        background-color: var(--estate-button);
+        border: 1px solid var(--estate-border);
         border-radius: .55rem;
         font-weight: 700;
     }
     .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton) button:not(:disabled):is(:hover, :active) {
-        color: white;
-        background-color: var(--green-dark);
-        border-color: var(--green-dark);
+        background-color: var(--estate-button-hover);
     }
     .stApp .stButtonGroup button {
-        color: var(--green-dark);
-        background-color: var(--green-tint);
-        border-color: var(--green);
+        color: var(--estate-accent);
+        background-color: var(--estate-tint);
+        border-color: var(--estate-border);
     }
     .stApp .stButtonGroup button:not(:disabled):is(:hover, [data-focus-visible]) {
-        background-color: var(--green-tint);
-        border-color: var(--green-dark);
+        border-color: var(--estate-accent);
     }
     .stApp .stButtonGroup button:is([data-selected], [data-testid$="Active"]):not(:disabled) {
         color: white;
-        background-color: var(--green);
-        border-color: var(--green);
+        background-color: var(--estate-button);
     }
     .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton, .stButtonGroup) button:focus-visible {
-        outline: 2px solid var(--green-dark);
+        outline: 2px solid var(--estate-accent);
         outline-offset: 2px;
         box-shadow: none;
     }
     .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton, .stButtonGroup) button:disabled {
-        color: #4b685b;
-        background-color: var(--green-tint);
-        border-color: var(--line);
+        color: var(--estate-muted);
+        background-color: var(--estate-tint);
+        border-color: var(--estate-border);
     }
+    .nearby-stat {
+        --stat-accent: var(--estate-accent);
+        border: 1px solid var(--estate-border);
+        border-left: 5px solid var(--stat-accent);
+        background: color-mix(in srgb, var(--stat-accent) 10%, transparent);
+        border-radius: .65rem;
+        padding: .85rem 1rem;
+        margin-bottom: .4rem;
+    }
+    .nearby-stat--neutral { --stat-accent: var(--estate-muted); }
+    .nearby-stat--warning { --stat-accent: light-dark(#974607, #f7bb77); }
+    .nearby-stat--below { --stat-accent: light-dark(#116761, #87ddd3); }
+    .nearby-stat--range { --stat-accent: light-dark(#1e40af, #a9c4ff); }
+    .nearby-stat-title { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+    .nearby-stat-value { color: var(--stat-accent); font-size: 1.45rem; font-weight: 800; margin: .15rem 0; }
+    .nearby-stat-note { font-size: .82rem; }
     footer { visibility: hidden; }
     </style>
     """,

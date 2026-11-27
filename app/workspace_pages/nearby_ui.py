@@ -79,22 +79,14 @@ def _render_colored_stat_card(
     title: str,
     primary_text: str,
     sub_text: str,
-    accent_hex: str,
-    bg_hex: str,
+    tone: str = "default",
 ) -> None:
     st.markdown(
         f"""
-        <div style="
-            border: 1px solid {accent_hex}44;
-            border-left: 5px solid {accent_hex};
-            background: {bg_hex};
-            border-radius: 0.65rem;
-            padding: 0.85rem 1rem;
-            margin-bottom: 0.4rem;
-        ">
-            <div style="font-size: 0.78rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.04em;">{title}</div>
-            <div style="font-size: 1.45rem; font-weight: 800; color: {accent_hex}; margin: 0.15rem 0;">{primary_text}</div>
-            <div style="font-size: 0.82rem; color: #334155;">{sub_text}</div>
+        <div class="nearby-stat nearby-stat--{tone}">
+            <div class="nearby-stat-title">{title}</div>
+            <div class="nearby-stat-value">{primary_text}</div>
+            <div class="nearby-stat-note">{sub_text}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -135,7 +127,7 @@ def _render_comparable_chart(
 
     points = (
         alt.Chart(df)
-        .mark_circle(size=75, opacity=0.82)
+        .mark_circle(size=75, opacity=1)
         .encode(
             x=alt.X("Sale date:T", title="Sale date"),
             y=alt.Y("Price per sqm:Q", title="Price per m² ($)"),
@@ -143,7 +135,7 @@ def _render_comparable_chart(
                 "Role:N",
                 scale=alt.Scale(
                     domain=["Comparable sale", "Selected reference flat"],
-                    range=["#176b52", "#c2410c"],
+                    range=["#2e866c", "#b86a43"],
                 ),
                 title="Series",
             ),
@@ -157,7 +149,7 @@ def _render_comparable_chart(
         median_df = pd.DataFrame({"median_psm": [float(median_psm)]})
         rule = (
             alt.Chart(median_df)
-            .mark_rule(strokeDash=[5, 4], color="#0f766e", size=2)
+            .mark_rule(strokeDash=[5, 4], color="#298775", size=2)
             .encode(y=alt.Y("median_psm:Q"))
         )
         layers.append(rule)
@@ -210,8 +202,7 @@ def _render_comparable_sales_subview(
 
     sample_count = summary["sample_count"]
     is_small = summary["is_small_sample"]
-    sample_accent = "#b45309" if is_small else ("#176b52" if sample_count > 0 else "#64748b")
-    sample_bg = "#fef3c7" if is_small else ("#ecfdf5" if sample_count > 0 else "#f1f5f9")
+    sample_tone = "warning" if is_small else ("default" if sample_count > 0 else "neutral")
     sample_sub = (
         f"Under {repository.SMALL_SAMPLE_THRESHOLD} sales (thin sample)"
         if is_small
@@ -235,29 +226,28 @@ def _render_comparable_sales_subview(
     if diff_pct is None:
         diff_text = "—"
         diff_sub = "Reference sale price/m² unavailable"
-        diff_accent = "#64748b"
-        diff_bg = "#f1f5f9"
+        diff_tone = "neutral"
     else:
         sign = "+" if diff_pct >= 0 else ""
         diff_text = f"{sign}{diff_pct:.1f}%"
         ref_psm_val = summary["reference_psm"]
         diff_sub = f'Ref ${ref_psm_val:,.0f}/m² vs median' if ref_psm_val is not None else "vs median"
         if diff_pct > 5:
-            diff_accent, diff_bg = "#b45309", "#fffbeb"
+            diff_tone = "warning"
         elif diff_pct < -5:
-            diff_accent, diff_bg = "#0f766e", "#f0fdfa"
+            diff_tone = "below"
         else:
-            diff_accent, diff_bg = "#176b52", "#ecfdf5"
+            diff_tone = "default"
 
     k1, k2, k3, k4 = st.columns(4)
     with k1:
-        _render_colored_stat_card("Sample count", f"{sample_count:,}", sample_sub, sample_accent, sample_bg)
+        _render_colored_stat_card("Sample count", f"{sample_count:,}", sample_sub, sample_tone)
     with k2:
-        _render_colored_stat_card("Median price / m²", med_psm_text, f"Median price: {med_price_text}", "#176b52", "#f6f8f5")
+        _render_colored_stat_card("Median price / m²", med_psm_text, f"Median price: {med_price_text}")
     with k3:
-        _render_colored_stat_card("Typical range (P25–P75)", iqr_text, iqr_price_sub, "#1e40af", "#eff6ff")
+        _render_colored_stat_card("Typical range (P25–P75)", iqr_text, iqr_price_sub, "range")
     with k4:
-        _render_colored_stat_card("Reference vs. median", diff_text, diff_sub, diff_accent, diff_bg)
+        _render_colored_stat_card("Reference vs. median", diff_text, diff_sub, diff_tone)
 
     if truncated:
         st.caption(
