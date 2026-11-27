@@ -134,5 +134,3 @@ The scripts in `data/scripts/data_prep/` inspect the raw CSVs, clean the HDB and
 .\.venv\Scripts\python.exe -m pip check
 .\.venv\Scripts\python.exe -m unittest discover -s test -v
 ```
-
-The unit tests run without database servers. They cover parameter binding, transaction ownership, password hashing, ranking logic, and analytics query and card handling. [Reorganization and verification log](REORGANIZATION.md)
