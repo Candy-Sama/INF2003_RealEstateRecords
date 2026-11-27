@@ -6,6 +6,7 @@ from contextlib import closing
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
+from unittest.mock import patch
 from uuid import uuid4
 
 import mysql.connector
@@ -15,6 +16,7 @@ from app import repository
 from app.app_modules.analytics.analytics_defaults import MARKET_OVERVIEW_SQL
 from app.app_modules.analytics.analytics_sql import run_query
 from app.app_modules.database.database import get_mysql_connection
+from app.app_modules.nearby.nearby_function import coverage
 from setup.benchmark_mysql import _restore_legacy_indexes, compare_indexes, workload
 from setup.migrate_mysql import migrate_schema
 
@@ -194,6 +196,121 @@ class MySQLSchemaTests(unittest.TestCase):
         self.assertEqual(final["rows_returned"], 1)
         self.assertTrue(final["explain"] and final["explain_analyze"])
         self.assertEqual(migrate_schema(self.connection), [])
+
+    def test_market_rankings_preserve_sale_weights_periods_and_interchanges(self):
+        self.load_fixture(area=Decimal("100.00"))
+        self.execute("INSERT INTO flat VALUES (2, '3 ROOM', 'Model', '01 TO 03', 50.00, 1, 1982, 780)")
+        self.execute("INSERT INTO stations VALUES (2, 'NS1', 'Test', 'Line', 'Red', 'MRT', 1)")
+        self.execute("INSERT INTO nearby VALUES (1, 1, 150), (1, 2, 500), (2, 2, 499)")
+        self.execute(
+            "INSERT INTO resale_transaction VALUES (1, 1, '2025-01-31', 400000), "
+            "(1, 2, '2024-01-31', 500000), (2, 1, '2024-12-31', 300000)"
+        )
+        self.connection.commit()
+
+        with patch.multiple(repository, RANKING_MIN_STATION_SALES=1, RANKING_MIN_STREET_SALES=1):
+            towns, stations, streets = repository.rank_market(self.connection)
+            filtered_towns, filtered_stations, filtered_streets = repository.rank_market(self.connection, "4 ROOM")
+            self.assertEqual(repository.rank_market(self.connection, "2 ROOM"), ([], [], []))
+
+        self.assertEqual(towns, [{
+            "town": "TEST", "sales": 3, "avg_psm": Decimal("5000"), "avg_price": Decimal("400000"),
+            "recent_sales": 2, "recent_psm": Decimal("5000"), "prior_sales": 1, "prior_psm": Decimal("5000"),
+        }])
+        self.assertEqual(stations, [{
+            "station_name": "Test", "station_code": "EW1", "sales": 3, "avg_psm": Decimal("5000"),
+        }])
+        self.assertEqual(streets, [{"town": "TEST", "road_name": "TEST ROAD", "sales": 3, "avg_price": Decimal("400000")}])
+        self.assertEqual(filtered_towns, repository.rank_towns(self.connection, "4 ROOM"))
+        self.assertEqual(filtered_stations, repository.rank_stations(self.connection, "4 ROOM", min_sales=1))
+        self.assertEqual(filtered_streets, repository.rank_streets(self.connection, "4 ROOM", min_sales=1))
+        self.assertEqual(filtered_towns[0]["recent_psm"], Decimal("4000"))
+        self.assertEqual(filtered_towns[0]["prior_psm"], Decimal("5000"))
+
+    def test_nearby_listing_filters_stations_and_paginates_by_flat(self):
+        self.load_fixture()
+        self.execute(
+            "INSERT INTO place VALUES "
+            "(3, '3', 'TEST ROAD', '030303', 1.35, 103.802, 'TEST'), "
+            "(4, '4', 'TEST ROAD', '040404', 1.35, 103.803, 'TEST'), "
+            "(5, '5', 'TEST ROAD', '050505', 1.35, 103.804, 'TEST')"
+        )
+        self.execute(
+            "INSERT INTO stations VALUES (2, 'EW2', 'Second', 'Line', 'Green', 'LRT', 1), "
+            "(3, 'EW3', 'Third', 'Line', 'Green', 'MRT', 1), "
+            "(4, 'EW4', 'Fourth', 'Line', 'Green', 'MRT', 1)"
+        )
+        self.execute(
+            "INSERT INTO flat VALUES "
+            "(2, '4 ROOM', 'Model', '01 TO 03', 95.00, 4, 1982, 780), "
+            "(3, '4 ROOM', 'Model', '01 TO 03', 95.00, 3, 1982, 780), "
+            "(4, '4 ROOM', 'Model', '01 TO 03', 95.00, 2, 1982, 780), "
+            "(5, '4 ROOM', 'Model', '01 TO 03', 95.00, 5, 1982, 780)"
+        )
+        self.execute(
+            "INSERT INTO nearby VALUES (1, 2, 250), (2, 2, 25), (3, 2, 50), (4, 2, 350), "
+            "(1, 3, 500), (4, 3, 501), (1, 5, 501), (2, 5, 25), (3, 5, 50)"
+        )
+        self.connection.commit()
+
+        page = repository.list_flats(self.connection, limit=2, offset=2)
+        self.assertEqual([(row["flat_id"], row["block_number"]) for row in page], [(3, "3"), (2, "4")])
+        address_coverage = coverage(self.connection)
+        self.assertEqual((address_coverage["places_missing"], address_coverage["flats_missing"]), (2, 1))
+
+        self.assertEqual(repository.count_nearby_flats(self.connection, {}), 5)
+        first_page = repository.search_nearby_flats(self.connection, {}, limit=2)
+        self.assertEqual([row["flat_id"] for row in first_page], [1, 2])
+        self.assertEqual(first_page[0]["station_count"], 4)
+        self.assertEqual(first_page[0]["nearest_m"], 25)
+        self.assertEqual(first_page[1]["station_count"], 0)
+        self.assertIsNone(first_page[1]["nearest_m"])
+        self.assertIsNone(first_page[1]["nearby_stations"])
+
+        filters = {"transport_types": ["MRT"], "stations": ["EW1", "EW2", "EW4"], "max_distance_m": 500}
+        self.assertEqual(repository.count_nearby_flats(self.connection, filters), 3)
+        rows = repository.search_nearby_flats(self.connection, filters)
+        self.assertEqual(
+            [(row["flat_id"], row["station_count"], row["nearest_m"], row["nearby_stations"]) for row in rows],
+            [
+                (1, 2, 250, "EW1 Test (250 m), EW4 Fourth (350 m)"),
+                (3, 1, 500, "EW1 Test (500 m)"),
+                (4, 2, 250, "EW1 Test (250 m), EW4 Fourth (350 m)"),
+            ],
+        )
+        second_page = repository.search_nearby_flats(self.connection, filters, limit=2, offset=2)
+        self.assertEqual(second_page, rows[2:])
+
+        broad_filters = {"transport_types": ["MRT"], "max_distance_m": 500}
+        self.assertEqual(repository.count_nearby_flats(self.connection, broad_filters), 4)
+        broad_page = repository.search_nearby_flats(self.connection, broad_filters, limit=2, offset=2)
+        self.assertEqual(
+            [(row["flat_id"], row["station_count"], row["nearest_m"]) for row in broad_page],
+            [(4, 3, 50), (5, 1, 50)],
+        )
+
+        station_ids = repository.get_flat_station_ids(self.connection, 3)
+        self.assertEqual(repository.count_similar_flats(self.connection, 3, station_ids), 3)
+        similar = repository.search_similar_flats(self.connection, 3, station_ids, limit=2, offset=1)
+        self.assertEqual(
+            [(row["flat_id"], row["station_count"], row["shared_stations"], row["nearest_m"]) for row in similar],
+            [(4, 4, 2, 25), (5, 3, 1, 25)],
+        )
+        self.assertEqual(similar[0]["nearby_stations"], first_page[0]["nearby_stations"])
+
+        # Make the filter broad enough to use the ordered scan, with flats sharing a block.
+        self.execute(
+            "INSERT INTO flat VALUES " + ", ".join(
+                f"({flat_id}, '4 ROOM', 'Model', '01 TO 03', 95.00, 2, 1982, 780)"
+                for flat_id in range(6, 26)
+            )
+        )
+        count = repository.count_nearby_flats(self.connection, broad_filters)
+        self.assertEqual(count, 24)
+        ordered_page = repository.search_nearby_flats(
+            self.connection, broad_filters, limit=1, offset=2, matching_flat_count=count,
+        )
+        self.assertEqual(ordered_page, broad_page[:1])
 
     def test_station_comparables_require_both_flats_within_the_radius(self):
         self.load_fixture(area=Decimal("95.00"))

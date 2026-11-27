@@ -116,13 +116,15 @@ def coverage(connection: Any) -> dict[str, Any]:
     has_column = has_distance_column(connection)
     with connection.cursor(buffered=True) as cursor:
         cursor.execute(
+            "WITH missing AS ("
+            "SELECT p.block_id FROM `place` AS p WHERE NOT EXISTS "
+            "(SELECT 1 FROM `nearby` AS n WHERE n.PLACE_block_id = p.block_id) "
+            "GROUP BY p.block_id) "
             "SELECT "
             "(SELECT COUNT(*) FROM `place`), "
             "(SELECT COUNT(*) FROM `stations`), "
-            "(SELECT COUNT(*) FROM `place` p WHERE NOT EXISTS "
-            "  (SELECT 1 FROM `nearby` n WHERE n.PLACE_block_id = p.block_id)), "
-            "(SELECT COUNT(*) FROM `flat` f WHERE NOT EXISTS "
-            "  (SELECT 1 FROM `nearby` n WHERE n.PLACE_block_id = f.block_id))"
+            "(SELECT COUNT(*) FROM missing), "
+            "(SELECT COUNT(*) FROM missing AS m JOIN `flat` AS f ON f.block_id = m.block_id)"
         )
         places, stations, places_missing, flats_missing = cursor.fetchone()
     return {

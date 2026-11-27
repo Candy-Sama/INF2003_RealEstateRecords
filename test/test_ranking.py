@@ -40,6 +40,11 @@ class BoardTests(unittest.TestCase):
         self.assertEqual(b["stations_busiest"]["rows"][0]["name"], "Bedok (EW5)")
         self.assertEqual([r["rank"] for r in b["towns_priciest"]["rows"]], [1, 2, 3, 4])
 
+    def test_towns_with_equal_sales_are_ranked_alphabetically(self):
+        tied = [town("BEDOK", 6000, 100), town("ANG MO KIO", 5000, 100)]
+        boards = {board["id"]: board for board in ranking.build_boards(tied, [], [], [])}
+        self.assertEqual([row["name"] for row in boards["towns_busiest"]["rows"]], ["ANG MO KIO", "BEDOK"])
+
     def test_rising_needs_enough_sales_in_both_windows(self):
         rows = boards()["towns_rising"]["rows"]
         self.assertNotIn("TINY", [r["name"] for r in rows])
@@ -102,9 +107,10 @@ class RankingQueryTests(unittest.TestCase):
         evil = "4 ROOM' OR 1=1 --"
         for call, expected in (
             (lambda c: repository.rank_towns(c, evil), (evil,)),
-            (lambda c: repository.rank_stations(c, evil), (500, evil, 200)),
+            (lambda c: repository.rank_stations(c, evil), (evil, 500, 200)),
             (lambda c: repository.rank_streets(c, evil), (evil, 30, 10)),
             (lambda c: repository.top_sales(c, evil), (evil, 10)),
+            (lambda c: repository.rank_market(c, evil), (evil, 500, 200, 30, 10)),
         ):
             connection = FakeConnection()
             call(connection)

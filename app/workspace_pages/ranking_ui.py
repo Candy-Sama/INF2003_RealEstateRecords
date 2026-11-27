@@ -36,18 +36,16 @@ def render_rankings(connection: Any) -> None:
     with refresh:
         st.button("Refresh rankings", width="stretch")  # any click reruns and re-queries
 
-    flat_types = repository.list_flat_options(connection)["flat_type"]
+    flat_types = repository.list_flat_types(connection)
     picker, status = st.columns([1, 2], vertical_alignment="bottom")
     choice = picker.selectbox("Flat type", [ALL_TYPES, *flat_types], key="rk_flat_type")
     flat_type = None if choice == ALL_TYPES else choice
 
     with st.spinner("Loading rankings..."):
         latest = repository.latest_transaction_date(connection)
+        towns, stations, streets = repository.rank_market(connection, flat_type)
         boards = ranking.build_boards(
-            repository.rank_towns(connection, flat_type),
-            repository.rank_stations(connection, flat_type),
-            repository.rank_streets(connection, flat_type),
-            repository.top_sales(connection, flat_type),
+            towns, stations, streets, repository.top_sales(connection, flat_type),
         )
     as_of = latest.strftime("%B %Y") if latest else "no data"
     status.caption(

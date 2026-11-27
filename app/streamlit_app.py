@@ -152,6 +152,15 @@ def render_workspace(agent: dict[str, Any]) -> None:
         if page == "My transactions":
             render_agent_transactions(agent["agent_id"])
             return
+        fragment = {
+            "Address": render_address_tab,
+            "Nearby stations": render_nearby_tab,
+            "Analytics": render_analytics_tab,
+            "Ranking": render_ranking_tab,
+        }.get(page)
+        if fragment is not None:
+            fragment()
+            return
 
         with closing(get_mysql_connection()) as connection:
             if page == "Search & filter":
@@ -165,14 +174,6 @@ def render_workspace(agent: dict[str, Any]) -> None:
                     and agent["email"].strip().lower() == admin_email
                 )
                 render_flat_management(connection, is_flat_admin)
-            elif page == "Address":
-                render_address_tab()
-            elif page == "Nearby stations":
-                render_nearby_tab()
-            elif page == "Analytics":
-                render_analytics_tab()
-            elif page == "Ranking":
-                render_ranking_tab()
             else:
                 with closing(get_mongodb_client()) as mongo_client:
                     mongo_database = mongo_client[get_mongodb_database_name()]

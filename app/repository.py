@@ -57,8 +57,8 @@ def list_flats(
             "SELECT f.flat_id, f.flat_type, f.flat_model, f.storey_range, "
             "f.floor_area_sqm, f.block_id, f.lease_commence_date, "
             "f.remaining_lease_months, p.block_number, p.road_name, p.town "
-            "FROM `flat` AS f JOIN `place` AS p ON p.block_id = f.block_id "
-            "ORDER BY f.flat_id DESC LIMIT %s OFFSET %s",
+            "FROM (SELECT * FROM `flat` ORDER BY flat_id DESC LIMIT %s OFFSET %s) AS f "
+            "JOIN `place` AS p ON p.block_id = f.block_id ORDER BY f.flat_id DESC",
             (limit, offset),
         )
         return cursor.fetchall()
@@ -388,21 +388,11 @@ def list_nearby_filter_options(connection: Any) -> dict[str, Any]:
     return options
 
 
-def _has_station_filter(filters: dict[str, Any]) -> bool:
-    return bool(
-        filters.get("transport_types")
-        or filters.get("lines")
-        or filters.get("stations")
-        or filters.get("max_distance_m") is not None
-    )
-
-
-def _nearby_where(filters: dict[str, Any]) -> tuple[str, list[Any]]:
-    conditions = ["1 = 1"]
+def _nearby_station_where(filters: dict[str, Any]) -> tuple[str, list[Any]]:
+    conditions = []
     parameters: list[Any] = []
     # Column names are fixed constants; only the values are user input.
     for key, column in (
-        ("flat_ids", "f.flat_id"),
         ("transport_types", "s.transport_type"),
         ("lines", "s.line_name"),
         ("stations", "s.station_code"),
@@ -414,49 +404,84 @@ def _nearby_where(filters: dict[str, Any]) -> tuple[str, list[Any]]:
     if filters.get("max_distance_m") is not None:
         conditions.append("n.distance_m <= %s")
         parameters.append(int(filters["max_distance_m"]))
-    return " AND ".join(conditions), parameters
+    return ("WHERE " + " AND ".join(conditions) if conditions else ""), parameters
 
 
-def _nearby_joins(filters: dict[str, Any]) -> str:
-    # With no station filter every flat is kept, even one with no nearby station.
-    join = "JOIN" if _has_station_filter(filters) else "LEFT JOIN"
+def _nearby_station_source(station_where: str) -> str:
     return (
-        "FROM `flat` AS f JOIN `place` AS p ON p.block_id = f.block_id "
-        f"{join} `nearby` AS n ON n.PLACE_block_id = p.block_id "
-        f"{join} `stations` AS s ON s.station_id = n.STATIONS_station_id "
+        "FROM `nearby` AS n "
+        "JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id "
+        f"{station_where}"
     )
 
 
+def _nearby_flat_where(filters: dict[str, Any], station_where: str) -> tuple[str, list[int]]:
+    conditions = []
+    flat_ids = list(filters.get("flat_ids") or [])
+    if flat_ids:
+        marks = ", ".join(["%s"] * len(flat_ids))
+        conditions.append(f"f.flat_id IN ({marks})")
+    if station_where:
+        conditions.append(f"f.block_id IN (SELECT n.PLACE_block_id {_nearby_station_source(station_where)})")
+    return ("WHERE " + " AND ".join(conditions) if conditions else ""), flat_ids
+
+
 def count_nearby_flats(connection: Any, filters: dict[str, Any]) -> int:
-    where, parameters = _nearby_where(filters)
-    if _has_station_filter(filters):
-        query = f"SELECT COUNT(DISTINCT f.flat_id) {_nearby_joins(filters)} WHERE {where}"
-    else:
-        query = (
-            "SELECT COUNT(*) FROM `flat` AS f "
-            f"JOIN `place` AS p ON p.block_id = f.block_id WHERE {where}"
-        )
+    station_where, station_parameters = _nearby_station_where(filters)
+    flat_where, flat_ids = _nearby_flat_where(filters, station_where)
+    query = f"SELECT COUNT(*) FROM `flat` AS f {flat_where}"
     with connection.cursor(buffered=True) as cursor:
-        cursor.execute(query, tuple(parameters))
+        cursor.execute(query, (*flat_ids, *station_parameters))
         return int(cursor.fetchone()[0])
 
 
 def search_nearby_flats(
-    connection: Any, filters: dict[str, Any], limit: int = 100, offset: int = 0
+    connection: Any,
+    filters: dict[str, Any],
+    limit: int = 100,
+    offset: int = 0,
+    *,
+    matching_flat_count: int | None = None,
 ) -> list[dict[str, Any]]:
     """One row per flat with its nearby stations collapsed into one column.
 
     Station filters (type, line, distance) also limit which stations are listed.
+    A known match count lets early pages of broad searches use an ordered scan.
     """
-    where, parameters = _nearby_where(filters)
+    limit, offset = int(limit), int(offset)
+    station_where, station_parameters = _nearby_station_where(filters)
+    flat_where, flat_ids = _nearby_flat_where(filters, station_where)
+    # Page the eligible flats before joining and aggregating their station rows.
+    page_from = f"FROM `flat` AS f {flat_where}"
+    if (
+        station_where
+        and not flat_ids
+        and not filters.get("stations")
+        and matching_flat_count is not None
+        and matching_flat_count >= max(20 * limit, 2 * (offset + limit))
+    ):
+        # For broad filters, scanning in primary key order avoids sorting all matches.
+        # Keep the normal optimizer plan for sparse or late pages.
+        station_source = _nearby_station_source(station_where)
+        page_from = (
+            "FROM `flat` AS f STRAIGHT_JOIN "
+            f"(SELECT DISTINCT n.PLACE_block_id {station_source}) AS b "
+            "ON b.PLACE_block_id = f.block_id"
+        )
+    join = "JOIN" if station_where else "LEFT JOIN"
     query = (
         f"SELECT {_FLAT_COLUMNS}, COUNT(s.station_id) AS station_count, "
         f"MIN(n.distance_m) AS nearest_m, {_STATION_LABEL} AS nearby_stations "
-        f"{_nearby_joins(filters)} WHERE {where} "
-        f"GROUP BY {_FLAT_COLUMNS} ORDER BY f.flat_id LIMIT %s OFFSET %s"
+        "FROM (SELECT f.flat_id, f.flat_type, f.storey_range, f.block_id "
+        f"{page_from} ORDER BY f.flat_id LIMIT %s OFFSET %s) AS f "
+        "JOIN `place` AS p ON p.block_id = f.block_id "
+        f"{join} `nearby` AS n ON n.PLACE_block_id = f.block_id "
+        f"{join} `stations` AS s ON s.station_id = n.STATIONS_station_id "
+        f"{station_where} GROUP BY {_FLAT_COLUMNS} ORDER BY f.flat_id"
     )
+    parameters = (*flat_ids, *station_parameters, limit, offset, *station_parameters)
     with connection.cursor(dictionary=True) as cursor:
-        cursor.execute(query, tuple(parameters) + (int(limit), int(offset)))
+        cursor.execute(query, parameters)
         return cursor.fetchall()
 
 
@@ -496,19 +521,23 @@ def search_similar_flats(
     if not station_ids:
         return []
     marks = ", ".join(["%s"] * len(station_ids))
+    # Flats in the same block share the same station summary.
     query = (
-        f"SELECT {_FLAT_COLUMNS}, COUNT(s.station_id) AS station_count, "
+        f"SELECT {_FLAT_COLUMNS}, b.station_count, b.shared_stations, b.nearest_m, b.nearby_stations "
+        "FROM (SELECT n.PLACE_block_id AS block_id, COUNT(s.station_id) AS station_count, "
         f"CAST(SUM(n.STATIONS_station_id IN ({marks})) AS UNSIGNED) AS shared_stations, "
         f"MIN(n.distance_m) AS nearest_m, {_STATION_LABEL} AS nearby_stations "
-        "FROM `flat` AS f JOIN `place` AS p ON p.block_id = f.block_id "
-        "JOIN `nearby` AS n ON n.PLACE_block_id = p.block_id "
+        "FROM `nearby` AS n "
         "JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id "
-        "WHERE f.flat_id <> %s AND f.block_id IN "
+        "WHERE n.PLACE_block_id IN "
         f"(SELECT n2.PLACE_block_id FROM `nearby` AS n2 WHERE n2.STATIONS_station_id IN ({marks})) "
-        f"GROUP BY {_FLAT_COLUMNS} "
-        "ORDER BY shared_stations DESC, nearest_m, f.flat_id LIMIT %s OFFSET %s"
+        "GROUP BY n.PLACE_block_id) AS b "
+        "JOIN `flat` AS f ON f.block_id = b.block_id "
+        "JOIN `place` AS p ON p.block_id = f.block_id "
+        "WHERE f.flat_id <> %s "
+        "ORDER BY b.shared_stations DESC, b.nearest_m, f.flat_id LIMIT %s OFFSET %s"
     )
-    parameters = (*station_ids, flat_id, *station_ids, int(limit), int(offset))
+    parameters = (*station_ids, *station_ids, flat_id, int(limit), int(offset))
     with connection.cursor(dictionary=True) as cursor:
         cursor.execute(query, parameters)
         return cursor.fetchall()
@@ -518,7 +547,7 @@ RANKING_RADIUS_M = 500
 RANKING_MIN_STATION_SALES = 200
 RANKING_MIN_STREET_SALES = 30
 RANKING_BOARD_SIZE = 10
-# Use the same precision per sale in streaming and temporary-table aggregations.
+# Round each sale to the same precision before adding it to its block total.
 _PRICE_PER_SQM = "CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6))"
 
 
@@ -533,33 +562,68 @@ def latest_transaction_date(connection: Any):
         return row[0] if row else None
 
 
-def rank_towns(connection: Any, flat_type: str | None = None) -> list[dict[str, Any]]:
-    """Per-town averages plus the latest 12 months against the 12 before.
+_RANK_PRICE_TOTAL = "SUM(rt.resale_price) AS price_total"
+_RANK_PSM_TOTAL = f"SUM({_PRICE_PER_SQM}) AS psm_total"
+_RANK_RECENT = "rt.transaction_date > DATE_SUB(m.latest, INTERVAL 12 MONTH)"
+_RANK_PRIOR = (
+    "rt.transaction_date > DATE_SUB(m.latest, INTERVAL 24 MONTH) "
+    "AND rt.transaction_date <= DATE_SUB(m.latest, INTERVAL 12 MONTH)"
+)
 
-    Windows are measured back from the most recent transaction in the data.
-    """
+
+def _ranking_block_sales(
+    flat_type: str | None, *totals: str, compare_periods: bool = False
+) -> tuple[str, list[Any]]:
+    """Sum transaction values and counts at the block level for the rankings."""
     extra, parameters = _flat_type_filter(flat_type)
-    recent = "rt.transaction_date > DATE_SUB(m.latest, INTERVAL 12 MONTH)"
-    prior = (
-        "rt.transaction_date > DATE_SUB(m.latest, INTERVAL 24 MONTH) "
-        "AND rt.transaction_date <= DATE_SUB(m.latest, INTERVAL 12 MONTH)"
+    aggregates = ", ".join(totals)
+    latest_join = ""
+    if compare_periods:
+        aggregates += (
+            f", SUM(CASE WHEN {_RANK_RECENT} THEN 1 ELSE 0 END) AS recent_sales"
+            f", SUM(CASE WHEN {_RANK_RECENT} THEN {_PRICE_PER_SQM} END) AS recent_total"
+            f", SUM(CASE WHEN {_RANK_PRIOR} THEN 1 ELSE 0 END) AS prior_sales"
+            f", SUM(CASE WHEN {_RANK_PRIOR} THEN {_PRICE_PER_SQM} END) AS prior_total"
+        )
+        latest_join = "CROSS JOIN (SELECT MAX(transaction_date) AS latest FROM `resale_transaction`) AS m "
+    return (
+        "WITH block_sales AS ("
+        f"SELECT f.block_id, COUNT(*) AS sales, {aggregates} "
+        "FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id "
+        f"{latest_join}WHERE 1 = 1{extra} GROUP BY f.block_id) ",
+        parameters,
     )
-    query = (
-        "SELECT p.town, COUNT(*) AS sales, "
-        f"AVG({_PRICE_PER_SQM}) AS avg_psm, "
-        "AVG(rt.resale_price) AS avg_price, "
-        f"SUM(CASE WHEN {recent} THEN 1 ELSE 0 END) AS recent_sales, "
-        f"AVG(CASE WHEN {recent} THEN {_PRICE_PER_SQM} END) AS recent_psm, "
-        f"SUM(CASE WHEN {prior} THEN 1 ELSE 0 END) AS prior_sales, "
-        f"AVG(CASE WHEN {prior} THEN {_PRICE_PER_SQM} END) AS prior_psm "
-        "FROM `resale_transaction` AS rt "
-        "JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id "
-        "JOIN `place` AS p ON p.block_id = f.block_id "
-        "CROSS JOIN (SELECT MAX(transaction_date) AS latest FROM `resale_transaction`) AS m "
-        f"WHERE 1 = 1{extra} GROUP BY p.town"
-    )
+
+
+_RANK_TOWNS = (
+    "SELECT p.town, CAST(SUM(b.sales) AS UNSIGNED) AS sales, "
+    "SUM(b.psm_total) / SUM(b.sales) AS avg_psm, SUM(b.price_total) / SUM(b.sales) AS avg_price, "
+    "SUM(b.recent_sales) AS recent_sales, SUM(b.recent_total) / NULLIF(SUM(b.recent_sales), 0) AS recent_psm, "
+    "SUM(b.prior_sales) AS prior_sales, SUM(b.prior_total) / NULLIF(SUM(b.prior_sales), 0) AS prior_psm "
+    "FROM block_sales AS b JOIN `place` AS p ON p.block_id = b.block_id GROUP BY p.town"
+)
+_RANK_STATIONS = (
+    "SELECT ns.station_name, MIN(ns.station_code) AS station_code, "
+    "CAST(SUM(b.sales) AS UNSIGNED) AS sales, SUM(b.psm_total) / SUM(b.sales) AS avg_psm "
+    "FROM block_sales AS b JOIN ("
+    "SELECT n.PLACE_block_id AS block_id, s.station_name, MIN(s.station_code) AS station_code "
+    "FROM `nearby` AS n JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id "
+    "WHERE n.distance_m <= %s GROUP BY n.PLACE_block_id, s.station_name"
+    ") AS ns ON ns.block_id = b.block_id GROUP BY ns.station_name HAVING SUM(b.sales) >= %s"
+)
+_RANK_STREETS = (
+    "SELECT p.town, p.road_name, CAST(SUM(b.sales) AS UNSIGNED) AS sales, "
+    "SUM(b.price_total) / SUM(b.sales) AS avg_price "
+    "FROM block_sales AS b JOIN `place` AS p ON p.block_id = b.block_id "
+    "GROUP BY p.town, p.road_name HAVING SUM(b.sales) >= %s ORDER BY avg_price DESC LIMIT %s"
+)
+
+
+def rank_towns(connection: Any, flat_type: str | None = None) -> list[dict[str, Any]]:
+    """Per-town averages, with two 12-month windows measured from the latest sale."""
+    blocks, parameters = _ranking_block_sales(flat_type, _RANK_PRICE_TOTAL, _RANK_PSM_TOTAL, compare_periods=True)
     with connection.cursor(dictionary=True) as cursor:
-        cursor.execute(query, tuple(parameters))
+        cursor.execute(blocks + _RANK_TOWNS, tuple(parameters))
         return cursor.fetchall()
 
 
@@ -570,22 +634,9 @@ def rank_stations(
     min_sales: int = RANKING_MIN_STATION_SALES,
 ) -> list[dict[str, Any]]:
     """Sales within `radius_m` of each station. Interchanges are merged by name."""
-    extra, parameters = _flat_type_filter(flat_type)
-    query = (
-        "SELECT ns.station_name, MIN(ns.station_code) AS station_code, COUNT(*) AS sales, "
-        f"AVG({_PRICE_PER_SQM}) AS avg_psm "
-        "FROM `resale_transaction` AS rt "
-        "JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id "
-        "JOIN (SELECT n.PLACE_block_id AS block_id, s.station_name, "
-        "MIN(s.station_code) AS station_code "
-        "FROM `nearby` AS n JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id "
-        "WHERE n.distance_m <= %s GROUP BY n.PLACE_block_id, s.station_name) AS ns "
-        "ON ns.block_id = f.block_id "
-        f"WHERE 1 = 1{extra} "
-        "GROUP BY ns.station_name HAVING COUNT(*) >= %s"
-    )
+    blocks, parameters = _ranking_block_sales(flat_type, _RANK_PSM_TOTAL)
     with connection.cursor(dictionary=True) as cursor:
-        cursor.execute(query, (int(radius_m), *parameters, int(min_sales)))
+        cursor.execute(blocks + _RANK_STATIONS, (*parameters, int(radius_m), int(min_sales)))
         return cursor.fetchall()
 
 
@@ -595,18 +646,42 @@ def rank_streets(
     min_sales: int = RANKING_MIN_STREET_SALES,
     limit: int = RANKING_BOARD_SIZE,
 ) -> list[dict[str, Any]]:
-    extra, parameters = _flat_type_filter(flat_type)
-    query = (
-        "SELECT p.town, p.road_name, COUNT(*) AS sales, AVG(rt.resale_price) AS avg_price "
-        "FROM `resale_transaction` AS rt "
-        "JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id "
-        "JOIN `place` AS p ON p.block_id = f.block_id "
-        f"WHERE 1 = 1{extra} GROUP BY p.town, p.road_name "
-        "HAVING COUNT(*) >= %s ORDER BY avg_price DESC LIMIT %s"
-    )
+    blocks, parameters = _ranking_block_sales(flat_type, _RANK_PRICE_TOTAL)
     with connection.cursor(dictionary=True) as cursor:
-        cursor.execute(query, (*parameters, int(min_sales), int(limit)))
+        cursor.execute(blocks + _RANK_STREETS, (*parameters, int(min_sales), int(limit)))
         return cursor.fetchall()
+
+
+def rank_market(
+    connection: Any, flat_type: str | None = None
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    """Load the town, station and street rankings using one set of block totals."""
+    blocks, parameters = _ranking_block_sales(flat_type, _RANK_PRICE_TOTAL, _RANK_PSM_TOTAL, compare_periods=True)
+    query = (
+        blocks
+        + "SELECT 'town' AS board, t.town, NULL AS station_name, NULL AS station_code, NULL AS road_name, "
+        "t.sales, t.avg_psm, t.avg_price, t.recent_sales, t.recent_psm, t.prior_sales, t.prior_psm "
+        f"FROM ({_RANK_TOWNS}) AS t "
+        "UNION ALL SELECT 'station', NULL, s.station_name, s.station_code, NULL, "
+        f"s.sales, s.avg_psm, NULL, NULL, NULL, NULL, NULL FROM ({_RANK_STATIONS}) AS s "
+        "UNION ALL SELECT 'street', s.town, NULL, NULL, s.road_name, "
+        f"s.sales, NULL, s.avg_price, NULL, NULL, NULL, NULL FROM ({_RANK_STREETS}) AS s"
+    )
+    towns, stations, streets = [], [], []
+    projections = {
+        "town": (towns, ("town", "sales", "avg_psm", "avg_price", "recent_sales", "recent_psm", "prior_sales", "prior_psm")),
+        "station": (stations, ("station_name", "station_code", "sales", "avg_psm")),
+        "street": (streets, ("town", "road_name", "sales", "avg_price")),
+    }
+    with connection.cursor(dictionary=True) as cursor:
+        cursor.execute(query, (
+            *parameters, RANKING_RADIUS_M, RANKING_MIN_STATION_SALES, RANKING_MIN_STREET_SALES, RANKING_BOARD_SIZE,
+        ))
+        for row in cursor.fetchall():
+            result, fields = projections[row["board"]]
+            result.append({field: row[field] for field in fields})
+    streets.sort(key=lambda row: row["avg_price"], reverse=True)
+    return towns, stations, streets
 
 
 def top_sales(

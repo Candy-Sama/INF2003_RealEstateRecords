@@ -438,9 +438,15 @@ def render_nearby_stations(connection: Any) -> None:
         page = st.number_input("Page", min_value=1, max_value=pages, step=1, key="nb_page")
     info.caption(f"Page {page} of {pages:,}")
 
+    if total == 0:
+        st.info("No flats to show.")
+        return
+
     offset = (page - 1) * NEARBY_PAGE_SIZE
     if focus is None:
-        rows = repository.search_nearby_flats(connection, filters, NEARBY_PAGE_SIZE, offset)
+        rows = repository.search_nearby_flats(
+            connection, filters, NEARBY_PAGE_SIZE, offset, matching_flat_count=total,
+        )
     else:
         rows = repository.search_similar_flats(
             connection, focus["flat_id"], station_ids, NEARBY_PAGE_SIZE, offset
