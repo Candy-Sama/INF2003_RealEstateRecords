@@ -43,11 +43,15 @@ st.markdown(
     .stApp {
         /* Streamlit sets color-scheme from the active app theme. */
         --estate-accent: light-dark(#176b52, #87d3b7);
-        --estate-muted: light-dark(#52635e, #a9c2b8);
+        --estate-muted: light-dark(#52635e, #c5c8cf);
         --estate-button: light-dark(#176b52, #308267);
         --estate-button-hover: light-dark(#10553f, #276950);
-        --estate-border: light-dark(#6a837a, #70877e);
-        --estate-tint: light-dark(#e1eee7, #223b33);
+        --estate-border: light-dark(#6a837a, #7c7f87);
+        --estate-tint: light-dark(#e1eee7, #2c2e32);
+    }
+    .stApp [data-testid="stCaptionContainer"] {
+        color: light-dark(rgb(23 43 42 / 60%), var(--estate-muted));
+        opacity: 1;
     }
     [data-testid="stHeader"] { background: transparent; }
     .block-container { max-width: 1180px; padding-top: 1.4rem; padding-bottom: 3rem; }
