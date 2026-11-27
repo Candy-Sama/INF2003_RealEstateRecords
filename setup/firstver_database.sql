@@ -7,19 +7,12 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 -- Schema estateRecordsDB
 -- -----------------------------------------------------
-DROP SCHEMA IF EXISTS `estateRecordsDB` ;
-
--- -----------------------------------------------------
--- Schema estateRecordsDB
--- -----------------------------------------------------
 CREATE SCHEMA IF NOT EXISTS `estateRecordsDB` DEFAULT CHARACTER SET utf8mb3 ;
 USE `estateRecordsDB` ;
 
 -- -----------------------------------------------------
 -- Table `estateRecordsDB`.`agents`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `estateRecordsDB`.`agents` ;
-
 CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`agents` (
   `agent_id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
@@ -36,8 +29,6 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `estateRecordsDB`.`place`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `estateRecordsDB`.`place` ;
-
 CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`place` (
   `block_id` INT NOT NULL AUTO_INCREMENT,
   `block_number` VARCHAR(45) NOT NULL,
@@ -55,8 +46,6 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `estateRecordsDB`.`flat`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `estateRecordsDB`.`flat` ;
-
 CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`flat` (
   `flat_id` INT NOT NULL AUTO_INCREMENT,
   `flat_type` VARCHAR(45) NOT NULL,
@@ -79,8 +68,6 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `estateRecordsDB`.`stations`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `estateRecordsDB`.`stations` ;
-
 CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`stations` (
   `station_id` INT NOT NULL AUTO_INCREMENT,
   `station_code` VARCHAR(45) NOT NULL,
@@ -105,11 +92,10 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `estateRecordsDB`.`nearby`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `estateRecordsDB`.`nearby` ;
-
 CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`nearby` (
   `STATIONS_station_id` INT NOT NULL,
   `PLACE_block_id` INT NOT NULL,
+  `distance_m` INT NOT NULL DEFAULT 0,
   PRIMARY KEY (`STATIONS_station_id`, `PLACE_block_id`),
   INDEX `fk_STATIONS_has_PLACE_PLACE1_idx` (`PLACE_block_id` ASC) VISIBLE,
   INDEX `fk_STATIONS_has_PLACE_STATIONS1_idx` (`STATIONS_station_id` ASC) VISIBLE,
@@ -126,8 +112,6 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `estateRecordsDB`.`resale_transaction`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `estateRecordsDB`.`resale_transaction` ;
-
 CREATE TABLE IF NOT EXISTS `estateRecordsDB`.`resale_transaction` (
   `FLAT_flat_id` INT NOT NULL,
   `AGENTS_agent_id` INT NOT NULL,

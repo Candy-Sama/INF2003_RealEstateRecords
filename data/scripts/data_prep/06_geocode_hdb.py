@@ -1,23 +1,28 @@
+import os
+import time
+from pathlib import Path
+
 import pandas as pd
 import requests
-import time
-import os
+from dotenv import load_dotenv
 
-INPUT = "data/cleaned/hdb_resale_cleaned.csv"
-OUTPUT = "data/geo/hdb_block_coordinates.csv"
+DATA_DIR = Path(__file__).resolve().parents[2]
+INPUT = DATA_DIR / "cleaned" / "hdb_resale_cleaned.csv"
+OUTPUT = DATA_DIR / "geo" / "hdb_block_coordinates.csv"
 
-# --- PASTE YOUR TOKEN HERE ---
-API_TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyNjk5NywiZm9yZXZlciI6ZmFsc2UsImlzcyI6Ik9uZU1hcCIsImlhdCI6MTc5MTk2ODYwOCwibmJmIjoxNzkxOTY4NjA4LCJleHAiOjE3OTIyMjc4MDgsImp0aSI6ImFmZTYzZDU5LTQ2NTYtNDk0NC04NWJlLWRiZWE3OTZkYTE2ZCJ9.gMJTDlIh1uRLAs3SsnhTzjS3v3aSxB4Ig1Q56PMqFle9f2egZH_zCsoIvmysjyZ4vWiXqCxXMReDvQ1gMw2YrEI_Qi2Ap-kTmv7T-edPHgzRF6aFLCBxC0jTQXoUL7ni3muHiPwI2C7BJXUHWd0xNsEsPH4dHsmtaQxcXm_CG9ztFSACayDYhUA1Md17QHg7TsqiZf9b_wcM3ddS-7N7B1mV4gD6WYGKTd3psUZxjJ-zmHZw6qHs6BqPkBI0ir3sWXSo_8b5yHys26oOqMtu2FkoIQv9miRKJLxqIeskRUna9Y5JVrTNd6NOX6ZRLYRWjCvSW4pV6xz6acNjlBlnFg" 
-# -----------------------------
+load_dotenv(DATA_DIR.parent / ".env", override=False)
+API_TOKEN = os.getenv("ONEMAP_API_TOKEN", "").strip()
+if not API_TOKEN:
+    raise SystemExit("Set ONEMAP_API_TOKEN before running HDB geocoding.")
 
-os.makedirs("data/geo", exist_ok=True)
+OUTPUT.parent.mkdir(exist_ok=True)
 
 print("Loading cleaned HDB data...")
 df = pd.read_csv(INPUT)
 addresses = df["full_address"].dropna().unique()
 print(f"Found {len(addresses)} unique addresses to geocode.")
 
-if os.path.exists(OUTPUT):
+if OUTPUT.exists():
     done = pd.read_csv(OUTPUT)
     done_set = set(done["full_address"])
     print(f"Resuming from {len(done_set)} already geocoded addresses.")
@@ -45,6 +50,8 @@ def geocode(addr, retries=3):
                     res = data["results"][0]
                     return float(res["LATITUDE"]), float(res["LONGITUDE"])
                 return None, None  # No result found, but no error
+            elif r.status_code in (401, 403):
+                raise SystemExit("OneMap rejected ONEMAP_API_TOKEN. Supply a valid token.")
             elif r.status_code == 429:
                 wait = 5 * (attempt + 1)  # Exponential backoff: 5s, 10s, 15s
                 print(f"Rate limited. Waiting {wait}s before retrying {addr}")

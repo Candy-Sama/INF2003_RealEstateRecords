@@ -1,8 +1,11 @@
+from pathlib import Path
+
 import pandas as pd
 
+RAW_DIR = Path(__file__).resolve().parents[2] / "raw"
 files = {
-    "HDB RESALE": "data/raw/hdb_resale_transactions.csv",
-    "MRT FULL LIST": "data/raw/mrt_lrt_full_list.csv",
+    "HDB RESALE": RAW_DIR / "hdb_resale_transactions.csv",
+    "MRT FULL LIST": RAW_DIR / "mrt_lrt_full_list.csv",
 }
 
 for name, path in files.items():

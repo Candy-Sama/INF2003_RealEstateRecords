@@ -8,9 +8,10 @@ from typing import Any
 import mysql.connector
 import streamlit as st
 
-import ranking
-import repository
-from database import get_mysql_connection
+from app import repository
+from app.app_modules.database.database import get_mysql_connection
+
+from . import ranking
 
 ALL_TYPES = "All flat types"
 

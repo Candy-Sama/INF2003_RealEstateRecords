@@ -8,17 +8,17 @@ import mysql.connector
 import streamlit as st
 from pymongo import errors as mongo_errors
 
-import nearby_function
-import repository
-from analytics_ui import render_analytics_tab
-from ranking_ui import render_ranking_tab
-from database import (
+from app import repository
+from app.app_modules.analytics.analytics_ui import render_analytics_tab
+from app.app_modules.database.database import (
     get_flat_record_admin_email,
     get_mongodb_client,
     get_mongodb_database_name,
     get_mysql_connection,
 )
-from security import hash_password, verify_password
+from app.app_modules.nearby import nearby_function
+from app.app_modules.ranking.ranking_ui import render_ranking_tab
+from app.app_modules.security.security import hash_password, verify_password
 
 
 st.set_page_config(
@@ -579,7 +579,10 @@ def render_addresses(connection: Any) -> None:
         st.warning("`nearby` has no `distance_m` column yet. Click **Update addresses** to set it up.")
         return
     if check["stations_total"] == 0:
-        st.warning("The `stations` table is empty. Run `import.py` first.")
+        st.warning(
+            "The `stations` table is empty. From the repository root, run "
+            "`python -m setup.import_data_script.import` to load a fresh demo schema."
+        )
         return
 
     first, second, third, fourth = st.columns(4)

@@ -1,9 +1,8 @@
 import unittest
 
-import analytics_sql
-import analytics_store
-from analytics_defaults import DEFAULT_CARDS
-from analytics_sql import QueryRejected, validate_query
+from app.app_modules.analytics import analytics_sql, analytics_store
+from app.app_modules.analytics.analytics_defaults import DEFAULT_CARDS
+from app.app_modules.analytics.analytics_sql import QueryRejected, validate_query
 
 
 class ValidatorTests(unittest.TestCase):

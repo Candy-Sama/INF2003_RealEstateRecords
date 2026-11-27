@@ -4,9 +4,8 @@ import re
 from datetime import datetime, timezone
 from typing import Any
 
-import analytics_builder
-import analytics_sql
-from analytics_defaults import DEFAULT_CARDS
+from . import analytics_builder, analytics_sql
+from .analytics_defaults import DEFAULT_CARDS
 
 COLLECTION = "analytics_cards"
 META_COLLECTION = "analytics_meta"

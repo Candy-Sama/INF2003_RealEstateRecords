@@ -6,7 +6,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
-load_dotenv(Path(__file__).with_name(".env"), override=False)
+load_dotenv(Path(__file__).resolve().parents[3] / ".env", override=False)
+
 
 def get_mysql_connection():
     """Connect to the configured MySQL schema."""

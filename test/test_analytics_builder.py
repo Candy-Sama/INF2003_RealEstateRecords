@@ -1,8 +1,7 @@
 import unittest
 
-import analytics_builder as b
-import analytics_sql
-import analytics_store
+from app.app_modules.analytics import analytics_builder as b
+from app.app_modules.analytics import analytics_sql, analytics_store
 
 
 def field(key, role="group", **extra):

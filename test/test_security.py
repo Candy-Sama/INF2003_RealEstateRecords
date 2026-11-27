@@ -1,6 +1,6 @@
 import unittest
 
-from security import hash_password, verify_password
+from app.app_modules.security.security import hash_password, verify_password
 
 
 class PasswordHashTests(unittest.TestCase):

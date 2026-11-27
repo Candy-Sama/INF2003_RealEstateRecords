@@ -1,8 +1,8 @@
 import unittest
 from datetime import date
 
-import ranking
-import repository
+from app import repository
+from app.app_modules.ranking import ranking
 
 
 def town(name, psm, sales, recent=40, prior=40, recent_psm=None, prior_psm=None):

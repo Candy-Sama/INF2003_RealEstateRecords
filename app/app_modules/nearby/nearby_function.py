@@ -5,8 +5,8 @@ whole job is a couple of INSERT ... SELECT statements. No streamlit dependency.
 
 Run standalone (uses the same .env settings as the app):
 
-    python nearby_function.py                # 1000 m radius
-    python nearby_function.py --radius 800
+    python -m app.app_modules.nearby.nearby_function
+    python -m app.app_modules.nearby.nearby_function --radius 800
 
 Requires MySQL 8.0+ (window functions are used for the nearest-station fallback).
 Note: `place` stores longitude in a column spelled `longtitude`, and MySQL's
@@ -18,6 +18,8 @@ from __future__ import annotations
 import argparse
 import time
 from typing import Any
+
+from app.app_modules.database.database import get_mysql_connection
 
 DEFAULT_RADIUS_M = 1000
 
@@ -216,8 +218,6 @@ def ensure_populated(connection: Any, radius_m: int = DEFAULT_RADIUS_M) -> dict[
 
 
 def main() -> None:
-    from database import get_mysql_connection
-
     parser = argparse.ArgumentParser(description="Populate the nearby table.")
     parser.add_argument("--radius", type=int, default=DEFAULT_RADIUS_M, help="radius in metres")
     parser.add_argument(

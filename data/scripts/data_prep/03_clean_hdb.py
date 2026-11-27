@@ -1,8 +1,11 @@
+from pathlib import Path
+
 import pandas as pd
-import numpy as np
+
+DATA_DIR = Path(__file__).resolve().parents[2]
 
 print("Loading HDB data...")
-df = pd.read_csv("data/raw/hdb_resale_transactions.csv")
+df = pd.read_csv(DATA_DIR / "raw" / "hdb_resale_transactions.csv")
 
 # 1. Rename columns to match our ERD
 df = df.rename(columns={
@@ -29,7 +32,7 @@ df["full_address"] = df["block_number"].astype(str) + " " + df["street_name"]
 # 4. Convert remaining lease (e.g. "61 years 04 months") to numeric months
 def lease_to_months(x):
     if pd.isna(x):
-        return np.nan
+        return float("nan")
     x = str(x).strip()
     years = 0
     months = 0
@@ -53,5 +56,5 @@ for col in ["town", "flat_type", "flat_model", "street_name"]:
     df[col] = df[col].astype(str).str.strip().str.upper()
 
 # 7. Save cleaned file
-df.to_csv("data/cleaned/hdb_resale_cleaned.csv", index=False)
+df.to_csv(DATA_DIR / "cleaned" / "hdb_resale_cleaned.csv", index=False)
 print(f"Success! Cleaned HDB data saved: {df.shape[0]} rows, {df.shape[1]} columns")

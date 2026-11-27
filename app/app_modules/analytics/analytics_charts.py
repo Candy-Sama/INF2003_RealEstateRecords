@@ -7,7 +7,7 @@ import pandas as pd
 import streamlit as st
 from pandas.api.types import is_bool_dtype, is_datetime64_any_dtype, is_numeric_dtype
 
-from analytics_store import escape_markdown
+from .analytics_store import escape_markdown
 
 AXIS_FORMATS = {"auto": None, "currency": "$,.0f", "integer": ",.0f", "percent": ",.1f"}
 CHART_HEIGHT = 320
