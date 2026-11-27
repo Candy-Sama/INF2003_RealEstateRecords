@@ -9,7 +9,7 @@ import streamlit as st
 from app import repository
 from app.app_modules.database.database import get_flat_record_admin_email, get_mysql_connection
 from app.app_modules.security.security import hash_password, verify_password
-from app.app_modules.ui_feedback import show_database_error
+from app.app_modules.ui_feedback import queue_feedback, show_database_error
 
 
 def valid_email(email: str) -> bool:
@@ -120,6 +120,7 @@ def render_authentication() -> None:
                                 "name": name.strip(),
                                 "email": email.strip().lower(),
                             }
+                            queue_feedback("workspace", "Account created.")
                             st.rerun()
                         except (mysql.connector.Error, ValueError) as error:
                             show_database_error(error)

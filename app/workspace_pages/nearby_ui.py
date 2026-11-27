@@ -188,6 +188,7 @@ def render_nearby_stations(connection: Any) -> None:
         st.info("No flats to show.")
         return
 
+    st.markdown("**Select a row** to see other flats near the same stations.")
     event = st.dataframe(
         rows,
         width="stretch",
@@ -197,7 +198,6 @@ def render_nearby_stations(connection: Any) -> None:
         selection_mode="single-row",
         key=f'nb_table_{st.session_state["nb_nonce"]}',
     )
-    st.caption("Select a row to see flats near the same stations.")
     if event.selection.rows:
         picked = rows[event.selection.rows[0]]
         st.session_state["nearby_focus"] = {

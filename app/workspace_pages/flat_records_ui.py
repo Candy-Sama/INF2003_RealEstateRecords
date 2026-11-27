@@ -6,6 +6,7 @@ from typing import Any
 import streamlit as st
 
 from app import repository
+from app.app_modules.ui_feedback import queue_feedback, show_feedback
 
 from .nearby_ui import go_to_nearby
 
@@ -93,6 +94,7 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
     else:
         st.caption("You can view flat records; only the configured admin can edit them.")
     st.subheader("Flat records")
+    show_feedback("flat_records")
     total_flats = repository.count_flats(connection)
     page_size = 100
     page_count = max(1, (total_flats + page_size - 1) // page_size)
@@ -110,7 +112,8 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
     )
     st.session_state.setdefault("mf_nonce", 0)
     if flats:
-        st.caption(f"Showing page {page} of {page_count} ({total_flats} flat records).")
+        st.caption(f"Showing page {page:,} of {page_count:,} ({total_flats:,} flat records).")
+        st.markdown("**Select a row** to view nearby MRT and LRT stations for that flat.")
         event = st.dataframe(
             flats, width="stretch",
             hide_index=True,
@@ -118,7 +121,6 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
             selection_mode="single-row",
             key=f'mf_table_{st.session_state["mf_nonce"]}',
         )
-        st.caption("Select a row to see its nearby MRT / LRT stations.")
         if event.selection.rows:
             go_to_nearby(flats[event.selection.rows[0]]["flat_id"], "Flat records")
             st.session_state["mf_nonce"] += 1  # reset selection for when you come back
@@ -170,7 +172,7 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
                 st.error("Complete the flat type, model, and storey range.")
             else:
                 repository.create_flat(connection, values)
-                st.success("Flat record created.")
+                queue_feedback("flat_records", "Flat record created.")
                 st.rerun()
         return
 
@@ -210,5 +212,5 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
             st.error("Complete the flat type, model, and storey range.")
         else:
             repository.update_flat(connection, selected_id, values)
-            st.success("Flat record updated.")
+            queue_feedback("flat_records", "Flat record updated.")
             st.rerun()

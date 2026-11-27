@@ -11,11 +11,7 @@ from mysql.connector import errorcode
 
 from app import repository
 from app.app_modules.database.database import get_mysql_connection
-
-
-def clear_transaction_batch(agent_id: int) -> None:
-    st.session_state.pop(f"transaction_batch_{agent_id}", None)
-    st.session_state.pop(f"transaction_batch_committed_{agent_id}", None)
+from app.app_modules.ui_feedback import queue_feedback, show_feedback
 
 
 def transaction_draft_fields(
@@ -38,16 +34,16 @@ def transaction_draft_fields(
 
 def render_transaction_batch(agent_id: int) -> None:
     drafts_key = f"transaction_batch_{agent_id}"
-    committed_key = f"transaction_batch_committed_{agent_id}"
+    feedback_page = f"transaction_batch_{agent_id}"
     drafts: list[repository.PlannedTransaction] = st.session_state.setdefault(drafts_key, [])
-    if committed := st.session_state.pop(committed_key, 0):
-        st.success(f"Batch committed. Saved {committed} in My transactions.")
-    st.caption("Drafts stay in this session until you commit the batch or log out.")
+    show_feedback(feedback_page)
+    st.markdown("Drafts stay in this session until you **commit the batch** or log out.")
 
     with st.form("add_transaction_draft", clear_on_submit=True):
         draft = transaction_draft_fields()
         if st.form_submit_button("Add draft"):
             drafts.append(draft)
+            st.toast("Draft added. Commit the batch to save it.")
 
     if not drafts:
         st.info("Add a draft to begin the batch.")
@@ -76,9 +72,11 @@ def render_transaction_batch(agent_id: int) -> None:
         edited = transaction_draft_fields(drafts[selected])
         if st.form_submit_button("Save draft changes"):
             drafts[selected] = edited
+            queue_feedback(feedback_page, "Draft updated.", kind="toast")
             st.rerun()
     if st.button("Remove draft"):
         del drafts[selected]
+        queue_feedback(feedback_page, "Draft removed.", kind="toast")
         st.rerun()
 
     if not st.button("Commit batch", type="primary"):
@@ -110,7 +108,8 @@ def render_transaction_batch(agent_id: int) -> None:
         logging.exception("Could not close the connection after committing the transaction batch")
 
     st.session_state.pop(drafts_key, None)
-    st.session_state[committed_key] = committed
+    noun = "transaction" if committed == 1 else "transactions"
+    queue_feedback(feedback_page, f"{committed:,} {noun} saved.")
     st.rerun()
 
 
@@ -132,6 +131,8 @@ def render_agent_transactions(agent_id: int) -> None:
 
 
 def render_recorded_transactions(connection: Any, agent_id: int, action: str) -> None:
+    feedback_page = f"recorded_transactions_{agent_id}"
+    show_feedback(feedback_page)
     transactions = repository.list_agent_transactions(connection, agent_id)
     if transactions:
         st.caption("Showing up to 100 of your most recent transactions.")
@@ -168,7 +169,7 @@ def render_recorded_transactions(connection: Any, agent_id: int, action: str) ->
                     repository.create_agent_transaction(
                         connection, agent_id, int(flat_id), transaction_date, resale_price
                     )
-                    st.success("Transaction created.")
+                    queue_feedback(feedback_page, "Transaction created.")
                     st.rerun()
                 except mysql.connector.IntegrityError:
                     st.error("You already recorded a transaction for this flat.")
@@ -238,7 +239,7 @@ def render_recorded_transactions(connection: Any, agent_id: int, action: str) ->
                 else:
                     if updated:
                         st.session_state["selected_transaction_flat_id"] = int(new_flat_id)
-                        st.success("Transaction updated.")
+                        queue_feedback(feedback_page, "Transaction updated.")
                         st.rerun()
                     else:
                         st.error("The transaction could not be updated.")
@@ -251,7 +252,7 @@ def render_recorded_transactions(connection: Any, agent_id: int, action: str) ->
         if st.button("Delete transaction", type="primary"):
             if repository.delete_agent_transaction(connection, agent_id, selected_flat_id):
                 st.session_state.pop("selected_transaction_flat_id", None)
-                st.success("Transaction deleted.")
+                queue_feedback(feedback_page, "Transaction deleted.")
                 st.rerun()
             else:
                 st.error("The transaction could not be deleted.")

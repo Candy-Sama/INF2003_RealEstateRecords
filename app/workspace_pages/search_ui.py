@@ -2,28 +2,33 @@
 
 from datetime import date
 from typing import Any
-
+from app.app_modules import saved_searches_store as store
 import streamlit as st
+
 
 from app import repository
 
 
+def seed_filter_widgets(
+    prefix: str, filters: dict[str, Any], *, replace: bool = False
+) -> None:
+    values = {
+        "town": filters.get("town") or "Any",
+        "flat_type": filters.get("flat_type") or "Any",
+        "min_price": filters.get("min_price") or 0,
+        "max_price": filters.get("max_price") or 0,
+        "start_date": date.fromisoformat(filters["start_date"]) if filters.get("start_date") else None,
+        "end_date": date.fromisoformat(filters["end_date"]) if filters.get("end_date") else None,
+    }
+    for name, value in values.items():
+        key = f"{prefix}_{name}"
+        if replace:
+            st.session_state[key] = value
+        else:
+            st.session_state.setdefault(key, value)
+
 def apply_saved_search_filters(filters: dict[str, Any]) -> None:
-    """Restore saved values before Streamlit creates the search widgets."""
-    st.session_state["filter_town"] = filters.get("town") or "Any"
-    st.session_state["filter_flat_type"] = filters.get("flat_type") or "Any"
-    st.session_state["filter_min_price"] = filters.get("min_price") or 0
-    st.session_state["filter_max_price"] = filters.get("max_price") or 0
-    st.session_state["filter_start_date"] = (
-        date.fromisoformat(filters["start_date"])
-        if filters.get("start_date")
-        else None
-    )
-    st.session_state["filter_end_date"] = (
-        date.fromisoformat(filters["end_date"])
-        if filters.get("end_date")
-        else None
-    )
+    seed_filter_widgets("filter", filters, replace=True)
     st.session_state["execute_saved_search"] = True
 
 
@@ -44,78 +49,75 @@ def filters_from_form(
         "end_date": end_date.isoformat() if end_date else None,
     }
 
+def render_filter_fields(connection: Any, prefix: str) -> dict[str, Any]:
+    town_key, type_key = f"{prefix}_town", f"{prefix}_flat_type"
+    towns = list(dict.fromkeys([
+        "Any", *filter(None, repository.list_towns(connection)), st.session_state[town_key],
+    ]))
+    flat_types = list(dict.fromkeys([
+        "Any", *filter(None, repository.list_flat_types(connection)), st.session_state[type_key],
+    ]))
+
+    left, right = st.columns(2)
+    town = left.selectbox("Town", towns, key=town_key)
+    flat_type = right.selectbox("Flat type", flat_types, key=type_key)
+    left, right = st.columns(2)
+    min_price = left.number_input(
+        "Minimum price (0 = no minimum)", min_value=0, max_value=20_000_000,
+        step=10_000, key=f"{prefix}_min_price",
+    )
+    max_price = right.number_input(
+        "Maximum price (0 = no maximum)", min_value=0, max_value=20_000_000,
+        step=10_000, key=f"{prefix}_max_price",
+    )
+    left, right = st.columns(2)
+    start = left.date_input("Transaction from", value=None, key=f"{prefix}_start_date")
+    end = right.date_input("Transaction to", value=None, key=f"{prefix}_end_date")
+    return filters_from_form(town, flat_type, min_price, max_price, start, end)
 
 def render_search(connection: Any, mongo_database: Any, agent_id: int) -> None:
     st.subheader("Search resale transactions")
-    towns = ["Any", *[town for town in repository.list_towns(connection) if town]]
-    flat_types = ["Any", *[value for value in repository.list_flat_types(connection) if value]]
-
-    st.session_state.setdefault("filter_town", "Any")
-    st.session_state.setdefault("filter_flat_type", "Any")
-    st.session_state.setdefault("filter_min_price", 0)
-    st.session_state.setdefault("filter_max_price", 0)
-    st.session_state.setdefault("filter_start_date", None)
-    st.session_state.setdefault("filter_end_date", None)
-    if st.session_state["filter_town"] not in towns:
-        st.session_state["filter_town"] = "Any"
-    if st.session_state["filter_flat_type"] not in flat_types:
-        st.session_state["filter_flat_type"] = "Any"
+    seed_filter_widgets("filter", {})
 
     with st.form("transaction_search_form"):
-        left, right = st.columns(2)
-        town = left.selectbox("Town", towns, key="filter_town")
-        flat_type = right.selectbox("Flat type", flat_types, key="filter_flat_type")
-        left, right = st.columns(2)
-        minimum_price = left.number_input(
-            "Minimum price (0 = no minimum)",
-            min_value=0,
-            max_value=20_000_000,
-            step=10_000,
-            key="filter_min_price",
-        )
-        maximum_price = right.number_input(
-            "Maximum price (0 = no maximum)",
-            min_value=0,
-            max_value=20_000_000,
-            step=10_000,
-            key="filter_max_price",
-        )
-        left, right = st.columns(2)
-        start_date = left.date_input("Transaction from", value=None, key="filter_start_date")
-        end_date = right.date_input("Transaction to", value=None, key="filter_end_date")
+        filters = render_filter_fields(connection, "filter")
         search_submitted = st.form_submit_button("Search records", type="primary")
 
     auto_run_saved_search = st.session_state.pop("execute_saved_search", False)
     if search_submitted or auto_run_saved_search:
-        filters = filters_from_form(
-            town, flat_type, minimum_price, maximum_price, start_date, end_date
-        )
-        if filters["min_price"] and filters["max_price"]:
-            if filters["min_price"] > filters["max_price"]:
-                st.error("Minimum price cannot exceed maximum price.")
-                return
+        try:
+            store.validate_filter_ranges(filters)
+        except ValueError as error:
+            st.error(str(error))
+            return
         results = repository.search_transactions(connection, filters)
         st.session_state["last_search_filters"] = filters
         st.session_state["last_search_results"] = results
 
     if "last_search_results" in st.session_state:
         results = st.session_state["last_search_results"]
-        st.caption(f'{len(results)} matching transaction(s), up to 1,000 shown.')
-        st.dataframe(results, width="stretch", hide_index=True)
+        if results:
+            count = len(results)
+            if count >= 1000:
+                st.caption(f"Showing the first {count:,} matching transactions.")
+            else:
+                noun = "transaction" if count == 1 else "transactions"
+                st.caption(f"{count:,} matching {noun}.")
+            st.dataframe(results, width="stretch", hide_index=True)
+        else:
+            st.info("No transactions match these filters.")
         with st.form("save_search_form"):
             search_name = st.text_input("Name this search", placeholder="e.g. 4-room flats in Tampines")
             save_submitted = st.form_submit_button("Save search")
         if save_submitted:
-            if not search_name.strip():
-                st.error("Enter a name for this saved search.")
-            else:
-                collection = mongo_database["saved_searches"]
-                collection.insert_one(
-                    {
-                        "agent_id": agent_id,
-                        "name": search_name.strip(),
-                        "filters": st.session_state["last_search_filters"],
-                        "created_at": date.today().isoformat(),
-                    }
+            try:
+                store.create_search(
+                    mongo_database,
+                    agent_id,
+                    search_name,
+                    st.session_state["last_search_filters"],
                 )
-                st.success("Search saved to MongoDB.")
+            except ValueError as error:
+                st.error(str(error))
+            else:
+                st.success("Search saved.")

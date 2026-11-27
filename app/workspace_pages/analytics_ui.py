@@ -17,6 +17,7 @@ from app.app_modules.database.database import (
     get_mongodb_database_name,
     get_mysql_connection,
 )
+from app.app_modules.ui_feedback import queue_feedback, show_feedback
 
 CACHE_TTL_SECONDS = 600
 NONE_CHOICE = "(none)"
@@ -139,18 +140,19 @@ def render_analytics(db: Any, agent_id: int) -> None:
                    on_click=open_editor, args=(None,))
     if refresh_col.button("Refresh data", width="stretch"):
         run_card_query.clear()
+        queue_feedback("analytics", "Refreshing cards…", kind="toast")
         st.rerun(scope="fragment")
     if restore_col.button("Restore defaults", width="stretch",
                           help="Re-add any default card you have deleted."):
         added = analytics_store.restore_defaults(db, agent_id)
-        st.session_state["an_flash"] = (
-            f"Restored {added} default card(s)." if added else "All default cards are already here."
-        )
+        if added:
+            noun = "card" if added == 1 else "cards"
+            queue_feedback("analytics", f"Restored {added} default {noun}.")
+        else:
+            queue_feedback("analytics", "All default cards are already here.", kind="info")
         st.rerun(scope="fragment")
 
-    flash = st.session_state.pop("an_flash", None)
-    if flash:
-        st.success(flash)
+    show_feedback("analytics")
     st.caption(
         "Each card is a saved query and a display type. "
         f"Results are cached for {CACHE_TTL_SECONDS // 60} minutes."
@@ -224,7 +226,9 @@ def render_card(card: dict[str, Any], db: Any, agent_id: int) -> None:
                 try:
                     analytics_store.duplicate_card(db, agent_id, card_id)
                 except ValueError as error:
-                    st.session_state["an_flash"] = str(error)
+                    queue_feedback("analytics", escape_markdown(str(error)), kind="warning")
+                else:
+                    queue_feedback("analytics", "Card duplicated.")
                 st.rerun(scope="fragment")
             st.button("Delete", key=f"an_del_{card_id}", width="stretch",
                       on_click=ask_delete, args=(card_id,))
@@ -234,7 +238,10 @@ def render_card(card: dict[str, Any], db: Any, agent_id: int) -> None:
             yes, no = st.columns(2)
             if yes.button("Yes, delete", key=f"an_yes_{card_id}", type="primary",
                           width="stretch"):
-                analytics_store.delete_card(db, agent_id, card_id)
+                if analytics_store.delete_card(db, agent_id, card_id):
+                    queue_feedback("analytics", "Card deleted.")
+                else:
+                    queue_feedback("analytics", "That card no longer exists.", kind="warning")
                 st.session_state.pop("an_delete", None)
                 st.rerun(scope="fragment")
             no.button("Cancel", key=f"an_no_{card_id}", width="stretch", on_click=cancel_delete)
@@ -727,6 +734,7 @@ def render_editor(db: Any, agent_id: int) -> None:
                 except ValueError as error:
                     st.error(escape_markdown(str(error)))
                 else:
+                    queue_feedback("analytics", "Card updated." if editing_id else "Card created.")
                     close_editor()
                     st.rerun(scope="fragment")
             cancel_col.button("Cancel", key="an_ed_cancel", width="stretch",

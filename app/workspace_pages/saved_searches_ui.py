@@ -4,13 +4,16 @@ from typing import Any
 
 import streamlit as st
 
+from app.app_modules import saved_searches_store as store
+from app.app_modules.ui_feedback import queue_feedback, show_feedback
 
-def render_saved_searches(mongo_database: Any, agent_id: int) -> None:
+from .search_ui import render_filter_fields, seed_filter_widgets
+
+
+def render_saved_searches(connection: Any, mongo_database: Any, agent_id: int) -> None:
     st.subheader("Saved searches")
-    collection = mongo_database["saved_searches"]
-    saved_searches = list(
-        collection.find({"agent_id": agent_id}).sort("created_at", -1)
-    )
+    show_feedback("saved_searches")
+    saved_searches = store.list_searches(mongo_database, agent_id)
     if not saved_searches:
         st.info("You have no saved searches yet. Run a transaction search and save it.")
         return
@@ -23,6 +26,8 @@ def render_saved_searches(mongo_database: Any, agent_id: int) -> None:
                 "Flat type": saved["filters"].get("flat_type") or "Any",
                 "Min price": saved["filters"].get("min_price") or "Any",
                 "Max price": saved["filters"].get("max_price") or "Any",
+                "From": saved["filters"].get("start_date") or "Any",
+                "To": saved["filters"].get("end_date") or "Any",
                 "Created": saved.get("created_at", ""),
             }
             for saved in saved_searches
@@ -30,40 +35,59 @@ def render_saved_searches(mongo_database: Any, agent_id: int) -> None:
         width="stretch",
         hide_index=True,
     )
-    saved_ids = [str(saved["_id"]) for saved in saved_searches]
+    searches_by_id = {str(saved["_id"]): saved for saved in saved_searches}
+    selection_key = "saved_search_selection"
+    if st.session_state.get(selection_key) not in searches_by_id:
+        st.session_state.pop(selection_key, None)
     selected_id = st.selectbox(
         "Choose a saved search",
-        saved_ids,
-        format_func=lambda value: next(
-            saved["name"] for saved in saved_searches if str(saved["_id"]) == value
-        ),
+        list(searches_by_id),
+        format_func=lambda search_id: searches_by_id[search_id]["name"],
+        key=selection_key,
     )
-    selected = next(saved for saved in saved_searches if str(saved["_id"]) == selected_id)
-    load_col, rename_col, delete_col = st.columns(3)
-
+    selected = searches_by_id[selected_id]
+    load_col, delete_col = st.columns(2)
     with load_col:
         if st.button("Run saved search", type="primary"):
             st.session_state["pending_search_filters"] = selected["filters"]
             st.session_state["pending_tab"] = "Search & filter"
             st.rerun()
 
-    with rename_col:
-        with st.form("rename_saved_search_form"):
-            new_name = st.text_input("Rename", value=selected["name"])
-            rename_submitted = st.form_submit_button("Update name")
-        if rename_submitted:
-            if not new_name.strip():
-                st.error("Enter a name for this saved search.")
-            else:
-                collection.update_one(
-                    {"_id": selected["_id"], "agent_id": agent_id},
-                    {"$set": {"name": new_name.strip()}},
-                )
-                st.success("Saved search renamed.")
-                st.rerun()
-
     with delete_col:
         if st.button("Delete saved search"):
-            collection.delete_one({"_id": selected["_id"], "agent_id": agent_id})
-            st.success("Saved search deleted.")
-            st.rerun()
+            try:
+                deleted = store.delete_search(mongo_database, agent_id, selected["_id"])
+            except ValueError as error:
+                st.error(str(error))
+            else:
+                if deleted:
+                    queue_feedback("saved_searches", "Saved search deleted.")
+                else:
+                    queue_feedback(
+                        "saved_searches", "That saved search no longer exists.", kind="warning"
+                    )
+                st.rerun()
+
+    prefix = f"saved_search_edit_{selected_id}"
+    seed_filter_widgets(prefix, selected["filters"])
+    with st.form(f"{prefix}_form"):
+        name = st.text_input("Search name", value=selected["name"], key=f"{prefix}_name")
+        filters = render_filter_fields(connection, prefix)
+        submitted = st.form_submit_button("Save changes")
+
+    if submitted:
+        try:
+            changed = store.update_search(mongo_database, agent_id, selected["_id"], name, filters)
+        except ValueError as error:
+            st.error(str(error))
+        else:
+            if changed is None:
+                queue_feedback(
+                    "saved_searches", "That saved search no longer exists.", kind="warning"
+                )
+                st.rerun()
+            elif changed:
+                queue_feedback("saved_searches", "Saved search updated.")
+                st.rerun()
+            else:
+                st.info("This saved search already has those settings.")

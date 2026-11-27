@@ -19,7 +19,7 @@ from app.app_modules.database.database import (
     get_mongodb_database_name,
     get_mysql_connection,
 )
-from app.app_modules.ui_feedback import show_database_error
+from app.app_modules.ui_feedback import show_database_error, show_feedback
 from app.workspace_pages.address_ui import render_address_tab
 from app.workspace_pages.analytics_ui import render_analytics_tab
 from app.workspace_pages.flat_records_ui import render_flat_management
@@ -27,7 +27,7 @@ from app.workspace_pages.nearby_ui import render_nearby_tab
 from app.workspace_pages.ranking_ui import render_ranking_tab
 from app.workspace_pages.saved_searches_ui import render_saved_searches
 from app.workspace_pages.search_ui import apply_saved_search_filters, render_search
-from app.workspace_pages.transactions_ui import clear_transaction_batch, render_agent_transactions
+from app.workspace_pages.transactions_ui import render_agent_transactions
 
 
 st.set_page_config(
@@ -44,6 +44,8 @@ st.markdown(
         --ink: #172b2a;
         --muted: #61716d;
         --green: #176b52;
+        --green-dark: #10553f;
+        --green-tint: #e1eee7;
         --line: #e4ebe7;
         --paper: #f6f8f5;
     }
@@ -60,8 +62,42 @@ st.markdown(
     .hero-card-label { color: #c8e3d3; font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
     .hero-card-title { max-width: 360px; font-family: 'Manrope', 'Segoe UI', sans-serif; font-size: 2rem; font-weight: 700; line-height: 1.2; }
     .hero-card-copy { max-width: 340px; color: #d6e8dc; line-height: 1.65; }
-    div.stButton > button[kind="primary"] { color: white; background: var(--green); border-color: var(--green); border-radius: .55rem; font-weight: 700; }
-    div.stButton > button[kind="primary"]:hover { background: #10553f; border-color: #10553f; }
+    .stApp :is(.stButton, .stFormSubmitButton) button {
+        color: white;
+        background-color: var(--green);
+        border: 1px solid var(--green);
+        border-radius: .55rem;
+        font-weight: 700;
+    }
+    .stApp :is(.stButton, .stFormSubmitButton) button:not(:disabled):is(:hover, :active) {
+        color: white;
+        background-color: var(--green-dark);
+        border-color: var(--green-dark);
+    }
+    .stApp .stButtonGroup button {
+        color: var(--green-dark);
+        background-color: var(--green-tint);
+        border-color: var(--green);
+    }
+    .stApp .stButtonGroup button:not(:disabled):is(:hover, [data-focus-visible]) {
+        background-color: var(--green-tint);
+        border-color: var(--green-dark);
+    }
+    .stApp .stButtonGroup button:is([data-selected], [data-testid$="Active"]):not(:disabled) {
+        color: white;
+        background-color: var(--green);
+        border-color: var(--green);
+    }
+    .stApp :is(.stButton, .stFormSubmitButton, .stButtonGroup) button:focus-visible {
+        outline: 2px solid var(--green-dark);
+        outline-offset: 2px;
+        box-shadow: none;
+    }
+    .stApp :is(.stButton, .stFormSubmitButton, .stButtonGroup) button:disabled {
+        color: #4b685b;
+        background-color: var(--green-tint);
+        border-color: var(--line);
+    }
     footer { visibility: hidden; }
     </style>
     """,
@@ -86,9 +122,9 @@ def render_workspace(agent: dict[str, Any]) -> None:
         st.caption("Property catalogue, resale transactions, and your saved searches.")
     with logout_column:
         if st.button("Log out"):
-            clear_transaction_batch(agent["agent_id"])
-            st.session_state.pop("agent", None)
+            st.session_state.clear()
             st.rerun()
+    show_feedback("workspace")
 
     pages = [
         "Search & filter",
@@ -140,7 +176,7 @@ def render_workspace(agent: dict[str, Any]) -> None:
             else:
                 with closing(get_mongodb_client()) as mongo_client:
                     mongo_database = mongo_client[get_mongodb_database_name()]
-                    render_saved_searches(mongo_database, agent["agent_id"])
+                    render_saved_searches(connection, mongo_database, agent["agent_id"])
     except (mysql.connector.Error, mongo_errors.PyMongoError, ValueError) as error:
         show_database_error(error)
 

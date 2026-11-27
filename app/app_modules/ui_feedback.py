@@ -1,8 +1,25 @@
-"""Shared database error feedback for the Streamlit UI."""
+"""Shared action and database feedback for the Streamlit UI."""
 
 import logging
+from typing import Literal
 
 import streamlit as st
+
+
+def queue_feedback(
+    page: str,
+    message: str,
+    kind: Literal["success", "toast", "warning", "info"] = "success",
+) -> None:
+    """Keep a message for the next render of the page after a rerun."""
+    st.session_state[f"feedback_{page}"] = (kind, message)
+
+
+def show_feedback(page: str) -> None:
+    """Display and clear the message queued for this page."""
+    if feedback := st.session_state.pop(f"feedback_{page}", None):
+        kind, message = feedback
+        getattr(st, kind)(message)
 
 
 def show_database_error(error: Exception) -> None:
