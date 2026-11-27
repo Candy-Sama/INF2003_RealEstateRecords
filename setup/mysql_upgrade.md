@@ -8,7 +8,7 @@ For a fresh installation, run `firstver_database.sql` and import the CSVs as des
 .\.venv\Scripts\python.exe -m setup.migrate_mysql
 ```
 
-Back up the schema and pause application writes before running the migration with a MySQL account that can alter the tables and create temporary tables. MySQL commits each DDL statement independently and rebuilds tables when changing column types. If the migration stops between statements, rerun the preflight to see the remaining operations. The backup is the rollback for type conversions. [MySQL online DDL operations](https://dev.mysql.com/doc/refman/8.0/en/innodb-online-ddl-operations.html)
+Back up the schema and pause application writes before running the migration with a MySQL account that can alter tables, create temporary tables, and create views. MySQL commits each DDL statement independently and rebuilds tables when changing column types. If the migration stops between statements, rerun the preflight to see the remaining operations. The backup is the rollback for type conversions. [MySQL online DDL operations](https://dev.mysql.com/doc/refman/8.0/en/innodb-online-ddl-operations.html)
 
 ```powershell
 .\.venv\Scripts\python.exe -m setup.migrate_mysql --apply
@@ -16,6 +16,8 @@ Back up the schema and pause application writes before running the migration wit
 ```
 
 The migration checks the transaction key, foreign keys, schema types, and existing values. It adds replacement foreign-key indexes before removing the redundant ones. On a legacy schema with a missing, nullable, or defaulted `nearby.distance_m`, it rebuilds derived station pairs before requiring an explicit distance. The default radius is 1,000 m with nearest-station fallback. Pass `--radius` or `--no-fallback` to reproduce a different existing configuration.
+
+The migration creates `v_resale_detail` when it is missing. This view supplies the flat, sale, and address fields for **Recent comparable sales**. If the app account uses table-level grants, grant it `SELECT` on the view after upgrading.
 
 A fresh import preserves all 166 fractional floor areas, all 69 prices with cents, and the decimal precision of the bundled coordinates. The migration converts existing stored values. Recovering digits lost by an earlier import requires verifying the original source mapping separately.
 

@@ -1,4 +1,6 @@
 -- MySQL Workbench Forward Engineering
+-- Fresh-install schema for Estate Records. Use setup/mysql_upgrade.md for
+-- upgrading a populated database.
 
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
@@ -135,27 +137,29 @@ DEFAULT CHARACTER SET = utf8mb3;
 
 -- -----------------------------------------------------
 -- View `estateRecordsDB`.`v_resale_detail`
--- Joins resale_transaction, flat, and place without exposing agent columns.
+-- Projects the sale, flat, and address fields used by Recent comparable sales.
+-- The app applies the selected station radius to both flats in its query.
+-- Keep this projection in sync with CREATE_RESALE_DETAIL_VIEW in migrate_mysql.py.
 -- -----------------------------------------------------
 CREATE OR REPLACE VIEW `estateRecordsDB`.`v_resale_detail` AS
 SELECT
   rt.`FLAT_flat_id` AS `flat_id`,
-  rt.`transaction_date` AS `transaction_date`,
-  rt.`resale_price` AS `resale_price`,
+  rt.`transaction_date`,
+  rt.`resale_price`,
   ROUND(rt.`resale_price` / NULLIF(f.`floor_area_sqm`, 0), 2) AS `price_per_sqm`,
-  f.`flat_type` AS `flat_type`,
-  f.`flat_model` AS `flat_model`,
-  f.`storey_range` AS `storey_range`,
-  f.`floor_area_sqm` AS `floor_area_sqm`,
-  f.`lease_commence_date` AS `lease_commence_date`,
-  f.`remaining_lease_months` AS `remaining_lease_months`,
-  p.`block_id` AS `block_id`,
-  p.`block_number` AS `block_number`,
-  p.`road_name` AS `road_name`,
-  p.`postal` AS `postal`,
-  p.`town` AS `town`,
-  p.`latitude` AS `latitude`,
-  p.`longtitude` AS `longtitude`
+  f.`flat_type`,
+  f.`flat_model`,
+  f.`storey_range`,
+  f.`floor_area_sqm`,
+  f.`lease_commence_date`,
+  f.`remaining_lease_months`,
+  p.`block_id`,
+  p.`block_number`,
+  p.`road_name`,
+  p.`postal`,
+  p.`town`,
+  p.`latitude`,
+  p.`longtitude`
 FROM `estateRecordsDB`.`resale_transaction` AS rt
 JOIN `estateRecordsDB`.`flat` AS f
   ON f.`flat_id` = rt.`FLAT_flat_id`

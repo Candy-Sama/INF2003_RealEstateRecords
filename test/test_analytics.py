@@ -1,10 +1,16 @@
 import unittest
 from decimal import Decimal
+from unittest.mock import Mock
 
 from pandas import DataFrame
 
 from app.app_modules.analytics import analytics_sql, analytics_store
-from app.app_modules.analytics.analytics_defaults import DEFAULT_CARDS
+from app.app_modules.analytics.analytics_defaults import (
+    DEFAULT_CARDS,
+    LEGACY_MARKET_OVERVIEW_SQL,
+    MARKET_OVERVIEW_SEED_KEY,
+    MARKET_OVERVIEW_SQL,
+)
 from app.app_modules.analytics.analytics_sql import QueryRejected, validate_query
 
 
@@ -160,6 +166,44 @@ class StoreTests(unittest.TestCase):
             keys.add(default["seed_key"])
         self.assertEqual(len(keys), len(DEFAULT_CARDS))
         self.assertEqual(len(DEFAULT_CARDS), 8)
+
+    def test_loading_cards_upgrades_only_the_legacy_seeded_market_overview(self):
+        legacy = {
+            "_id": "legacy-card",
+            "agent_id": 7,
+            "seed_key": MARKET_OVERVIEW_SEED_KEY,
+            "sql": LEGACY_MARKET_OVERVIEW_SQL,
+            "title": "My market overview",
+            "display_type": "table",
+            "width": "half",
+            "number_format": "currency",
+            "mapping": {"x": "transactions"},
+        }
+        custom_sql = {**legacy, "_id": "custom-query", "sql": "SELECT 1 AS transactions"}
+        copied = {**legacy, "_id": "copied-card", "seed_key": None}
+        collection = Mock()
+        collection.find.return_value.sort.return_value = [legacy, custom_sql, copied]
+        collection.update_one.return_value.matched_count = 1
+        db = {analytics_store.COLLECTION: collection}
+
+        market, edited, duplicate = analytics_store.list_cards(db, 7)
+        self.assertEqual(market["sql"], MARKET_OVERVIEW_SQL)
+        for field in ("title", "display_type", "width", "number_format", "mapping"):
+            self.assertEqual(market[field], legacy[field])
+        self.assertEqual(edited["sql"], custom_sql["sql"])
+        self.assertEqual(duplicate["sql"], LEGACY_MARKET_OVERVIEW_SQL)
+
+        self.assertEqual(analytics_store.list_cards(db, 7)[0]["sql"], MARKET_OVERVIEW_SQL)
+        collection.find.assert_called_with({"agent_id": 7})
+        collection.update_one.assert_called_once_with(
+            {
+                "_id": "legacy-card",
+                "agent_id": 7,
+                "seed_key": MARKET_OVERVIEW_SEED_KEY,
+                "sql": LEGACY_MARKET_OVERVIEW_SQL,
+            },
+            {"$set": {"sql": MARKET_OVERVIEW_SQL}},
+        )
 
 
 if __name__ == "__main__":

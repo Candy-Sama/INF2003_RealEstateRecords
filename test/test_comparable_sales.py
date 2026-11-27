@@ -52,7 +52,7 @@ class ComparableSalesQueryTests(unittest.TestCase):
         }
         self.cutoff = date(2025, 11, 1)
 
-    def test_default_station_catchment_and_similar_size_binds_parameters(self):
+    def test_station_catchment_binds_both_distances_in_sql_order(self):
         query, params = build_comparable_sales_query(
             self.reference,
             station_ids=[3, 7],
@@ -60,7 +60,15 @@ class ComparableSalesQueryTests(unittest.TestCase):
             cutoff_date=self.cutoff,
         )
         self.assertIn("FROM `v_resale_detail` AS v", query)
-        self.assertIn("n_ref.STATIONS_station_id IN (%s, %s) AND n_ref.distance_m <= %s", query)
+        self.assertIn(
+            "WHERE v.flat_type = %s AND v.flat_id <> %s AND v.transaction_date >= %s "
+            "AND EXISTS (SELECT 1 FROM `nearby` AS n_ref JOIN `nearby` AS n_sale "
+            "ON n_sale.STATIONS_station_id = n_ref.STATIONS_station_id "
+            "WHERE n_ref.PLACE_block_id = %s AND n_ref.distance_m <= %s "
+            "AND n_ref.STATIONS_station_id IN (%s, %s) "
+            "AND n_sale.PLACE_block_id = v.block_id AND n_sale.distance_m <= %s)",
+            query,
+        )
         self.assertIn("v.floor_area_sqm BETWEEN %s AND %s", query)
         self.assertEqual(
             params,
@@ -68,6 +76,8 @@ class ComparableSalesQueryTests(unittest.TestCase):
                 "4 ROOM",
                 10,
                 self.cutoff,
+                200,
+                500,
                 3,
                 7,
                 500,

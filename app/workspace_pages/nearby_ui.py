@@ -19,7 +19,7 @@ DISTANCE_BANDS = {"≤ 300 m": 300, "≤ 500 m": 500, "≤ 1 km": 1000}
 CLEAR_FILTERS = "✕ Clear filters"
 CLEAR_SELECTION = "✕ Clear selection"
 SUBVIEWS = ["Flats near the same stations", "Recent comparable sales"]
-CATCHMENT_OPTIONS = ["300 m", "500 m", "1,000 m", "Same block", "Same town"]
+CATCHMENT_OPTIONS = [*repository.CATCHMENT_RADII_M, "Same block", "Same town"]
 PERIOD_MONTH_OPTIONS = [6, 12, 24, 36]
 FLAT_TABLE_COLUMNS = {
     "flat_id": st.column_config.NumberColumn("Flat ID"),
@@ -169,9 +169,8 @@ def _render_comparable_sales_subview(
     connection: Any,
     reference: dict[str, Any],
     station_ids: list[int],
+    nearest_station_m: int | None,
 ) -> None:
-    repository.ensure_resale_detail_view(connection)
-
     st.session_state.setdefault("nb_comp_catchment", "500 m")
     st.session_state.setdefault("nb_comp_months", 12)
     st.session_state.setdefault("nb_comp_similar_size", True)
@@ -179,7 +178,10 @@ def _render_comparable_sales_subview(
     with st.container(border=True):
         c1, c2, c3, c4 = st.columns([2, 2, 2, 2], vertical_alignment="center")
         c1.markdown(f"**Flat type:** `{reference.get('flat_type', '—')}`")
-        catchment = c2.selectbox("Catchment", CATCHMENT_OPTIONS, key="nb_comp_catchment")
+        catchment = c2.selectbox(
+            "Catchment", CATCHMENT_OPTIONS, key="nb_comp_catchment",
+            help="For a distance option, both flats must be within the radius of the same station.",
+        )
         months = c3.selectbox(
             "Period (months)",
             PERIOD_MONTH_OPTIONS,
@@ -187,6 +189,14 @@ def _render_comparable_sales_subview(
             format_func=lambda m: f"Last {m} months",
         )
         similar_size = c4.checkbox("Similar size (±10 m²)", key="nb_comp_similar_size")
+
+    radius_m = repository.CATCHMENT_RADII_M.get(catchment)
+    if radius_m is not None and (nearest_station_m is None or nearest_station_m > radius_m):
+        st.info(
+            f"No station is within {catchment} of the reference flat. "
+            "Try **Same block** or **Same town**."
+        )
+        return
 
     options = {
         "catchment": catchment,
@@ -404,7 +414,7 @@ def render_nearby_stations(connection: Any) -> None:
         )
         if subview == "Recent comparable sales":
             ref_profile = repository.get_reference_flat_profile(connection, focus["flat_id"]) or selected[0]
-            _render_comparable_sales_subview(connection, ref_profile, station_ids)
+            _render_comparable_sales_subview(connection, ref_profile, station_ids, selected[0]["nearest_m"])
             return
 
         total = repository.count_similar_flats(connection, focus["flat_id"], station_ids)

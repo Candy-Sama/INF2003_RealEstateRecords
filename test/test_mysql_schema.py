@@ -12,6 +12,7 @@ import mysql.connector
 from mysql.connector import errorcode
 
 from app import repository
+from app.app_modules.analytics.analytics_defaults import MARKET_OVERVIEW_SQL
 from app.app_modules.analytics.analytics_sql import run_query
 from app.app_modules.database.database import get_mysql_connection
 from setup.benchmark_mysql import _restore_legacy_indexes, compare_indexes, workload
@@ -151,6 +152,23 @@ class MySQLSchemaTests(unittest.TestCase):
         self.execute("INSERT INTO nearby VALUES (1, 1, 0)")
         self.assertEqual(self.execute("SELECT distance_m FROM nearby"), [(0,)])
 
+    def test_market_overview_counts_all_sales_in_the_latest_calendar_month(self):
+        self.load_fixture()
+        frame, _ = run_query(self.connection, MARKET_OVERVIEW_SQL)
+        self.assertEqual(frame["latest_month_sales"].iloc[0], 0)
+
+        self.execute("INSERT INTO flat VALUES (2, '4 ROOM', 'Model', '01 TO 03', 80.20, 2, 1982, 780)")
+        self.execute(
+            "INSERT INTO resale_transaction VALUES (1, 1, '2025-12-31', 400000), "
+            "(1, 2, '2026-01-01', 450000), (2, 1, '2026-01-20', 500000)"
+        )
+        self.connection.commit()
+
+        frame, truncated = run_query(self.connection, MARKET_OVERVIEW_SQL)
+        self.assertFalse(truncated)
+        self.assertEqual(frame["transactions"].iloc[0], 3)
+        self.assertEqual(frame["latest_month_sales"].iloc[0], 2)
+
     def test_defaulted_legacy_distances_are_rebuilt(self):
         self.load_fixture()
         self.execute("ALTER TABLE nearby ALTER COLUMN distance_m SET DEFAULT 0")
@@ -177,9 +195,51 @@ class MySQLSchemaTests(unittest.TestCase):
         self.assertTrue(final["explain"] and final["explain_analyze"])
         self.assertEqual(migrate_schema(self.connection), [])
 
+    def test_station_comparables_require_both_flats_within_the_radius(self):
+        self.load_fixture(area=Decimal("95.00"))
+        self.execute(
+            "INSERT INTO place VALUES "
+            "(3, '3', 'TEST ROAD', '030303', 1.35, 103.802, 'TEST'), "
+            "(4, '4', 'TEST ROAD', '040404', 1.35, 103.803, 'TEST'), "
+            "(5, '5', 'TEST ROAD', '050505', 1.35, 103.804, 'TEST')"
+        )
+        self.execute(
+            "INSERT INTO stations VALUES (2, 'EW2', 'Second', 'Line', 'Green', 'MRT', 1), "
+            "(3, 'EW3', 'Third', 'Line', 'Green', 'MRT', 1)"
+        )
+        self.execute(
+            "INSERT INTO flat VALUES "
+            "(2, '4 ROOM', 'Model', '01 TO 03', 95.00, 3, 1982, 780), "
+            "(3, '4 ROOM', 'Model', '01 TO 03', 95.00, 4, 1982, 780), "
+            "(4, '4 ROOM', 'Model', '01 TO 03', 95.00, 5, 1982, 780)"
+        )
+        self.execute(
+            "INSERT INTO nearby VALUES (1, 2, 450), (2, 2, 500), (3, 2, 501), "
+            "(1, 3, 500), (2, 3, 300), (1, 4, 501), (3, 5, 100)"
+        )
+        self.execute(
+            "INSERT INTO resale_transaction VALUES (1, 1, '2025-01-31', 500000), "
+            "(2, 1, '2025-01-31', 510000), (3, 1, '2025-01-31', 520000), "
+            "(4, 1, '2025-01-31', 530000)"
+        )
+        self.connection.commit()
+
+        reference = repository.get_reference_flat_profile(self.connection, 1)
+        stations = repository.get_flat_station_ids(self.connection, 1)
+        rows, truncated, _ = repository.search_comparable_sales(self.connection, reference, stations, {})
+        self.assertFalse(truncated)
+        self.assertEqual([row["flat_id"] for row in rows], [2])
+
+        rows, _, _ = repository.search_comparable_sales(
+            self.connection, reference, stations, {"catchment": "300 m"},
+        )
+        self.assertEqual(rows, [])
+
     def test_legacy_migration_is_repeatable_and_preserves_records(self):
+        fresh_view_definition = self.execute("SHOW CREATE VIEW v_resale_detail")[0][1]
         _restore_legacy_indexes(self.connection)
         for ddl in (
+            "DROP VIEW v_resale_detail",
             "ALTER TABLE place DROP CHECK chk_place_coordinates, MODIFY latitude FLOAT NOT NULL, MODIFY longtitude FLOAT NOT NULL",
             "ALTER TABLE flat DROP CHECK chk_flat_area, DROP CHECK chk_flat_remaining_lease, MODIFY floor_area_sqm INT NOT NULL",
             "ALTER TABLE resale_transaction DROP CHECK chk_resale_price, MODIFY resale_price FLOAT NOT NULL",
@@ -197,11 +257,17 @@ class MySQLSchemaTests(unittest.TestCase):
 
         operations = migrate_schema(self.connection)
         self.assertIn("ALTER TABLE `nearby` ADD COLUMN `distance_m` INT NULL", operations)
+        self.assertTrue(any(operation.startswith("CREATE VIEW `v_resale_detail`") for operation in operations))
         self.assertEqual(self.execute("SHOW COLUMNS FROM nearby LIKE 'distance_m'"), [])
+        self.assertEqual(self.execute("SHOW FULL TABLES LIKE 'v_resale_detail'"), [])
         self.connection.rollback()
         self.assertEqual(migrate_schema(self.connection, apply=True), operations)
         self.assertEqual(migrate_schema(self.connection, apply=True), [])
+        self.assertEqual(self.execute("SHOW CREATE VIEW v_resale_detail")[0][1], fresh_view_definition)
         self.assertEqual(self.execute("SELECT resale_price FROM resale_transaction"), [(Decimal("650001.00"),)])
+        self.assertEqual(self.execute("SELECT flat_id, resale_price, price_per_sqm, town FROM v_resale_detail"), [
+            (1, Decimal("650001.00"), Decimal("10833.35"), "TEST"),
+        ])
         rows = self.execute("SELECT PLACE_block_id, distance_m FROM nearby ORDER BY PLACE_block_id")
         self.assertEqual(rows[0], (1, 0))
         self.assertEqual(rows[1][0], 2)

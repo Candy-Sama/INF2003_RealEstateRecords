@@ -62,14 +62,14 @@ st.markdown(
     .hero-card-label { color: #c8e3d3; font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
     .hero-card-title { max-width: 360px; font-family: 'Manrope', 'Segoe UI', sans-serif; font-size: 2rem; font-weight: 700; line-height: 1.2; }
     .hero-card-copy { max-width: 340px; color: #d6e8dc; line-height: 1.65; }
-    .stApp :is(.stButton, .stFormSubmitButton) button {
+    .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton) button {
         color: white;
         background-color: var(--green);
         border: 1px solid var(--green);
         border-radius: .55rem;
         font-weight: 700;
     }
-    .stApp :is(.stButton, .stFormSubmitButton) button:not(:disabled):is(:hover, :active) {
+    .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton) button:not(:disabled):is(:hover, :active) {
         color: white;
         background-color: var(--green-dark);
         border-color: var(--green-dark);
@@ -88,12 +88,12 @@ st.markdown(
         background-color: var(--green);
         border-color: var(--green);
     }
-    .stApp :is(.stButton, .stFormSubmitButton, .stButtonGroup) button:focus-visible {
+    .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton, .stButtonGroup) button:focus-visible {
         outline: 2px solid var(--green-dark);
         outline-offset: 2px;
         box-shadow: none;
     }
-    .stApp :is(.stButton, .stFormSubmitButton, .stButtonGroup) button:disabled {
+    .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton, .stButtonGroup) button:disabled {
         color: #4b685b;
         background-color: var(--green-tint);
         border-color: var(--line);

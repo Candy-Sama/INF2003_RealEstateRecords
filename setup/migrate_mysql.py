@@ -73,6 +73,30 @@ INVALID_ROWS = {
     "resale_transaction": "resale_price < 0.01 OR resale_price > 9999999999.99",
     "nearby": "distance_m < 0",
 }
+CREATE_RESALE_DETAIL_VIEW = """
+CREATE VIEW `v_resale_detail` AS
+SELECT
+    rt.`FLAT_flat_id` AS `flat_id`,
+    rt.`transaction_date`,
+    rt.`resale_price`,
+    ROUND(rt.`resale_price` / NULLIF(f.`floor_area_sqm`, 0), 2) AS `price_per_sqm`,
+    f.`flat_type`,
+    f.`flat_model`,
+    f.`storey_range`,
+    f.`floor_area_sqm`,
+    f.`lease_commence_date`,
+    f.`remaining_lease_months`,
+    p.`block_id`,
+    p.`block_number`,
+    p.`road_name`,
+    p.`postal`,
+    p.`town`,
+    p.`latitude`,
+    p.`longtitude`
+FROM `resale_transaction` AS rt
+JOIN `flat` AS f ON f.`flat_id` = rt.`FLAT_flat_id`
+JOIN `place` AS p ON p.`block_id` = f.`block_id`
+""".strip()
 
 
 def _read_indexes(cursor):
@@ -194,6 +218,17 @@ def _schema_operations(cursor, indexes, columns):
     return alters, additions, removals, legacy_distance
 
 
+def _needs_resale_detail_view(cursor):
+    cursor.execute(
+        "SELECT TABLE_TYPE FROM information_schema.TABLES "
+        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'v_resale_detail'"
+    )
+    existing = cursor.fetchone()
+    if existing is not None and existing[0] != "VIEW":
+        raise ValueError("Expected v_resale_detail to be a view in the configured schema.")
+    return existing is None
+
+
 def migrate_schema(connection, *, apply=False, radius_m=DEFAULT_RADIUS_M, nearest_fallback=True):
     """Return planned or applied operations using a dedicated connection."""
     if radius_m <= 0:
@@ -222,6 +257,7 @@ def migrate_schema(connection, *, apply=False, radius_m=DEFAULT_RADIUS_M, neares
             has_distance = ("nearby", "distance_m") in columns
             _preflight(cursor, indexes, has_distance)
             alters, additions, removals, rebuild_nearby = _schema_operations(cursor, indexes, columns)
+            create_resale_detail_view = _needs_resale_detail_view(cursor)
             operations = []
 
             def execute(sql):
@@ -243,6 +279,8 @@ def migrate_schema(connection, *, apply=False, radius_m=DEFAULT_RADIUS_M, neares
                 execute("ALTER TABLE `nearby` " + ", ".join(alters["nearby"]))
             for sql in additions + removals:
                 execute(sql)
+            if create_resale_detail_view:
+                execute(CREATE_RESALE_DETAIL_VIEW)
             return operations
         finally:
             connection.rollback()
