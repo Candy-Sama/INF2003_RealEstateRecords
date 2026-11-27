@@ -1,0 +1,74 @@
+INF2003_RealEstateRecords/
+|-- app/
+|   |-- app_modules/
+|   |   |-- analytics/
+|   |   |   |-- analytics_builder.py
+|   |   |   |-- analytics_charts.py
+|   |   |   |-- analytics_defaults.py
+|   |   |   |-- analytics_sql.py
+|   |   |   `-- analytics_store.py
+|   |   |-- database/
+|   |   |   `-- database.py
+|   |   |-- nearby/
+|   |   |   `-- nearby_function.py
+|   |   |-- ranking/
+|   |   |   `-- ranking.py
+|   |   |-- security/
+|   |   |   `-- security.py
+|   |   |-- authentication_ui.py
+|   |   `-- ui_feedback.py
+|   |-- workspace_pages/
+|   |   |-- __init__.py
+|   |   |-- address_ui.py
+|   |   |-- analytics_ui.py
+|   |   |-- flat_records_ui.py
+|   |   |-- nearby_ui.py
+|   |   |-- ranking_ui.py
+|   |   |-- saved_searches_ui.py
+|   |   |-- search_ui.py
+|   |   `-- transactions_ui.py
+|   |-- __init__.py
+|   |-- repository.py
+|   `-- streamlit_app.py
+|-- data/
+|   |-- cleaned/
+|   |   `-- .gitkeep
+|   |-- geo/
+|   |   `-- .gitkeep
+|   |-- raw/
+|   |   `-- .gitkeep
+|   |-- samples/
+|   |   |-- hdb_resale_sample.csv
+|   |   `-- mrt_stations_sample.csv
+|   `-- scripts/
+|       `-- data_prep/
+|           |-- 00_inspect.py
+|           |-- 03_clean_hdb.py
+|           |-- 04_clean_mrt.py
+|           |-- 05_make_samples.py
+|           |-- 06_geocode_hdb.py
+|           `-- 07_merge_geo.py
+|-- setup/
+|   |-- import_data_script/
+|   |   |-- hdb_resale_enriched_block_id.csv
+|   |   |-- import.py
+|   |   |-- ImportInstructions.md
+|   |   |-- mrt_lrt_full_list.csv
+|   |   `-- places_for_mysql.csv
+|   |-- __init__.py
+|   |-- benchmark_mysql.py
+|   |-- firstver_database.sql
+|   |-- migrate_mysql.py
+|   `-- mysql_upgrade.md
+|-- test/
+|   |-- test_analytics.py
+|   |-- test_analytics_builder.py
+|   |-- test_mysql_schema.py
+|   |-- test_ranking.py
+|   |-- test_repository.py
+|   `-- test_security.py
+|-- .env.example
+|-- .gitignore
+|-- project_structure.txt
+|-- README.md
+`-- requirements.txt
