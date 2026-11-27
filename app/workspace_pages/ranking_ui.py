@@ -10,8 +10,7 @@ import streamlit as st
 
 from app import repository
 from app.app_modules.database.database import get_mysql_connection
-
-from . import ranking
+from app.app_modules.ranking import ranking
 
 ALL_TYPES = "All flat types"
 

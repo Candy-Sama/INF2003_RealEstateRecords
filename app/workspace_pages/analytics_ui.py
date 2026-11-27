@@ -9,15 +9,14 @@ import mysql.connector
 import streamlit as st
 from pymongo import errors as mongo_errors
 
+from app.app_modules.analytics import analytics_builder as builder
+from app.app_modules.analytics import analytics_charts, analytics_sql, analytics_store
+from app.app_modules.analytics.analytics_store import escape_markdown
 from app.app_modules.database.database import (
     get_mongodb_client,
     get_mongodb_database_name,
     get_mysql_connection,
 )
-
-from . import analytics_builder as builder
-from . import analytics_charts, analytics_sql, analytics_store
-from .analytics_store import escape_markdown
 
 CACHE_TTL_SECONDS = 600
 NONE_CHOICE = "(none)"

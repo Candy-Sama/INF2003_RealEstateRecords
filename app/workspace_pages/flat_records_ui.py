@@ -6,7 +6,8 @@ from typing import Any
 import streamlit as st
 
 from app import repository
-from app.app_modules.nearby.nearby_ui import go_to_nearby
+
+from .nearby_ui import go_to_nearby
 
 
 def flat_values_form(

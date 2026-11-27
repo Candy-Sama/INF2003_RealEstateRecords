@@ -12,8 +12,6 @@ project_root = str(Path(__file__).resolve().parents[1])
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from app.app_modules.address_ui import render_address_tab
-from app.app_modules.analytics.analytics_ui import render_analytics_tab
 from app.app_modules.authentication_ui import render_authentication
 from app.app_modules.database.database import (
     get_flat_record_admin_email,
@@ -21,13 +19,15 @@ from app.app_modules.database.database import (
     get_mongodb_database_name,
     get_mysql_connection,
 )
-from app.app_modules.flat_records_ui import render_flat_management
-from app.app_modules.nearby.nearby_ui import render_nearby_tab
-from app.app_modules.ranking.ranking_ui import render_ranking_tab
-from app.app_modules.saved_searches_ui import render_saved_searches
-from app.app_modules.search_ui import apply_saved_search_filters, render_search
-from app.app_modules.transactions_ui import clear_transaction_batch, render_agent_transactions
 from app.app_modules.ui_feedback import show_database_error
+from app.workspace_pages.address_ui import render_address_tab
+from app.workspace_pages.analytics_ui import render_analytics_tab
+from app.workspace_pages.flat_records_ui import render_flat_management
+from app.workspace_pages.nearby_ui import render_nearby_tab
+from app.workspace_pages.ranking_ui import render_ranking_tab
+from app.workspace_pages.saved_searches_ui import render_saved_searches
+from app.workspace_pages.search_ui import apply_saved_search_filters, render_search
+from app.workspace_pages.transactions_ui import clear_transaction_batch, render_agent_transactions
 
 
 st.set_page_config(

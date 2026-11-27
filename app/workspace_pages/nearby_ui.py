@@ -8,9 +8,8 @@ import streamlit as st
 
 from app import repository
 from app.app_modules.database.database import get_mysql_connection
+from app.app_modules.nearby import nearby_function
 from app.app_modules.ui_feedback import show_database_error
-
-from . import nearby_function
 
 
 NEARBY_PAGE_SIZE = 100
