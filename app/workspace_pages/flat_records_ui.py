@@ -6,6 +6,7 @@ from typing import Any
 import streamlit as st
 
 from app import repository
+from app.app_modules.table_columns import FLAT_RECORD_COLUMNS
 from app.app_modules.ui_feedback import queue_feedback, show_feedback
 
 from .nearby_ui import go_to_nearby
@@ -89,19 +90,20 @@ def flat_values_form(
 
 
 def render_flat_management(connection: Any, is_admin: bool) -> None:
+    st.subheader("Flat records")
     if is_admin:
         st.caption("Administrator access: you can create and edit flat records.")
     else:
-        st.caption("You can view flat records; only the configured admin can edit them.")
-    st.subheader("Flat records")
+        st.caption("Flat records are read-only for agent accounts.")
     show_feedback("flat_records")
     total_flats = repository.count_flats(connection)
     page_size = 100
     page_count = max(1, (total_flats + page_size - 1) // page_size)
     if st.session_state.get("flat_records_page", 1) > page_count:
         st.session_state["flat_records_page"] = page_count
-    page = st.number_input(
-        "Flat records page",
+    details, pager = st.columns([4, 1], vertical_alignment="center")
+    page = pager.number_input(
+        "Page",
         min_value=1,
         max_value=page_count,
         step=1,
@@ -112,11 +114,12 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
     )
     st.session_state.setdefault("mf_nonce", 0)
     if flats:
-        st.caption(f"Showing page {page:,} of {page_count:,} ({total_flats:,} flat records).")
-        st.markdown("**Select a row** to view nearby MRT and LRT stations for that flat.")
+        details.caption(f"{total_flats:,} flat records · Page {page:,} of {page_count:,}")
+        details.markdown("Select a row to see its nearby MRT and LRT stations.")
         event = st.dataframe(
             flats, width="stretch",
             hide_index=True,
+            column_config=FLAT_RECORD_COLUMNS,
             on_select="rerun",
             selection_mode="single-row",
             key=f'mf_table_{st.session_state["mf_nonce"]}',
@@ -129,7 +132,6 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
         st.info("No flat records are currently available.")
 
     if not is_admin:
-        st.info("Flat records are read-only for agent accounts.")
         with st.form("view_flat_form"):
             flat_search_id = st.number_input(
                 "Look up a flat by ID",
@@ -137,7 +139,7 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
                 step=1,
                 key="view_flat_search_id",
             )
-            view_submitted = st.form_submit_button("Find flat")
+            view_submitted = st.form_submit_button("Find flat", type="primary")
         if view_submitted:
             st.session_state["view_flat_selected_id"] = int(flat_search_id)
         selected_id = st.session_state.get("view_flat_selected_id")
@@ -146,7 +148,10 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
             if selected_flat is None:
                 st.warning("No flat record exists with that ID.")
             else:
-                st.dataframe([selected_flat], width="stretch", hide_index=True)
+                st.dataframe(
+                    [selected_flat], width="stretch", hide_index=True,
+                    column_config=FLAT_RECORD_COLUMNS,
+                )
         return
 
     action = st.radio(

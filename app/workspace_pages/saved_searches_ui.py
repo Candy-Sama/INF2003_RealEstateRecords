@@ -54,7 +54,7 @@ def render_saved_searches(connection: Any, mongo_database: Any, agent_id: int) -
             st.rerun()
 
     with delete_col:
-        if st.button("Delete saved search"):
+        if st.button("Delete saved search", key="danger_delete_saved_search"):
             try:
                 deleted = store.delete_search(mongo_database, agent_id, selected["_id"])
             except ValueError as error:
@@ -73,7 +73,7 @@ def render_saved_searches(connection: Any, mongo_database: Any, agent_id: int) -
     with st.form(f"{prefix}_form"):
         name = st.text_input("Search name", value=selected["name"], key=f"{prefix}_name")
         filters = render_filter_fields(connection, prefix)
-        submitted = st.form_submit_button("Save changes")
+        submitted = st.form_submit_button("Save changes", type="primary")
 
     if submitted:
         try:

@@ -1,19 +1,27 @@
 [theme]
+font = "sans-serif"
+headingFontSizes = ["2.125rem", "1.875rem", "1.625rem", "1.25rem", "1.125rem", "1rem"]
+headingFontWeights = [700, 650, 650, 650, 650, 650]
+baseRadius = "0.625rem"
+buttonRadius = "0.5rem"
 showWidgetBorder = true
 
 [theme.light]
 primaryColor = "#176b52"
-backgroundColor = "#f6f8f5"
-secondaryBackgroundColor = "#e8efeb"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f2f5f3"
 textColor = "#172b2a"
 borderColor = "#6a837a"
+dataframeBorderColor = "#d3ddd8"
+dataframeHeaderBackgroundColor = "#eaf1ed"
+linkColor = "#176b52"
 
 [theme.dark]
 primaryColor = "#308267"
 backgroundColor = "#2a2c30"
-secondaryBackgroundColor = "#242528"
+secondaryBackgroundColor = "#2d2f34"
 textColor = "#f2f3f5"
 borderColor = "#7c7f87"
-dataframeBorderColor = "#70737a"
+dataframeBorderColor = "#585e67"
 dataframeHeaderBackgroundColor = "#393c43"
 linkColor = "#87d3b7"

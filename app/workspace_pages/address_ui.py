@@ -26,10 +26,11 @@ def render_addresses(connection: Any) -> None:
     if not nearby_function.has_distance_column(connection):
         st.warning(nearby_function.MIGRATION_REQUIRED)
         return
-    title, action = st.columns([3, 1], vertical_alignment="center")
-    title.subheader("Addresses & nearby stations")
-    with action:
-        update_clicked = st.button("Update addresses", type="primary", width="stretch")
+    with st.container(
+        horizontal=True, horizontal_alignment="distribute", vertical_alignment="center",
+    ):
+        st.subheader("Addresses & nearby stations", width="content")
+        update_clicked = st.button("Update addresses", key="update_addresses")
 
     if update_clicked:
         with st.spinner("Computing station distances for addresses without any..."):
@@ -57,16 +58,18 @@ def render_addresses(connection: Any) -> None:
         )
         return
 
-    first, second, third, fourth = st.columns(4)
-    first.metric("Addresses", f'{check["places_total"]:,}')
-    second.metric("With nearby stations", f'{check["places_with_nearby"]:,}')
-    third.metric("Missing", f'{check["places_missing"]:,}')
-    fourth.metric("Flat records affected", f'{check["flats_missing"]:,}')
+    with st.container(key="address_summary"):
+        first, second, third, fourth = st.columns(4)
+        first.metric("Addresses", f'{check["places_total"]:,}')
+        second.metric("With nearby stations", f'{check["places_with_nearby"]:,}')
+        third.metric("Missing", f'{check["places_missing"]:,}')
+        fourth.metric("Flat records affected", f'{check["flats_missing"]:,}')
     if check["places_missing"]:
-        st.warning(
-            f'{check["places_missing"]:,} address(es) have no nearby stations, which leaves '
-            f'{check["flats_missing"]:,} flat record(s) without any. Click **Update addresses**.'
-        )
+        with st.container(key="address_coverage_missing"):
+            st.warning(
+                f'Station coverage is missing for {check["places_missing"]:,} of '
+                f'{check["places_total"]:,} addresses. Use **Update addresses** to fill the gaps.'
+            )
     else:
         st.success("Every address has at least one nearby station.")
 
@@ -77,13 +80,13 @@ def render_addresses(connection: Any) -> None:
         width="stretch",
         hide_index=True,
         column_config={
-            "block_id": st.column_config.NumberColumn("Block ID"),
+            "block_id": st.column_config.NumberColumn("Block ID", format="%d"),
             "block_number": "Block",
             "road_name": "Road",
-            "postal": "Postal",
+            "postal": "Postal code",
             "town": "Town",
-            "station_count": st.column_config.NumberColumn("Stations"),
-            "nearest_m": st.column_config.NumberColumn("Nearest (m)"),
+            "station_count": st.column_config.NumberColumn("Stations", format="%d"),
+            "nearest_m": st.column_config.NumberColumn("Nearest (m)", format="%d"),
             "nearby_stations": st.column_config.TextColumn("Nearby stations", width="large"),
         },
     )

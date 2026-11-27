@@ -2,11 +2,12 @@
 
 from datetime import date
 from typing import Any
-from app.app_modules import saved_searches_store as store
+
 import streamlit as st
 
-
 from app import repository
+from app.app_modules import saved_searches_store as store
+from app.app_modules.table_columns import RESALE_COLUMNS
 
 
 def seed_filter_widgets(
@@ -90,7 +91,8 @@ def render_search(connection: Any, mongo_database: Any, agent_id: int) -> None:
         except ValueError as error:
             st.error(str(error))
             return
-        results = repository.search_transactions(connection, filters)
+        with st.spinner("Searching resale transactions…"):
+            results = repository.search_transactions(connection, filters)
         st.session_state["last_search_filters"] = filters
         st.session_state["last_search_results"] = results
 
@@ -103,12 +105,12 @@ def render_search(connection: Any, mongo_database: Any, agent_id: int) -> None:
             else:
                 noun = "transaction" if count == 1 else "transactions"
                 st.caption(f"{count:,} matching {noun}.")
-            st.dataframe(results, width="stretch", hide_index=True)
+            st.dataframe(results, width="stretch", hide_index=True, column_config=RESALE_COLUMNS)
         else:
             st.info("No transactions match these filters.")
         with st.form("save_search_form"):
             search_name = st.text_input("Name this search", placeholder="e.g. 4-room flats in Tampines")
-            save_submitted = st.form_submit_button("Save search")
+            save_submitted = st.form_submit_button("Save search", type="primary")
         if save_submitted:
             try:
                 store.create_search(

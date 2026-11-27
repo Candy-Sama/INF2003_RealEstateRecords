@@ -1,5 +1,6 @@
 import sys
 from contextlib import closing
+from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -37,94 +38,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-st.markdown(
-    """
-    <style>
-    .stApp {
-        /* Streamlit uses its theme background for canvas table cells. */
-        background-color: light-dark(#f6f8f5, #18191b);
-        --estate-accent: light-dark(#176b52, #87d3b7);
-        --estate-muted: light-dark(#52635e, #c5c8cf);
-        --estate-button: light-dark(#176b52, #308267);
-        --estate-button-hover: light-dark(#10553f, #276950);
-        --estate-border: light-dark(#6a837a, #7c7f87);
-        --estate-tint: light-dark(#e1eee7, #2c2e32);
-    }
-    .stApp [data-testid="stCaptionContainer"] {
-        color: light-dark(rgb(23 43 42 / 60%), var(--estate-muted));
-        opacity: 1;
-    }
-    .stApp [data-testid="stDataFrame"] {
-        border-radius: .5rem;
-        box-shadow: 0 .5rem 1.25rem light-dark(transparent, rgb(0 0 0 / 35%));
-    }
-    [data-testid="stHeader"] { background: transparent; }
-    .block-container { max-width: 1180px; padding-top: 1.4rem; padding-bottom: 3rem; }
-    .brand { font-family: 'Manrope', 'Segoe UI', sans-serif; font-size: 1.2rem; font-weight: 800; letter-spacing: -.04em; }
-    .brand-mark { display: inline-grid; place-items: center; width: 2rem; height: 2rem; margin-right: .55rem; color: white; background: var(--estate-button); border-radius: .65rem; vertical-align: middle; }
-    .eyebrow { color: var(--estate-accent); font-size: .76rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-    .hero-title { max-width: 690px; margin: .75rem 0 1rem; font-family: 'Manrope', 'Segoe UI', sans-serif; font-size: clamp(2.5rem, 5vw, 4.35rem); font-weight: 800; letter-spacing: -.065em; line-height: 1.05; }
-    .hero-copy { max-width: 560px; color: var(--estate-muted); font-size: 1.08rem; line-height: 1.75; }
-    .hero-card { min-height: 320px; padding: 2rem; color: white; border-radius: 1.25rem; background: linear-gradient(145deg, #163d35 0%, #176b52 60%, #74a887 150%); display: flex; flex-direction: column; justify-content: space-between; }
-    .hero-card-label { color: #c8e3d3; font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-    .hero-card-title { max-width: 360px; font-family: 'Manrope', 'Segoe UI', sans-serif; font-size: 2rem; font-weight: 700; line-height: 1.2; }
-    .hero-card-copy { max-width: 340px; color: #d6e8dc; line-height: 1.65; }
-    .stApp .stTabs [role="tab"]:is([aria-selected="true"], :hover, :focus-visible) {
-        color: var(--estate-accent);
-    }
-    .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton) button {
-        color: white;
-        background-color: var(--estate-button);
-        border: 1px solid var(--estate-border);
-        border-radius: .55rem;
-        font-weight: 700;
-    }
-    .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton) button:not(:disabled):is(:hover, :active) {
-        background-color: var(--estate-button-hover);
-    }
-    .stApp .stButtonGroup button {
-        color: var(--estate-accent);
-        background-color: var(--estate-tint);
-        border-color: var(--estate-border);
-    }
-    .stApp .stButtonGroup button:not(:disabled):is(:hover, [data-focus-visible]) {
-        border-color: var(--estate-accent);
-    }
-    .stApp .stButtonGroup button:is([data-selected], [data-testid$="Active"]):not(:disabled) {
-        color: white;
-        background-color: var(--estate-button);
-    }
-    .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton, .stButtonGroup) button:focus-visible {
-        outline: 2px solid var(--estate-accent);
-        outline-offset: 2px;
-        box-shadow: none;
-    }
-    .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton, .stButtonGroup) button:disabled {
-        color: var(--estate-muted);
-        background-color: var(--estate-tint);
-        border-color: var(--estate-border);
-    }
-    .nearby-stat {
-        --stat-accent: var(--estate-accent);
-        border: 1px solid var(--estate-border);
-        border-left: 5px solid var(--stat-accent);
-        background: color-mix(in srgb, var(--stat-accent) 10%, transparent);
-        border-radius: .65rem;
-        padding: .85rem 1rem;
-        margin-bottom: .4rem;
-    }
-    .nearby-stat--neutral { --stat-accent: var(--estate-muted); }
-    .nearby-stat--warning { --stat-accent: light-dark(#974607, #f7bb77); }
-    .nearby-stat--below { --stat-accent: light-dark(#116761, #87ddd3); }
-    .nearby-stat--range { --stat-accent: light-dark(#1e40af, #a9c4ff); }
-    .nearby-stat-title { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-    .nearby-stat-value { color: var(--stat-accent); font-size: 1.45rem; font-weight: 800; margin: .15rem 0; }
-    .nearby-stat-note { font-size: .82rem; }
-    footer { visibility: hidden; }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+st.html(Path(__file__).with_name("styles.css"))
 
 
 def render_workspace(agent: dict[str, Any]) -> None:
@@ -133,19 +47,24 @@ def render_workspace(agent: dict[str, Any]) -> None:
         st.session_state["workspace_section"] = "Search & filter"
         apply_saved_search_filters(pending_filters)
 
-    st.markdown(
-        '<div class="brand"><span class="brand-mark">E</span>Estate Records</div>',
-        unsafe_allow_html=True,
-    )
-    st.write("")
-    greeting, logout_column = st.columns([4, 1])
-    with greeting:
-        st.subheader(f'Welcome, {agent["name"]}')
-        st.caption("Property catalogue, resale transactions, and your saved searches.")
-    with logout_column:
-        if st.button("Log out"):
-            st.session_state.clear()
-            st.rerun()
+    with st.container(
+        horizontal=True, horizontal_alignment="distribute", vertical_alignment="center",
+        key="workspace_header",
+    ):
+        st.markdown(
+            '<div class="brand"><span class="brand-mark" aria-hidden="true">E</span>Estate Records</div>',
+            unsafe_allow_html=True,
+            width="content",
+        )
+        with st.container(horizontal=True, vertical_alignment="center", width="content"):
+            st.markdown(
+                f'<span class="workspace-user">Signed in as <strong>{escape(agent["name"])}</strong></span>',
+                unsafe_allow_html=True,
+                width="content",
+            )
+            if st.button("Log out", type="tertiary"):
+                st.session_state.clear()
+                st.rerun()
     show_feedback("workspace")
 
     pages = [
@@ -168,6 +87,7 @@ def render_workspace(agent: dict[str, Any]) -> None:
         horizontal=True,
         label_visibility="collapsed",
         key="workspace_section",
+        width="stretch",
     )
 
     try:

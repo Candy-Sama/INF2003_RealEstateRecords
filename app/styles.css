@@ -1,0 +1,285 @@
+.stApp {
+    /* The native theme background fills Streamlit's canvas tables. */
+    background-color: light-dark(#f6f8f5, #18191b);
+    --estate-surface: light-dark(#ffffff, #242528);
+    --estate-muted: light-dark(#52635e, #c5c8cf);
+    --estate-accent: light-dark(#176b52, #87d3b7);
+    --estate-button: light-dark(#176b52, #308267);
+    --estate-button-hover: light-dark(#10553f, #276950);
+    --estate-border: light-dark(#6a837a, #7c7f87);
+    --estate-panel-border: light-dark(#bdcbc4, #777b84);
+    --estate-tint: light-dark(#e4efe9, #303338);
+    --estate-danger: light-dark(#a12e3b, #ffb4bb);
+    --estate-danger-fill: light-dark(#a12e3b, #a63c49);
+    --estate-danger-hover: light-dark(#852433, #892e3a);
+    --estate-shadow: light-dark(rgb(23 43 42 / 8%), rgb(0 0 0 / 28%));
+}
+
+.stApp [data-testid="stHeader"] { background: transparent; }
+.stApp .block-container {
+    max-width: 1180px;
+    padding-top: 1.25rem;
+    padding-bottom: 3rem;
+}
+
+.stApp :is(h1, h2, h3) { text-wrap: balance; }
+.stApp [data-testid="stCaptionContainer"] {
+    color: var(--estate-muted);
+    opacity: 1;
+    font-size: .8125rem;
+    text-wrap: pretty;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+    font-size: 1.1875rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.brand-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    color: white;
+    background: var(--estate-button);
+    border-radius: .625rem;
+}
+
+.workspace-user {
+    color: var(--estate-muted);
+    font-size: .875rem;
+    overflow-wrap: anywhere;
+}
+
+.st-key-workspace_header { padding-block: .25rem; }
+.st-key-workspace_section [role="radiogroup"] {
+    gap: .125rem .375rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--estate-panel-border);
+}
+
+.st-key-workspace_section :is([data-testid="stRadioOption"], [data-baseweb="radio"]) {
+    margin: 0;
+    padding: .65rem .625rem .55rem;
+    border-bottom: 3px solid transparent;
+    border-radius: .375rem .375rem 0 0;
+    color: var(--estate-muted);
+    font-weight: 600;
+}
+
+/* Keep the native input and keyboard behavior while replacing its indicator. */
+.st-key-workspace_section [data-testid="stRadioOption"] > div > div:first-child:not([data-testid="stMarkdownContainer"]),
+.st-key-workspace_section [data-baseweb="radio"] > div:first-child {
+    display: none;
+}
+
+.st-key-workspace_section :is([data-testid="stRadioOption"], [data-baseweb="radio"]) p {
+    padding: 0;
+    font-size: .9375rem;
+    font-weight: inherit;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.st-key-workspace_section :is([data-testid="stRadioOption"], [data-baseweb="radio"]):hover {
+    background: var(--estate-tint);
+}
+
+.st-key-workspace_section :is([data-testid="stRadioOption"], [data-baseweb="radio"]):has(input:checked) {
+    color: var(--estate-accent);
+    border-bottom-color: var(--estate-accent);
+    font-weight: 700;
+}
+
+.st-key-workspace_section :is([data-testid="stRadioOption"], [data-baseweb="radio"]):has(input:focus-visible) {
+    outline: 2px solid var(--estate-accent);
+    outline-offset: -2px;
+}
+
+.eyebrow {
+    color: var(--estate-accent);
+    font-size: .8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.hero-title {
+    max-width: 620px;
+    margin: .75rem 0;
+    font-size: clamp(2.5rem, 5vw, 3.75rem);
+    font-weight: 700;
+    line-height: 1.08;
+    text-wrap: balance;
+}
+
+.hero-copy {
+    max-width: 520px;
+    color: var(--estate-muted);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    text-wrap: pretty;
+}
+
+.hero-card {
+    display: flex;
+    flex-direction: column;
+    gap: .875rem;
+    padding: 1.5rem;
+    background: var(--estate-surface);
+    border: 1px solid var(--estate-panel-border);
+    border-left: 4px solid var(--estate-accent);
+    border-radius: .625rem;
+}
+
+.hero-card-title {
+    font-size: 1.375rem;
+    font-weight: 650;
+    line-height: 1.25;
+    text-wrap: balance;
+}
+
+.hero-card-copy {
+    max-width: 360px;
+    color: var(--estate-muted);
+    line-height: 1.55;
+    text-wrap: pretty;
+}
+
+.stApp :is([data-testid="stForm"], .st-key-account_panel) {
+    background-color: var(--estate-surface);
+}
+
+.stApp [data-testid="stDataFrame"] {
+    border-radius: .625rem;
+    box-shadow: 0 0 0 1px var(--estate-panel-border), 0 .375rem 1.125rem var(--estate-shadow);
+    font-variant-numeric: tabular-nums;
+}
+
+.stApp [data-testid="stDataFrame"]:focus-within {
+    outline: 2px solid var(--estate-accent);
+    outline-offset: 2px;
+}
+
+.stApp [data-testid="stMetricValue"] {
+    font-size: 1.75rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.st-key-address_summary [data-testid="stMetric"] {
+    padding: .75rem .875rem;
+    background: var(--estate-surface);
+    border: 1px solid var(--estate-panel-border);
+    border-radius: .625rem;
+}
+
+.stApp .stTabs [role="tab"]:is([aria-selected="true"], :hover, :focus-visible) {
+    color: var(--estate-accent);
+}
+
+.stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton) button {
+    background-color: var(--action-fill, var(--estate-surface));
+    border-color: var(--action-border, var(--estate-border));
+    color: var(--action-text, inherit);
+    font-weight: 600;
+}
+
+.stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton) button[data-testid*="-primary"],
+.stApp:has(.st-key-address_coverage_missing) .st-key-update_addresses button {
+    --action-fill: var(--estate-button);
+    --action-hover: var(--estate-button-hover);
+    --action-text: white;
+}
+
+.stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton) button[data-testid*="-tertiary"] {
+    --action-fill: transparent;
+    --action-border: transparent;
+}
+
+.stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton) button:not(:disabled):is(:hover, :active) {
+    background-color: var(--action-hover, var(--estate-tint));
+    border-color: var(--action-border, var(--estate-border));
+    color: var(--action-text, inherit);
+}
+
+.stApp [class*="st-key-danger_"] button,
+.stApp [class*="st-key-an_del_"] button {
+    --action-text: var(--estate-danger);
+    --action-border: var(--estate-danger);
+}
+
+.stApp :is(.st-key-danger_delete_transaction, [class*="st-key-an_yes_"]) button {
+    --action-fill: var(--estate-danger-fill);
+    --action-hover: var(--estate-danger-hover);
+    --action-border: var(--estate-danger);
+    --action-text: white;
+}
+
+.stApp .stButtonGroup button {
+    color: var(--estate-accent);
+    background-color: var(--estate-tint);
+    border-color: var(--estate-border);
+}
+
+.stApp .stButtonGroup button:not(:disabled):is(:hover, [data-focus-visible]) {
+    border-color: var(--estate-accent);
+}
+
+.stApp .stButtonGroup button:is([data-selected], [data-testid$="Active"]):not(:disabled) {
+    color: white;
+    background-color: var(--estate-button);
+}
+
+.stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton, .stButtonGroup) button:focus-visible {
+    outline: 2px solid var(--estate-accent);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+.stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton, .stButtonGroup) button:disabled {
+    color: var(--estate-muted);
+    background-color: var(--estate-tint);
+    border-color: var(--estate-panel-border);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton, .stButtonGroup) button:not(:disabled) {
+        transition: transform 150ms ease-out;
+    }
+
+    .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton, .stButtonGroup) button:not(:disabled):hover {
+        transform: translateY(-1px);
+    }
+
+    .stApp :is(.stButton, .stFormSubmitButton, .stDownloadButton, .stButtonGroup) button:not(:disabled):active {
+        transform: none;
+    }
+}
+
+.nearby-stat {
+    --stat-accent: var(--estate-accent);
+    border: 1px solid var(--estate-panel-border);
+    border-left: 4px solid var(--stat-accent);
+    background: var(--estate-surface);
+    border-radius: .625rem;
+    padding: .85rem 1rem;
+    margin-bottom: .4rem;
+}
+
+.nearby-stat--neutral { --stat-accent: var(--estate-muted); }
+.nearby-stat--warning { --stat-accent: light-dark(#974607, #f7bb77); }
+.nearby-stat--below { --stat-accent: light-dark(#116761, #87ddd3); }
+.nearby-stat--range { --stat-accent: light-dark(#1e40af, #a9c4ff); }
+.nearby-stat-title { font-size: .8125rem; font-weight: 650; }
+.nearby-stat-value {
+    color: var(--stat-accent);
+    font-size: 1.45rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin: .15rem 0;
+}
+.nearby-stat-note { color: var(--estate-muted); font-size: .8125rem; }
+footer { visibility: hidden; }

@@ -11,6 +11,7 @@ from mysql.connector import errorcode
 
 from app import repository
 from app.app_modules.database.database import get_mysql_connection
+from app.app_modules.table_columns import RESALE_COLUMNS
 from app.app_modules.ui_feedback import queue_feedback, show_feedback
 
 
@@ -74,7 +75,7 @@ def render_transaction_batch(agent_id: int) -> None:
             drafts[selected] = edited
             queue_feedback(feedback_page, "Draft updated.", kind="toast")
             st.rerun()
-    if st.button("Remove draft"):
+    if st.button("Remove draft", key="danger_remove_draft"):
         del drafts[selected]
         queue_feedback(feedback_page, "Draft removed.", kind="toast")
         st.rerun()
@@ -136,7 +137,7 @@ def render_recorded_transactions(connection: Any, agent_id: int, action: str) ->
     transactions = repository.list_agent_transactions(connection, agent_id)
     if transactions:
         st.caption("Showing up to 100 of your most recent transactions.")
-        st.dataframe(transactions, width="stretch", hide_index=True)
+        st.dataframe(transactions, width="stretch", hide_index=True, column_config=RESALE_COLUMNS)
     else:
         st.info("You have not recorded any resale transactions.")
 
@@ -249,7 +250,7 @@ def render_recorded_transactions(connection: Any, agent_id: int, action: str) ->
             f'{selected_transaction["block_number"]} '
             f'{selected_transaction["road_name"]}, {selected_transaction["town"]}'
         )
-        if st.button("Delete transaction", type="primary"):
+        if st.button("Delete transaction", type="primary", key="danger_delete_transaction"):
             if repository.delete_agent_transaction(connection, agent_id, selected_flat_id):
                 st.session_state.pop("selected_transaction_flat_id", None)
                 queue_feedback(feedback_page, "Transaction deleted.")

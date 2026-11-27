@@ -18,7 +18,7 @@ def valid_email(email: str) -> bool:
 
 def render_authentication() -> None:
     st.markdown(
-        '<div class="brand"><span class="brand-mark">E</span>Estate Records</div>',
+        '<div class="brand"><span class="brand-mark" aria-hidden="true">E</span>Estate Records</div>',
         unsafe_allow_html=True,
     )
     st.write("")
@@ -39,24 +39,20 @@ def render_authentication() -> None:
         st.markdown(
             """
             <div class="hero-card">
-                <div class="hero-card-label">Your property workspace</div>
-                <div>
-                    <div class="hero-card-title">From first search to saved shortlist.</div>
-                    <div class="hero-card-copy">A practical workspace for agents to review property and transaction data.</div>
-                </div>
-                <div class="hero-card-copy">Search &amp; filter &nbsp; · &nbsp; CRUD &nbsp; · &nbsp; Saved searches</div>
+                <div class="hero-card-title">From first search to saved shortlist.</div>
+                <div class="hero-card-copy">A practical workspace for agents to review property and transaction data.</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
     with account:
-        with st.container(border=True):
+        with st.container(border=True, key="account_panel"):
             st.markdown("### Welcome")
             login_tab, register_tab = st.tabs(["Log in", "Create account"])
 
             with login_tab:
-                with st.form("login_form"):
+                with st.form("login_form", border=False):
                     email = st.text_input("Email address", placeholder="you@example.com")
                     password = st.text_input("Password", type="password")
                     submitted = st.form_submit_button(
@@ -83,7 +79,7 @@ def render_authentication() -> None:
                             show_database_error(error)
 
             with register_tab:
-                with st.form("register_form"):
+                with st.form("register_form", border=False):
                     name = st.text_input("Full name")
                     email = st.text_input("Email address", placeholder="you@example.com")
                     phone = st.text_input("Phone number")
