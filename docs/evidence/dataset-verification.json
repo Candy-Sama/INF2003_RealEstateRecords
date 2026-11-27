@@ -1,0 +1,114 @@
+{
+  "mysql_version": "8.0.45",
+  "innodb_page_size_bytes": 16384,
+  "performance_schema_consumers": {
+    "events_statements_current": "YES",
+    "events_statements_history": "YES"
+  },
+  "sha256": {
+    "hdb_resale_enriched_block_id.csv": "5bec778da2fd65cd46ac038c6415f6e68791b1d4764ac7bbbc35bb9e9dd30176",
+    "places_for_mysql.csv": "71ad1080d10364af5fe95a16acf08edc3a4d3b88e0b7a563f88ce63349cfaee7",
+    "mrt_lrt_full_list.csv": "3a3504e5cead57ddd48902cc63fb52ff4e8c6108991142f3bd4b13e1cf1a867c"
+  },
+  "csv": {
+    "resale_rows": 242634,
+    "hdb_location_ids": 9761,
+    "hdb_ids_min_max": [
+      1,
+      9761
+    ],
+    "distinct_station_codes": 203,
+    "station_rows": 203,
+    "station_transport_types": {
+      "MRT": 162,
+      "LRT": 41
+    },
+    "distinct_station_names": 171,
+    "station_location_ids": 203,
+    "station_ids_min_max": [
+      9762,
+      9964
+    ],
+    "place_rows": 9964,
+    "distinct_place_ids": 9964,
+    "ids_shared_by_hdb_and_stations": 0,
+    "unreferenced_place_ids": 0,
+    "missing_place_ids": 0,
+    "hdb_towns": [
+      "ANG MO KIO",
+      "BEDOK",
+      "BISHAN",
+      "BUKIT BATOK",
+      "BUKIT MERAH",
+      "BUKIT PANJANG",
+      "BUKIT TIMAH",
+      "CENTRAL AREA",
+      "CHOA CHU KANG",
+      "CLEMENTI",
+      "GEYLANG",
+      "HOUGANG",
+      "JURONG EAST",
+      "JURONG WEST",
+      "KALLANG/WHAMPOA",
+      "MARINE PARADE",
+      "PASIR RIS",
+      "PUNGGOL",
+      "QUEENSTOWN",
+      "SEMBAWANG",
+      "SENGKANG",
+      "SERANGOON",
+      "TAMPINES",
+      "TOA PAYOH",
+      "WOODLANDS",
+      "YISHUN"
+    ],
+    "hdb_town_join_mismatches": 0,
+    "transaction_months_min_max": [
+      "2017-01",
+      "2026-10"
+    ],
+    "distinct_transaction_months": 118,
+    "fractional_floor_areas": 166,
+    "nonzero_price_cents": 69,
+    "max_price_scale": 2,
+    "max_area_scale": 1,
+    "max_place_coordinate_scale": {
+      "latitude": 15,
+      "longitude": 13
+    },
+    "place_postal_length_histogram": {
+      "6": 9844,
+      "5": 120
+    }
+  },
+  "mysql_imported_rows": {
+    "agents": 1,
+    "place": 9964,
+    "flat": 242634,
+    "stations": 203,
+    "resale_transaction": 242634,
+    "nearby": 24178
+  },
+  "mysql_hdb_towns": 26,
+  "sale_precision_or_link_mismatches": 0,
+  "place_postal_or_coordinate_mismatches": 0,
+  "station_code_place_pair_differences": 0,
+  "nearby": {
+    "station_ids_with_pairs": 203,
+    "covered_hdb_locations": 9761,
+    "hdb_distance_min_max_m": [
+      23,
+      3516
+    ],
+    "hdb_stored_distance_over_1000_m": "1509",
+    "hdb_zero_m_pairs": "0",
+    "orphan_pairs": 0
+  },
+  "nearby_build": {
+    "radius_m": 1000,
+    "within_radius_rows": 22669,
+    "fallback_rows": 1509,
+    "total_rows": 24178,
+    "seconds": 5.0
+  }
+}

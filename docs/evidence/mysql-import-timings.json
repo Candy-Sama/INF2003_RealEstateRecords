@@ -1,0 +1,27 @@
+{
+  "method": "Complete repository CSV import function, excluding DDL and nearby derivation",
+  "order": [
+    "final",
+    "before",
+    "before",
+    "final",
+    "final",
+    "before"
+  ],
+  "samples_s": {
+    "before": [
+      7.139515,
+      7.290038,
+      7.204313
+    ],
+    "final": [
+      8.73991,
+      8.405523,
+      8.413177
+    ]
+  },
+  "median_s": {
+    "before": 7.204313,
+    "final": 8.413177
+  }
+}

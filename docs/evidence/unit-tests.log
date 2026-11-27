@@ -1,0 +1,88 @@
+test_decimal_values_are_numeric_for_charts (test_analytics.RunQueryTests.test_decimal_values_are_numeric_for_charts) ... ok
+test_runs_read_only_wrapped_and_rolled_back (test_analytics.RunQueryTests.test_runs_read_only_wrapped_and_rolled_back) ... ok
+test_truncates_at_row_cap (test_analytics.RunQueryTests.test_truncates_at_row_cap) ... ok
+test_unsafe_sql_never_reaches_the_database (test_analytics.RunQueryTests.test_unsafe_sql_never_reaches_the_database) ... ok
+test_all_default_cards_are_valid (test_analytics.StoreTests.test_all_default_cards_are_valid) ... ok
+test_control_characters_are_stripped (test_analytics.StoreTests.test_control_characters_are_stripped) ... ok
+test_escape_markdown_neutralises_links_and_html (test_analytics.StoreTests.test_escape_markdown_neutralises_links_and_html) ... ok
+test_loading_cards_upgrades_only_the_legacy_seeded_market_overview (test_analytics.StoreTests.test_loading_cards_upgrades_only_the_legacy_seeded_market_overview) ... ok
+test_rejects_bad_values (test_analytics.StoreTests.test_rejects_bad_values) ... ok
+test_valid_card (test_analytics.StoreTests.test_valid_card) ... ok
+test_accepts_select_and_with (test_analytics.ValidatorTests.test_accepts_select_and_with) ... ok
+test_rejects_bad_input (test_analytics.ValidatorTests.test_rejects_bad_input) ... ok
+test_rejects_multiple_statements_and_comments (test_analytics.ValidatorTests.test_rejects_multiple_statements_and_comments) ... ok
+test_rejects_sensitive_objects (test_analytics.ValidatorTests.test_rejects_sensitive_objects) ... ok
+test_rejects_writes_and_admin (test_analytics.ValidatorTests.test_rejects_writes_and_admin) ... ok
+test_date_bucket_and_filters (test_analytics_builder.CompileTests.test_date_bucket_and_filters) ... ok
+test_every_generated_query_passes_the_sql_validator (test_analytics_builder.CompileTests.test_every_generated_query_passes_the_sql_validator) ... ok
+test_joins_follow_the_chain (test_analytics_builder.CompileTests.test_joins_follow_the_chain) ... ok
+test_list_mode_has_a_default_limit (test_analytics_builder.CompileTests.test_list_mode_has_a_default_limit) ... ok
+test_nearest_station_rule (test_analytics_builder.CompileTests.test_nearest_station_rule) ... ok
+test_number_of_records_alone_counts_transactions (test_analytics_builder.CompileTests.test_number_of_records_alone_counts_transactions) ... ok
+test_station_location_and_nearby_are_separate_routes (test_analytics_builder.CompileTests.test_station_location_and_nearby_are_separate_routes) ... ok
+test_tables_between_two_picks_are_pulled_in (test_analytics_builder.CompileTests.test_tables_between_two_picks_are_pulled_in) ... ok
+test_auto_picks_by_shape (test_analytics_builder.DisplayTests.test_auto_picks_by_shape) ... ok
+test_mapping_puts_time_on_x (test_analytics_builder.DisplayTests.test_mapping_puts_time_on_x) ... ok
+test_unsuitable_choices_explain_themselves (test_analytics_builder.DisplayTests.test_unsuitable_choices_explain_themselves) ... ok
+test_apostrophes_are_escaped_not_rejected (test_analytics_builder.RejectTests.test_apostrophes_are_escaped_not_rejected) ... ok
+test_filter_values_are_validated (test_analytics_builder.RejectTests.test_filter_values_are_validated) ... ok
+test_role_must_fit_the_column (test_analytics_builder.RejectTests.test_role_must_fit_the_column) ... ok
+test_row_count_needs_summarise (test_analytics_builder.RejectTests.test_row_count_needs_summarise) ... ok
+test_sort_and_limit (test_analytics_builder.RejectTests.test_sort_and_limit) ... ok
+test_unknown_or_dangerous_columns (test_analytics_builder.RejectTests.test_unknown_or_dangerous_columns) ... ok
+test_bad_builder_settings_are_rejected (test_analytics_builder.StoreIntegrationTests.test_bad_builder_settings_are_rejected) ... ok
+test_builder_cards_store_the_generated_sql (test_analytics_builder.StoreIntegrationTests.test_builder_cards_store_the_generated_sql) ... ok
+test_describe_spec (test_analytics_builder.StoreIntegrationTests.test_describe_spec) ... ok
+test_plain_sql_cards_are_sql_source (test_analytics_builder.StoreIntegrationTests.test_plain_sql_cards_are_sql_source) ... ok
+test_same_town_without_similar_size_avoids_string_interpolation (test_comparable_sales.ComparableSalesQueryTests.test_same_town_without_similar_size_avoids_string_interpolation) ... ok
+test_station_catchment_binds_both_distances_in_sql_order (test_comparable_sales.ComparableSalesQueryTests.test_station_catchment_binds_both_distances_in_sql_order) ... ok
+test_empty_rows_returns_nones_and_zero_count (test_comparable_sales.ComparableSalesSummaryTests.test_empty_rows_returns_nones_and_zero_count) ... ok
+test_medians_percentiles_small_sample_and_diff_pct (test_comparable_sales.ComparableSalesSummaryTests.test_medians_percentiles_small_sample_and_diff_pct) ... ok
+test_benchmark_compares_and_restores_index_layouts (test_mysql_schema.MySQLSchemaTests.test_benchmark_compares_and_restores_index_layouts) ... skipped 'set ESTATE_MYSQL_TEST=1 for MySQL integration tests'
+test_defaulted_legacy_distances_are_rebuilt (test_mysql_schema.MySQLSchemaTests.test_defaulted_legacy_distances_are_rebuilt) ... skipped 'set ESTATE_MYSQL_TEST=1 for MySQL integration tests'
+test_exact_types_and_owner_key (test_mysql_schema.MySQLSchemaTests.test_exact_types_and_owner_key) ... skipped 'set ESTATE_MYSQL_TEST=1 for MySQL integration tests'
+test_legacy_migration_is_repeatable_and_preserves_records (test_mysql_schema.MySQLSchemaTests.test_legacy_migration_is_repeatable_and_preserves_records) ... skipped 'set ESTATE_MYSQL_TEST=1 for MySQL integration tests'
+test_market_overview_counts_all_sales_in_the_latest_calendar_month (test_mysql_schema.MySQLSchemaTests.test_market_overview_counts_all_sales_in_the_latest_calendar_month) ... skipped 'set ESTATE_MYSQL_TEST=1 for MySQL integration tests'
+test_market_rankings_preserve_sale_weights_periods_and_interchanges (test_mysql_schema.MySQLSchemaTests.test_market_rankings_preserve_sale_weights_periods_and_interchanges) ... skipped 'set ESTATE_MYSQL_TEST=1 for MySQL integration tests'
+test_nearby_listing_filters_stations_and_paginates_by_flat (test_mysql_schema.MySQLSchemaTests.test_nearby_listing_filters_stations_and_paginates_by_flat) ... skipped 'set ESTATE_MYSQL_TEST=1 for MySQL integration tests'
+test_numeric_checks_and_real_zero_distance (test_mysql_schema.MySQLSchemaTests.test_numeric_checks_and_real_zero_distance) ... skipped 'set ESTATE_MYSQL_TEST=1 for MySQL integration tests'
+test_station_comparables_require_both_flats_within_the_radius (test_mysql_schema.MySQLSchemaTests.test_station_comparables_require_both_flats_within_the_radius) ... skipped 'set ESTATE_MYSQL_TEST=1 for MySQL integration tests'
+test_transaction_batch_commit_is_visible_to_a_new_session (test_mysql_schema.MySQLSchemaTests.test_transaction_batch_commit_is_visible_to_a_new_session) ... skipped 'set ESTATE_MYSQL_TEST=1 for MySQL integration tests'
+test_transaction_batch_rolls_back_a_valid_first_row_when_the_next_row_fails (test_mysql_schema.MySQLSchemaTests.test_transaction_batch_rolls_back_a_valid_first_row_when_the_next_row_fails) ... skipped 'set ESTATE_MYSQL_TEST=1 for MySQL integration tests'
+test_boards_are_capped (test_ranking.BoardTests.test_boards_are_capped) ... ok
+test_decimal_values_from_mysql_are_supported (test_ranking.BoardTests.test_decimal_values_from_mysql_are_supported) ... ok
+test_empty_inputs_give_empty_boards (test_ranking.BoardTests.test_empty_inputs_give_empty_boards) ... ok
+test_leaders (test_ranking.BoardTests.test_leaders) ... ok
+test_orders (test_ranking.BoardTests.test_orders) ... ok
+test_prices_are_shown_in_thousands (test_ranking.BoardTests.test_prices_are_shown_in_thousands) ... ok
+test_rising_needs_enough_sales_in_both_windows (test_ranking.BoardTests.test_rising_needs_enough_sales_in_both_windows) ... ok
+test_towns_with_equal_sales_are_ranked_alphabetically (test_ranking.BoardTests.test_towns_with_equal_sales_are_ranked_alphabetically) ... ok
+test_flat_type_is_bound_not_interpolated (test_ranking.RankingQueryTests.test_flat_type_is_bound_not_interpolated) ... ok
+test_no_flat_type_adds_no_condition (test_ranking.RankingQueryTests.test_no_flat_type_adds_no_condition) ... ok
+test_top_sales_breaks_price_ties_by_primary_key (test_ranking.RankingQueryTests.test_top_sales_breaks_price_ties_by_primary_key) ... ok
+test_create_transaction_uses_session_agent_id (test_repository.FlatAndTransactionAccessTests.test_create_transaction_uses_session_agent_id) ... ok
+test_flat_count_supports_pagination_without_loading_records (test_repository.FlatAndTransactionAccessTests.test_flat_count_supports_pagination_without_loading_records) ... ok
+test_flat_listing_is_public_and_limited (test_repository.FlatAndTransactionAccessTests.test_flat_listing_is_public_and_limited) ... ok
+test_flat_update_has_no_owner_dependency (test_repository.FlatAndTransactionAccessTests.test_flat_update_has_no_owner_dependency) ... ok
+test_own_transaction_listing_is_scoped_to_agent (test_repository.FlatAndTransactionAccessTests.test_own_transaction_listing_is_scoped_to_agent) ... ok
+test_transaction_delete_is_owner_scoped (test_repository.FlatAndTransactionAccessTests.test_transaction_delete_is_owner_scoped) ... ok
+test_transaction_update_is_owner_scoped (test_repository.FlatAndTransactionAccessTests.test_transaction_update_is_owner_scoped) ... ok
+test_all_rows_commit_in_one_transaction (test_repository.TransactionBatchTests.test_all_rows_commit_in_one_transaction) ... ok
+test_database_error_on_second_insert_rolls_back (test_repository.TransactionBatchTests.test_database_error_on_second_insert_rolls_back) ... ok
+test_empty_batch_does_not_start_a_transaction (test_repository.TransactionBatchTests.test_empty_batch_does_not_start_a_transaction) ... ok
+test_invalid_second_draft_rolls_back_the_first_insert (test_repository.TransactionBatchTests.test_invalid_second_draft_rolls_back_the_first_insert) ... ok
+test_decimal_price_bounds_and_stable_date_order (test_repository.TransactionSearchTests.test_decimal_price_bounds_and_stable_date_order) ... ok
+test_filters_are_bound_as_parameters (test_repository.TransactionSearchTests.test_filters_are_bound_as_parameters) ... ok
+test_user_values_are_not_interpolated_into_sql (test_repository.TransactionSearchTests.test_user_values_are_not_interpolated_into_sql) ... ok
+test_hash_verifies_original_password (test_security.PasswordHashTests.test_hash_verifies_original_password) ... ok
+test_hashes_use_independent_salts (test_security.PasswordHashTests.test_hashes_use_independent_salts) ... ok
+test_malformed_hash_is_rejected (test_security.PasswordHashTests.test_malformed_hash_is_rejected) ... ok
+test_logout_clears_workspace_before_another_agent_signs_in (test_workspace_session.WorkspaceSessionTests.test_logout_clears_workspace_before_another_agent_signs_in) ... 2026-11-27 19:24:29.348 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-27 19:24:30.295 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-27 19:24:30.295 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+ok
+
+----------------------------------------------------------------------
+Ran 80 tests in 1.258s
+
+OK (skipped=11)

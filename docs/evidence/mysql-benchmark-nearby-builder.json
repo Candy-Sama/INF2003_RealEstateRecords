@@ -1,0 +1,232 @@
+{
+  "stages": {
+    "before": {
+      "mysql": "8.0.45",
+      "schema": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91",
+      "optimizer_switch": "index_merge=on,index_merge_union=on,index_merge_sort_union=on,index_merge_intersection=on,engine_condition_pushdown=on,index_condition_pushdown=on,mrr=on,mrr_cost_based=on,block_nested_loop=on,batched_key_access=off,materialization=on,semijoin=on,loosescan=on,firstmatch=on,duplicateweedout=on,subquery_materialization_cost_based=on,use_index_extensions=on,condition_fanout_filter=on,derived_merge=on,use_invisible_indexes=off,skip_scan=on,hash_join=on,subquery_to_derived=off,prefer_ordering_index=on,hypergraph_optimizer=off,derived_condition_pushdown=on",
+      "warmups": 1,
+      "samples": 3,
+      "index_bytes": {
+        "agents": 32768,
+        "flat": 10518528,
+        "nearby": 720896,
+        "place": 114688,
+        "resale_transaction": 9469952,
+        "stations": 49152
+      },
+      "queries": {
+        "nearby_build_select": {
+          "sql": "SELECT d.station_id, d.block_id, d.distance_m\nFROM (\n    SELECT s.station_id,\n           p.block_id,\n           ROUND(ST_Distance_Sphere(\n               POINT(p.longtitude, p.latitude),\n               POINT(sp.longtitude, sp.latitude)\n           )) AS distance_m\n    FROM `stations` AS s\n    JOIN `place` AS sp ON sp.block_id = s.place_block_id\n    JOIN `place` AS p\n      ON p.latitude   BETWEEN sp.latitude   - %(deg)s AND sp.latitude   + %(deg)s\n     AND p.longtitude BETWEEN sp.longtitude - %(deg)s AND sp.longtitude + %(deg)s\n    \n) AS d\nWHERE d.distance_m <= %(radius)s",
+          "parameters": {
+            "deg": 0.00909090909090909,
+            "radius": 1000
+          },
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "s",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "fk_stations_place1_idx",
+              "key": "fk_stations_place1_idx",
+              "key_len": "4",
+              "ref": null,
+              "rows": 203,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "sp",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.s.place_block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 10059,
+              "filtered": 1.23,
+              "Extra": "Using where; Using join buffer (hash join)"
+            }
+          ],
+          "explain_analyze": "-> Filter: ((round(st_distance_sphere(point(p.longtitude,p.latitude),point(sp.longtitude,sp.latitude)),0) <= 1000) and (p.latitude between (sp.latitude - 0.00909090909090909) and (sp.latitude + 0.00909090909090909)) and (p.longtitude between (sp.longtitude - 0.00909090909090909) and (sp.longtitude + 0.00909090909090909)))  (cost=204314 rows=25205) (actual time=0.65..8797 rows=22669 loops=1)\n    -> Inner hash join (no condition)  (cost=204314 rows=25205) (actual time=0.2..120 rows=2.02e+6 loops=1)\n        -> Table scan on p  (cost=0.183 rows=10059) (actual time=0.0269..8 rows=9964 loops=1)\n        -> Hash\n            -> Nested loop inner join  (cost=91.6 rows=203) (actual time=0.0152..0.158 rows=203 loops=1)\n                -> Covering index scan on s using fk_stations_place1_idx  (cost=20.6 rows=203) (actual time=0.0093..0.0349 rows=203 loops=1)\n                -> Single-row index lookup on sp using PRIMARY (block_id=s.place_block_id)  (cost=0.25 rows=1) (actual time=519e-6..535e-6 rows=1 loops=203)\n",
+          "rows_examined": 10370,
+          "rows_returned": 22669,
+          "result_sha256": "50175d46b36932720bad9d038ed23d34cb6dc5914d6e6675e37b5252ff84a844",
+          "median_ms": 8868.125,
+          "p95_ms": 8941.253
+        }
+      }
+    },
+    "added": {
+      "mysql": "8.0.45",
+      "schema": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91",
+      "optimizer_switch": "index_merge=on,index_merge_union=on,index_merge_sort_union=on,index_merge_intersection=on,engine_condition_pushdown=on,index_condition_pushdown=on,mrr=on,mrr_cost_based=on,block_nested_loop=on,batched_key_access=off,materialization=on,semijoin=on,loosescan=on,firstmatch=on,duplicateweedout=on,subquery_materialization_cost_based=on,use_index_extensions=on,condition_fanout_filter=on,derived_merge=on,use_invisible_indexes=off,skip_scan=on,hash_join=on,subquery_to_derived=off,prefer_ordering_index=on,hypergraph_optimizer=off,derived_condition_pushdown=on",
+      "warmups": 1,
+      "samples": 3,
+      "index_bytes": {
+        "agents": 32768,
+        "flat": 17350656,
+        "nearby": 1179648,
+        "place": 819200,
+        "resale_transaction": 24723456,
+        "stations": 49152
+      },
+      "queries": {
+        "nearby_build_select": {
+          "sql": "SELECT d.station_id, d.block_id, d.distance_m\nFROM (\n    SELECT s.station_id,\n           p.block_id,\n           ROUND(ST_Distance_Sphere(\n               POINT(p.longtitude, p.latitude),\n               POINT(sp.longtitude, sp.latitude)\n           )) AS distance_m\n    FROM `stations` AS s\n    JOIN `place` AS sp ON sp.block_id = s.place_block_id\n    JOIN `place` AS p\n      ON p.latitude   BETWEEN sp.latitude   - %(deg)s AND sp.latitude   + %(deg)s\n     AND p.longtitude BETWEEN sp.longtitude - %(deg)s AND sp.longtitude + %(deg)s\n    \n) AS d\nWHERE d.distance_m <= %(radius)s",
+          "parameters": {
+            "deg": 0.00909090909090909,
+            "radius": 1000
+          },
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "s",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "fk_stations_place1_idx",
+              "key": "fk_stations_place1_idx",
+              "key_len": "4",
+              "ref": null,
+              "rows": 203,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "sp",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.s.place_block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "ix_place_coords",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 9799,
+              "filtered": 1.23,
+              "Extra": "Range checked for each record (index map: 0x8)"
+            }
+          ],
+          "explain_analyze": "-> Nested loop inner join  (cost=199036 rows=24553) (actual time=2.52..984 rows=22669 loops=1)\n    -> Nested loop inner join  (cost=91.6 rows=203) (actual time=0.0139..1.58 rows=203 loops=1)\n        -> Covering index scan on s using fk_stations_place1_idx  (cost=20.6 rows=203) (actual time=0.0083..0.212 rows=203 loops=1)\n        -> Single-row index lookup on sp using PRIMARY (block_id=s.place_block_id)  (cost=0.25 rows=1) (actual time=0.00624..0.00629 rows=1 loops=203)\n    -> Filter: ((round(st_distance_sphere(point(p.longtitude,p.latitude),point(sp.longtitude,sp.latitude)),0) <= 1000) and (p.latitude between (sp.latitude - 0.00909090909090909) and (sp.latitude + 0.00909090909090909)) and (p.longtitude between (sp.longtitude - 0.00909090909090909) and (sp.longtitude + 0.00909090909090909)))  (cost=0.182 rows=121) (actual time=0.664..4.83 rows=112 loops=203)\n        -> Covering index range scan on p (re-planned for each iteration)  (cost=0.182 rows=9799) (actual time=0.0359..0.287 rows=988 loops=203)\n",
+          "rows_examined": 406,
+          "rows_returned": 22669,
+          "result_sha256": "50175d46b36932720bad9d038ed23d34cb6dc5914d6e6675e37b5252ff84a844",
+          "median_ms": 1071.927,
+          "p95_ms": 1071.946
+        }
+      }
+    },
+    "final": {
+      "mysql": "8.0.45",
+      "schema": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91",
+      "optimizer_switch": "index_merge=on,index_merge_union=on,index_merge_sort_union=on,index_merge_intersection=on,engine_condition_pushdown=on,index_condition_pushdown=on,mrr=on,mrr_cost_based=on,block_nested_loop=on,batched_key_access=off,materialization=on,semijoin=on,loosescan=on,firstmatch=on,duplicateweedout=on,subquery_materialization_cost_based=on,use_index_extensions=on,condition_fanout_filter=on,derived_merge=on,use_invisible_indexes=off,skip_scan=on,hash_join=on,subquery_to_derived=off,prefer_ordering_index=on,hypergraph_optimizer=off,derived_condition_pushdown=on",
+      "warmups": 1,
+      "samples": 3,
+      "index_bytes": {
+        "agents": 16384,
+        "flat": 13664256,
+        "nearby": 458752,
+        "place": 704512,
+        "resale_transaction": 15253504,
+        "stations": 32768
+      },
+      "queries": {
+        "nearby_build_select": {
+          "sql": "SELECT d.station_id, d.block_id, d.distance_m\nFROM (\n    SELECT s.station_id,\n           p.block_id,\n           ROUND(ST_Distance_Sphere(\n               POINT(p.longtitude, p.latitude),\n               POINT(sp.longtitude, sp.latitude)\n           )) AS distance_m\n    FROM `stations` AS s\n    JOIN `place` AS sp ON sp.block_id = s.place_block_id\n    JOIN `place` AS p\n      ON p.latitude   BETWEEN sp.latitude   - %(deg)s AND sp.latitude   + %(deg)s\n     AND p.longtitude BETWEEN sp.longtitude - %(deg)s AND sp.longtitude + %(deg)s\n    \n) AS d\nWHERE d.distance_m <= %(radius)s",
+          "parameters": {
+            "deg": 0.00909090909090909,
+            "radius": 1000
+          },
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "s",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "fk_stations_place1_idx",
+              "key": "fk_stations_place1_idx",
+              "key_len": "4",
+              "ref": null,
+              "rows": 203,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "sp",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.s.place_block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "ix_place_coords",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 9786,
+              "filtered": 1.23,
+              "Extra": "Range checked for each record (index map: 0x4)"
+            }
+          ],
+          "explain_analyze": "-> Nested loop inner join  (cost=198772 rows=24521) (actual time=2.4..970 rows=22669 loops=1)\n    -> Nested loop inner join  (cost=91.6 rows=203) (actual time=0.0139..2 rows=203 loops=1)\n        -> Covering index scan on s using fk_stations_place1_idx  (cost=20.6 rows=203) (actual time=0.0082..0.258 rows=203 loops=1)\n        -> Single-row index lookup on sp using PRIMARY (block_id=s.place_block_id)  (cost=0.25 rows=1) (actual time=0.00799..0.00804 rows=1 loops=203)\n    -> Filter: ((round(st_distance_sphere(point(p.longtitude,p.latitude),point(sp.longtitude,sp.latitude)),0) <= 1000) and (p.latitude between (sp.latitude - 0.00909090909090909) and (sp.latitude + 0.00909090909090909)) and (p.longtitude between (sp.longtitude - 0.00909090909090909) and (sp.longtitude + 0.00909090909090909)))  (cost=0.182 rows=121) (actual time=0.66..4.76 rows=112 loops=203)\n        -> Covering index range scan on p (re-planned for each iteration)  (cost=0.182 rows=9786) (actual time=0.0416..0.292 rows=988 loops=203)\n",
+          "rows_examined": 406,
+          "rows_returned": 22669,
+          "result_sha256": "50175d46b36932720bad9d038ed23d34cb6dc5914d6e6675e37b5252ff84a844",
+          "median_ms": 1068.768,
+          "p95_ms": 1069.354
+        }
+      }
+    }
+  },
+  "comparison": {
+    "nearby_build_select": {
+      "same_rows": true,
+      "median_change_ms": -7799.357
+    }
+  }
+}

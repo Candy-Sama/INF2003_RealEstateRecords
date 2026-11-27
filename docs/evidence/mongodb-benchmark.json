@@ -1,0 +1,3733 @@
+{
+  "mongodb": "9.0.4",
+  "documents_per_fixture": 20000,
+  "agents": 200,
+  "owner_filter": {
+    "agent_id": 42
+  },
+  "sort": [
+    [
+      "created_at",
+      -1
+    ],
+    [
+      "_id",
+      -1
+    ]
+  ],
+  "compound_index": [
+    [
+      "agent_id",
+      1
+    ],
+    [
+      "created_at",
+      -1
+    ],
+    [
+      "_id",
+      -1
+    ]
+  ],
+  "compound_index_name": "saved_searches_agent_created_id",
+  "warmups_per_layout": 3,
+  "explain_and_fetch_samples_per_layout_per_trial": 15,
+  "trials": [
+    {
+      "before": {
+        "explain": [
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          }
+        ],
+        "client_fetch_ms": [
+          4.647,
+          4.4605,
+          4.4482,
+          4.3651,
+          4.6069,
+          4.2949,
+          4.283,
+          4.6216,
+          4.3092,
+          4.3834,
+          4.4449,
+          4.46,
+          4.5561,
+          4.7419,
+          4.7049
+        ],
+        "client_median_ms": 4.46
+      },
+      "after": {
+        "explain": [
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_a4c8d3a3690f479da57867aba4d5e47b",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          }
+        ],
+        "client_fetch_ms": [
+          0.4891,
+          0.5111,
+          0.6364,
+          0.4742,
+          0.6211,
+          0.4808,
+          0.4672,
+          0.5716,
+          0.6503,
+          0.4359,
+          0.4293,
+          0.3974,
+          0.4138,
+          0.439,
+          0.6582
+        ],
+        "client_median_ms": 0.4808
+      },
+      "same_ordered_documents": true
+    },
+    {
+      "before": {
+        "explain": [
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          }
+        ],
+        "client_fetch_ms": [
+          4.5003,
+          4.4168,
+          4.362,
+          4.6734,
+          4.4828,
+          4.7269,
+          4.8783,
+          4.4237,
+          4.3296,
+          4.4253,
+          4.3437,
+          4.415,
+          4.5665,
+          4.5535,
+          4.3411
+        ],
+        "client_median_ms": 4.4253
+      },
+      "after": {
+        "explain": [
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_989b2df27b6940319ec0b495c41b401e",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          }
+        ],
+        "client_fetch_ms": [
+          0.5328,
+          0.4708,
+          0.4446,
+          0.5239,
+          0.3681,
+          0.374,
+          0.3716,
+          0.5407,
+          0.4792,
+          0.3785,
+          0.3452,
+          0.4933,
+          0.4493,
+          0.3712,
+          0.5672
+        ],
+        "client_median_ms": 0.4493
+      },
+      "same_ordered_documents": true
+    },
+    {
+      "before": {
+        "explain": [
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 8,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          },
+          {
+            "planStages": [
+              "SORT",
+              "COLLSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "SORT",
+              "sortPattern": {
+                "created_at": -1,
+                "_id": -1
+              },
+              "memLimit": 104857600,
+              "type": "simple",
+              "inputStage": {
+                "stage": "COLLSCAN",
+                "filter": {
+                  "agent_id": {
+                    "$eq": 42
+                  }
+                },
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "direction": "forward"
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 0,
+            "totalDocsExamined": 20000,
+            "executionTimeMillis": 5,
+            "explicitSort": true
+          }
+        ],
+        "client_fetch_ms": [
+          4.3393,
+          4.3962,
+          4.4381,
+          4.5194,
+          4.5129,
+          4.4505,
+          4.51,
+          4.5117,
+          4.3625,
+          4.4278,
+          4.6809,
+          4.5586,
+          4.5373,
+          4.5683,
+          4.3664
+        ],
+        "client_median_ms": 4.51
+      },
+      "after": {
+        "explain": [
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          },
+          {
+            "planStages": [
+              "FETCH",
+              "IXSCAN"
+            ],
+            "winningPlan": {
+              "isCached": false,
+              "stage": "FETCH",
+              "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+              "inputStage": {
+                "stage": "IXSCAN",
+                "nss": "estate_evidence_7868b49ec212417ab42fed2bc47dc4a3.tmp_saved_search_bench_ef70d94c4f774ee3ad1310538518ee2f",
+                "keyPattern": {
+                  "agent_id": 1,
+                  "created_at": -1,
+                  "_id": -1
+                },
+                "indexName": "saved_searches_agent_created_id",
+                "isMultiKey": false,
+                "multiKeyPaths": {
+                  "agent_id": [],
+                  "created_at": [],
+                  "_id": []
+                },
+                "isUnique": false,
+                "isSparse": false,
+                "isPartial": false,
+                "indexVersion": 2,
+                "direction": "forward",
+                "indexBounds": {
+                  "agent_id": [
+                    "[42, 42]"
+                  ],
+                  "created_at": [
+                    "[MaxKey, MinKey]"
+                  ],
+                  "_id": [
+                    "[MaxKey, MinKey]"
+                  ]
+                }
+              }
+            },
+            "nReturned": 100,
+            "totalKeysExamined": 100,
+            "totalDocsExamined": 100,
+            "executionTimeMillis": 0,
+            "explicitSort": false
+          }
+        ],
+        "client_fetch_ms": [
+          0.4335,
+          0.6336,
+          0.5617,
+          0.5868,
+          0.5645,
+          0.4243,
+          0.4449,
+          0.5656,
+          0.6206,
+          0.3931,
+          0.4726,
+          0.4488,
+          0.4553,
+          0.3785,
+          0.3495
+        ],
+        "client_median_ms": 0.4553
+      },
+      "same_ordered_documents": true
+    }
+  ]
+}

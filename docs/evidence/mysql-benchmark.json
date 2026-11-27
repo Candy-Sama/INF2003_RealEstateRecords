@@ -1,0 +1,2950 @@
+{
+  "stages": {
+    "before": {
+      "mysql": "8.0.45",
+      "schema": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91",
+      "optimizer_switch": "index_merge=on,index_merge_union=on,index_merge_sort_union=on,index_merge_intersection=on,engine_condition_pushdown=on,index_condition_pushdown=on,mrr=on,mrr_cost_based=on,block_nested_loop=on,batched_key_access=off,materialization=on,semijoin=on,loosescan=on,firstmatch=on,duplicateweedout=on,subquery_materialization_cost_based=on,use_index_extensions=on,condition_fanout_filter=on,derived_merge=on,use_invisible_indexes=off,skip_scan=on,hash_join=on,subquery_to_derived=off,prefer_ordering_index=on,hypergraph_optimizer=off,derived_condition_pushdown=on",
+      "warmups": 5,
+      "samples": 30,
+      "index_bytes": {
+        "agents": 32768,
+        "flat": 10518528,
+        "nearby": 720896,
+        "place": 114688,
+        "resale_transaction": 9469952,
+        "stations": 49152
+      },
+      "queries": {
+        "agent_recent": {
+          "sql": "SELECT rt.FLAT_flat_id AS flat_id, rt.transaction_date, rt.resale_price, f.flat_type, f.flat_model, p.block_number, p.road_name, p.town FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE rt.AGENTS_agent_id = %s ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC LIMIT %s",
+          "parameters": [
+            1,
+            100
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_AGENTS1_idx,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "fk_RESALE_TRANSACTION_has_AGENTS_AGENTS1_idx",
+              "key_len": "4",
+              "ref": "const",
+              "rows": 121268,
+              "filtered": 100.0,
+              "Extra": "Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 100 row(s)  (cost=97471 rows=100) (actual time=241..241 rows=100 loops=1)\n    -> Nested loop inner join  (cost=97471 rows=121268) (actual time=241..241 rows=100 loops=1)\n        -> Nested loop inner join  (cost=55027 rows=121268) (actual time=241..241 rows=100 loops=1)\n            -> Sort: rt.transaction_date DESC, rt.FLAT_flat_id DESC  (cost=12584 rows=121268) (actual time=241..241 rows=100 loops=1)\n                -> Index lookup on rt using fk_RESALE_TRANSACTION_has_AGENTS_AGENTS1_idx (AGENTS_agent_id=1)  (cost=12584 rows=121268) (actual time=3.78..194 rows=242634 loops=1)\n            -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00244..0.00246 rows=1 loops=100)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=962e-6..976e-6 rows=1 loops=100)\n",
+          "rows_examined": 242934,
+          "rows_returned": 100,
+          "result_sha256": "f344c8ea3aa86843316cc76261022351f8081965400e5fc7bcfabfdc6ed22267",
+          "median_ms": 193.53,
+          "p95_ms": 254.422
+        },
+        "search_town_type": {
+          "sql": "SELECT rt.transaction_date, rt.resale_price, f.flat_id, f.flat_type, f.flat_model, f.storey_range, f.floor_area_sqm, f.remaining_lease_months, p.block_number, p.road_name, p.town, p.postal FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 AND f.flat_type = %s AND p.town = %s AND rt.resale_price >= %s AND rt.resale_price <= %s AND rt.transaction_date >= %s AND rt.transaction_date <= %s ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT 1000",
+          "parameters": [
+            "4 ROOM",
+            "TAMPINES",
+            "600000.00",
+            "900000.00",
+            "2025-01-01",
+            "2025-12-31"
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 9962,
+              "filtered": 10.0,
+              "Extra": "Using where; Using temporary; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.p.block_id",
+              "rows": 28,
+              "filtered": 10.0,
+              "Extra": "Using where"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 5.0,
+              "Extra": "Using where"
+            }
+          ],
+          "explain_analyze": "-> Limit: 1000 row(s)  (actual time=37.2..37.3 rows=790 loops=1)\n    -> Sort: rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC, limit input to 1000 row(s) per chunk  (actual time=37.2..37.2 rows=790 loops=1)\n        -> Stream results  (cost=11870 rows=141) (actual time=0.176..36.9 rows=790 loops=1)\n            -> Nested loop inner join  (cost=11870 rows=141) (actual time=0.172..36.4 rows=790 loops=1)\n                -> Nested loop inner join  (cost=10884 rows=2818) (actual time=0.0919..24.1 rows=7024 loops=1)\n                    -> Filter: (p.town = 'TAMPINES')  (cost=1020 rows=996) (actual time=0.0579..2.63 rows=799 loops=1)\n                        -> Table scan on p  (cost=1020 rows=9962) (actual time=0.0488..2.32 rows=9964 loops=1)\n                    -> Filter: (f.flat_type = '4 ROOM')  (cost=7.07 rows=2.83) (actual time=0.0136..0.0265 rows=8.79 loops=799)\n                        -> Index lookup on f using fk_RESALE_TRANSACTION_BLOCK1_idx (block_id=p.block_id)  (cost=7.07 rows=28.3) (actual time=0.0111..0.0254 rows=21.1 loops=799)\n                -> Filter: ((rt.resale_price >= 600000.00) and (rt.resale_price <= 900000.00) and (rt.transaction_date >= DATE'2025-01-01') and (rt.transaction_date <= DATE'2025-12-31'))  (cost=0.25 rows=0.05) (actual time=0.00163..0.00167 rows=0.112 loops=7024)\n                    -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.0012..0.00146 rows=1 loops=7024)\n",
+          "rows_examined": 34653,
+          "rows_returned": 790,
+          "result_sha256": "17ec12e46a8256ab411ccd217aeb474613537766216da979ef935adf1ae8ad1e",
+          "median_ms": 37.983,
+          "p95_ms": 40.631
+        },
+        "search_date": {
+          "sql": "SELECT rt.transaction_date, rt.resale_price, f.flat_id, f.flat_type, f.flat_model, f.storey_range, f.floor_area_sqm, f.remaining_lease_months, p.block_number, p.road_name, p.town, p.postal FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 AND rt.transaction_date >= %s AND rt.transaction_date <= %s ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT 1000",
+          "parameters": [
+            "2025-01-01",
+            "2025-12-31"
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 242536,
+              "filtered": 11.11,
+              "Extra": "Using where; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 1000 row(s)  (cost=86385 rows=1000) (actual time=43.9..46.4 rows=1000 loops=1)\n    -> Nested loop inner join  (cost=86385 rows=242536) (actual time=43.9..46.3 rows=1000 loops=1)\n        -> Nested loop inner join  (cost=55395 rows=242536) (actual time=43.9..45.5 rows=1000 loops=1)\n            -> Sort: rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC  (cost=24406 rows=242536) (actual time=43.8..43.9 rows=1000 loops=1)\n                -> Filter: ((rt.transaction_date >= DATE'2025-01-01') and (rt.transaction_date <= DATE'2025-12-31'))  (cost=24406 rows=242536) (actual time=29.2..36.5 rows=25084 loops=1)\n                    -> Table scan on rt  (cost=24406 rows=242536) (actual time=0.419..28 rows=242634 loops=1)\n            -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00153..0.00155 rows=1 loops=1000)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=690e-6..705e-6 rows=1 loops=1000)\n",
+          "rows_examined": 245634,
+          "rows_returned": 1000,
+          "result_sha256": "5144841bb35feb51ce581cdeda493665d45b69bf659d09825b44d7dfad3a90d2",
+          "median_ms": 41.872,
+          "p95_ms": 42.465
+        },
+        "search_price": {
+          "sql": "SELECT rt.transaction_date, rt.resale_price, f.flat_id, f.flat_type, f.flat_model, f.storey_range, f.floor_area_sqm, f.remaining_lease_months, p.block_number, p.road_name, p.town, p.postal FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 AND rt.resale_price >= %s AND rt.resale_price <= %s ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT 1000",
+          "parameters": [
+            "1400000.00",
+            "1600000.00"
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 242536,
+              "filtered": 11.11,
+              "Extra": "Using where; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 1000 row(s)  (cost=86385 rows=1000) (actual time=29.8..30.5 rows=293 loops=1)\n    -> Nested loop inner join  (cost=86385 rows=242536) (actual time=29.8..30.5 rows=293 loops=1)\n        -> Nested loop inner join  (cost=55395 rows=242536) (actual time=29.8..30.3 rows=293 loops=1)\n            -> Sort: rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC  (cost=24406 rows=242536) (actual time=29.7..29.7 rows=293 loops=1)\n                -> Filter: ((rt.resale_price >= 1400000.00) and (rt.resale_price <= 1600000.00))  (cost=24406 rows=242536) (actual time=15..29.6 rows=293 loops=1)\n                    -> Table scan on rt  (cost=24406 rows=242536) (actual time=0.39..20.6 rows=242634 loops=1)\n            -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00168..0.00169 rows=1 loops=293)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=578e-6..592e-6 rows=1 loops=293)\n",
+          "rows_examined": 243513,
+          "rows_returned": 293,
+          "result_sha256": "204168a3f41c13fc45df9657a55084182fd79bcb2e1fa8b5c0c0e06c2e921cd0",
+          "median_ms": 34.275,
+          "p95_ms": 35.442
+        },
+        "place_list": {
+          "sql": "SELECT block_id, block_number, road_name, town FROM `place` ORDER BY town, road_name, block_number",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "place",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 9962,
+              "filtered": 100.0,
+              "Extra": "Using filesort"
+            }
+          ],
+          "explain_analyze": "-> Sort: place.town, place.road_name, place.block_number  (cost=1020 rows=9962) (actual time=10.5..10.9 rows=9964 loops=1)\n    -> Table scan on place  (cost=1020 rows=9962) (actual time=0.0786..1.9 rows=9964 loops=1)\n",
+          "rows_examined": 19928,
+          "rows_returned": 9964,
+          "result_sha256": "b46a8e494b1f0c2bab9ec153d562af88c0f5678706a1fdec89c445c372114928",
+          "median_ms": 16.951,
+          "p95_ms": 20.288
+        },
+        "flat_types": {
+          "sql": "SELECT DISTINCT flat_type FROM `flat` ORDER BY flat_type",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "flat",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 242369,
+              "filtered": 100.0,
+              "Extra": "Using temporary; Using filesort"
+            }
+          ],
+          "explain_analyze": "-> Sort: flat.flat_type  (actual time=55.6..55.6 rows=7 loops=1)\n    -> Table scan on <temporary>  (cost=48738..51770 rows=242369) (actual time=55.6..55.6 rows=7 loops=1)\n        -> Temporary table with deduplication  (cost=48738..48738 rows=242369) (actual time=55.6..55.6 rows=7 loops=1)\n            -> Table scan on flat  (cost=24501 rows=242369) (actual time=0.0924..28.7 rows=242634 loops=1)\n",
+          "rows_examined": 242641,
+          "rows_returned": 7,
+          "result_sha256": "91c3d55eac5f0963ff9614002cea6b3d26bf013bc5b3ddfd5d1419c7dca638ec",
+          "median_ms": 49.385,
+          "p95_ms": 50.102
+        },
+        "top_sales": {
+          "sql": "SELECT rt.transaction_date, p.town, p.block_number, p.road_name, f.flat_type, f.floor_area_sqm, rt.resale_price FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 ORDER BY rt.resale_price DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT %s",
+          "parameters": [
+            10
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 242536,
+              "filtered": 100.0,
+              "Extra": "Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 10 row(s)  (cost=194181 rows=10) (actual time=98..98 rows=10 loops=1)\n    -> Nested loop inner join  (cost=194181 rows=242536) (actual time=98..98 rows=10 loops=1)\n        -> Nested loop inner join  (cost=109293 rows=242536) (actual time=98..98 rows=10 loops=1)\n            -> Sort: rt.resale_price DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC  (cost=24406 rows=242536) (actual time=97.9..97.9 rows=10 loops=1)\n                -> Table scan on rt  (cost=24406 rows=242536) (actual time=0.449..29.3 rows=242634 loops=1)\n            -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00537..0.00538 rows=1 loops=10)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=0.00137..0.00137 rows=1 loops=10)\n",
+          "rows_examined": 242664,
+          "rows_returned": 10,
+          "result_sha256": "180baabb5aa7741d77d7de6352654386ae9eb135cc2afde9f322475b653603da",
+          "median_ms": 91.99,
+          "p95_ms": 95.559
+        },
+        "top_sales_4room": {
+          "sql": "SELECT rt.transaction_date, p.town, p.block_number, p.road_name, f.flat_type, f.floor_area_sqm, rt.resale_price FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 AND f.flat_type = %s ORDER BY rt.resale_price DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT %s",
+          "parameters": [
+            "4 ROOM",
+            10
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 242369,
+              "filtered": 10.0,
+              "Extra": "Using where; Using temporary; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 10 row(s)  (actual time=360..360 rows=10 loops=1)\n    -> Sort: rt.resale_price DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC, limit input to 10 row(s) per chunk  (actual time=360..360 rows=10 loops=1)\n        -> Stream results  (cost=41467 rows=24237) (actual time=0.0723..336 rows=103123 loops=1)\n            -> Nested loop inner join  (cost=41467 rows=24237) (actual time=0.0684..297 rows=103123 loops=1)\n                -> Nested loop inner join  (cost=32984 rows=24237) (actual time=0.0597..140 rows=103123 loops=1)\n                    -> Filter: (f.flat_type = '4 ROOM')  (cost=24501 rows=24237) (actual time=0.0513..56.2 rows=103123 loops=1)\n                        -> Table scan on f  (cost=24501 rows=242369) (actual time=0.0459..43.7 rows=242634 loops=1)\n                    -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=711e-6..727e-6 rows=1 loops=103123)\n                -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00109..0.0014 rows=1 loops=103123)\n",
+          "rows_examined": 448890,
+          "rows_returned": 10,
+          "result_sha256": "72056526ea9dcce31338def21de30335d354a6579be4c5a063a8e77f69282b83",
+          "median_ms": 316.961,
+          "p95_ms": 333.056
+        },
+        "rank_towns": {
+          "sql": "WITH block_sales AS (SELECT f.block_id, COUNT(*) AS sales, SUM(rt.resale_price) AS price_total, SUM(CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6))) AS psm_total, SUM(CASE WHEN rt.transaction_date > DATE_SUB(m.latest, INTERVAL 12 MONTH) THEN 1 ELSE 0 END) AS recent_sales, SUM(CASE WHEN rt.transaction_date > DATE_SUB(m.latest, INTERVAL 12 MONTH) THEN CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6)) END) AS recent_total, SUM(CASE WHEN rt.transaction_date > DATE_SUB(m.latest, INTERVAL 24 MONTH) AND rt.transaction_date <= DATE_SUB(m.latest, INTERVAL 12 MONTH) THEN 1 ELSE 0 END) AS prior_sales, SUM(CASE WHEN rt.transaction_date > DATE_SUB(m.latest, INTERVAL 24 MONTH) AND rt.transaction_date <= DATE_SUB(m.latest, INTERVAL 12 MONTH) THEN CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6)) END) AS prior_total FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id CROSS JOIN (SELECT MAX(transaction_date) AS latest FROM `resale_transaction`) AS m WHERE 1 = 1 GROUP BY f.block_id) SELECT p.town, CAST(SUM(b.sales) AS UNSIGNED) AS sales, SUM(b.psm_total) / SUM(b.sales) AS avg_psm, SUM(b.price_total) / SUM(b.sales) AS avg_price, SUM(b.recent_sales) AS recent_sales, SUM(b.recent_total) / NULLIF(SUM(b.recent_sales), 0) AS recent_psm, SUM(b.prior_sales) AS prior_sales, SUM(b.prior_total) / NULLIF(SUM(b.prior_sales), 0) AS prior_psm FROM block_sales AS b JOIN `place` AS p ON p.block_id = b.block_id GROUP BY p.town",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "p",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 9962,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "<auto_key0>",
+              "key": "<auto_key0>",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.p.block_id",
+              "rows": 24,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "<derived3>",
+              "partitions": null,
+              "type": "system",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 242369,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 3,
+              "select_type": "DERIVED",
+              "table": "resale_transaction",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 242536,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Table scan on <temporary>  (actual time=741..741 rows=26 loops=1)\n    -> Aggregate using temporary table  (actual time=741..741 rows=26 loops=1)\n        -> Nested loop inner join  (cost=61613 rows=0) (actual time=722..730 rows=9761 loops=1)\n            -> Table scan on p  (cost=1020 rows=9962) (actual time=0.079..1.77 rows=9964 loops=1)\n            -> Index lookup on b using <auto_key0> (block_id=p.block_id)  (cost=0.25..6.08 rows=24.3) (actual time=0.0728..0.073 rows=0.98 loops=9964)\n                -> Materialize CTE block_sales  (cost=0..0 rows=0) (actual time=722..722 rows=9761 loops=1)\n                    -> Table scan on <temporary>  (actual time=718..718 rows=9761 loops=1)\n                        -> Aggregate using temporary table  (actual time=718..718 rows=9761 loops=1)\n                            -> Nested loop inner join  (cost=109330 rows=242369) (actual time=0.0702..441 rows=242634 loops=1)\n                                -> Table scan on f  (cost=24501 rows=242369) (actual time=0.0579..42.7 rows=242634 loops=1)\n                                -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00116..0.00151 rows=1 loops=242634)\n",
+          "rows_examined": 262359,
+          "rows_returned": 26,
+          "result_sha256": "386ef4ab79a02c47d842d018eea83432c0dc2ca5edc8a75dfbcc9efe3d2c13d0",
+          "median_ms": 707.48,
+          "p95_ms": 715.664
+        },
+        "rank_streets": {
+          "sql": "WITH block_sales AS (SELECT f.block_id, COUNT(*) AS sales, SUM(rt.resale_price) AS price_total FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id WHERE 1 = 1 GROUP BY f.block_id) SELECT p.town, p.road_name, CAST(SUM(b.sales) AS UNSIGNED) AS sales, SUM(b.price_total) / SUM(b.sales) AS avg_price FROM block_sales AS b JOIN `place` AS p ON p.block_id = b.block_id GROUP BY p.town, p.road_name HAVING SUM(b.sales) >= %s ORDER BY avg_price DESC LIMIT %s",
+          "parameters": [
+            30,
+            10
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "p",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 10039,
+              "filtered": 100.0,
+              "Extra": "Using temporary; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "<auto_key0>",
+              "key": "<auto_key0>",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.p.block_id",
+              "rows": 24,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key_len": "4",
+              "ref": null,
+              "rows": 242369,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 10 row(s)  (actual time=476..476 rows=10 loops=1)\n    -> Sort: avg_price DESC  (actual time=476..476 rows=10 loops=1)\n        -> Filter: (`sum(b.sales)` >= 30)  (actual time=476..476 rows=551 loops=1)\n            -> Table scan on <temporary>  (actual time=476..476 rows=580 loops=1)\n                -> Aggregate using temporary table  (actual time=476..476 rows=580 loops=1)\n                    -> Nested loop inner join  (cost=8.66e+6 rows=86e+6) (actual time=461..468 rows=9761 loops=1)\n                        -> Table scan on p  (cost=1028 rows=10039) (actual time=0.0638..2.02 rows=9964 loops=1)\n                        -> Index lookup on b using <auto_key0> (block_id=p.block_id)  (cost=134424..134430 rows=24.1) (actual time=0.0466..0.0467 rows=0.98 loops=9964)\n                            -> Materialize CTE block_sales  (cost=134424..134424 rows=8568) (actual time=461..461 rows=9761 loops=1)\n                                -> Group aggregate: count(0), sum(rt.resale_price)  (cost=133567 rows=8568) (actual time=0.105..454 rows=9761 loops=1)\n                                    -> Nested loop inner join  (cost=109330 rows=242369) (actual time=0.0319..434 rows=242634 loops=1)\n                                        -> Covering index scan on f using fk_RESALE_TRANSACTION_BLOCK1_idx  (cost=24501 rows=242369) (actual time=0.0209..31.8 rows=242634 loops=1)\n                                        -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00129..0.00154 rows=1 loops=242634)\n",
+          "rows_examined": 19735,
+          "rows_returned": 10,
+          "result_sha256": "6a0a268adbb38f725564d0aad4cb5ecb6444f73e9cb7d6210bfbafc746f52e39",
+          "median_ms": 407.042,
+          "p95_ms": 436.435
+        },
+        "rank_stations": {
+          "sql": "WITH block_sales AS (SELECT f.block_id, COUNT(*) AS sales, SUM(CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6))) AS psm_total FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id WHERE 1 = 1 GROUP BY f.block_id) SELECT ns.station_name, MIN(ns.station_code) AS station_code, CAST(SUM(b.sales) AS UNSIGNED) AS sales, SUM(b.psm_total) / SUM(b.sales) AS avg_psm FROM block_sales AS b JOIN (SELECT n.PLACE_block_id AS block_id, s.station_name, MIN(s.station_code) AS station_code FROM `nearby` AS n JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id WHERE n.distance_m <= %s GROUP BY n.PLACE_block_id, s.station_name) AS ns ON ns.block_id = b.block_id GROUP BY ns.station_name HAVING SUM(b.sales) >= %s",
+          "parameters": [
+            500,
+            200
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived3>",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 10265,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "<auto_key0>",
+              "key": "<auto_key0>",
+              "key_len": "4",
+              "ref": "ns.block_id",
+              "rows": 23,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 3,
+              "select_type": "DERIVED",
+              "table": "s",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,station_id_UNIQUE",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 203,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 3,
+              "select_type": "DERIVED",
+              "table": "n",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_STATIONS_has_PLACE_STATIONS1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.s.station_id",
+              "rows": 151,
+              "filtered": 33.33,
+              "Extra": "Using where"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 242369,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Filter: (`sum(b.sales)` >= 200)  (actual time=535..535 rows=110 loops=1)\n    -> Table scan on <temporary>  (actual time=535..535 rows=132 loops=1)\n        -> Aggregate using temporary table  (actual time=535..535 rows=132 loops=1)\n            -> Nested loop inner join  (cost=60595 rows=0) (actual time=528..532 rows=5787 loops=1)\n                -> Table scan on ns  (cost=2.5..2.5 rows=0) (actual time=8.08..8.57 rows=6054 loops=1)\n                    -> Materialize  (cost=0..0 rows=0) (actual time=8.08..8.08 rows=6054 loops=1)\n                        -> Table scan on <temporary>  (actual time=7..7.37 rows=6054 loops=1)\n                            -> Aggregate using temporary table  (actual time=7..7 rows=6054 loops=1)\n                                -> Nested loop inner join  (cost=3163 rows=10266) (actual time=0.0295..4.04 rows=6614 loops=1)\n                                    -> Table scan on s  (cost=20.6 rows=203) (actual time=0.0119..0.0617 rows=203 loops=1)\n                                    -> Filter: (n.distance_m <= 500)  (cost=0.331 rows=50.6) (actual time=0.00852..0.0184 rows=32.6 loops=203)\n                                        -> Index lookup on n using PRIMARY (STATIONS_station_id=s.station_id)  (cost=0.331 rows=152) (actual time=0.00722..0.0152 rows=119 loops=203)\n                -> Index lookup on b using <auto_key0> (block_id=ns.block_id)  (cost=0.25..5.9 rows=23.6) (actual time=0.0863..0.0864 rows=0.956 loops=6054)\n                    -> Materialize CTE block_sales  (cost=0..0 rows=0) (actual time=520..520 rows=9761 loops=1)\n                        -> Table scan on <temporary>  (actual time=516..517 rows=9761 loops=1)\n                            -> Aggregate using temporary table  (actual time=516..516 rows=9761 loops=1)\n                                -> Nested loop inner join  (cost=109330 rows=242369) (actual time=0.0558..401 rows=242634 loops=1)\n                                    -> Table scan on f  (cost=24501 rows=242369) (actual time=0.0492..39.2 rows=242634 loops=1)\n                                    -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00108..0.00137 rows=1 loops=242634)\n",
+          "rows_examined": 11841,
+          "rows_returned": 110,
+          "result_sha256": "19a332817da3602760ebe67fcb56f24f882399cce513a3f4a1e9053367e0e0c5",
+          "median_ms": 483.509,
+          "p95_ms": 486.503
+        },
+        "nearby_ew2": {
+          "sql": "SELECT f.flat_id, f.flat_type, f.storey_range, p.town, p.block_number, p.road_name, COUNT(s.station_id) AS station_count, MIN(n.distance_m) AS nearest_m, GROUP_CONCAT(CONCAT(s.station_code, ' ', s.station_name, ' (', n.distance_m, ' m)') ORDER BY n.distance_m, s.station_code SEPARATOR ', ') AS nearby_stations FROM (SELECT f.flat_id, f.flat_type, f.storey_range, f.block_id FROM `flat` AS f WHERE f.block_id IN (SELECT n.PLACE_block_id FROM `nearby` AS n JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id WHERE s.station_code IN (%s) AND n.distance_m <= %s) ORDER BY f.flat_id LIMIT %s OFFSET %s) AS f JOIN `place` AS p ON p.block_id = f.block_id JOIN `nearby` AS n ON n.PLACE_block_id = f.block_id JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id WHERE s.station_code IN (%s) AND n.distance_m <= %s GROUP BY f.flat_id, f.flat_type, f.storey_range, p.town, p.block_number, p.road_name ORDER BY f.flat_id",
+          "parameters": [
+            "EW2",
+            500,
+            100,
+            0,
+            "EW2",
+            500
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "s",
+              "partitions": null,
+              "type": "const",
+              "possible_keys": "PRIMARY,station_code_UNIQUE,station_id_UNIQUE",
+              "key": "station_code_UNIQUE",
+              "key_len": "137",
+              "ref": "const",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": "Using temporary; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 100,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "n",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,fk_STATIONS_has_PLACE_STATIONS1_idx,fk_STATIONS_has_PLACE_PLACE1_idx",
+              "key": "PRIMARY",
+              "key_len": "8",
+              "ref": "const,f.block_id",
+              "rows": 1,
+              "filtered": 33.33,
+              "Extra": "Using where"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "s",
+              "partitions": null,
+              "type": "const",
+              "possible_keys": "PRIMARY,station_code_UNIQUE,station_id_UNIQUE",
+              "key": "station_code_UNIQUE",
+              "key_len": "137",
+              "ref": "const",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "n",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_STATIONS_has_PLACE_STATIONS1_idx,fk_STATIONS_has_PLACE_PLACE1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "const",
+              "rows": 273,
+              "filtered": 33.33,
+              "Extra": "Using where"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.n.PLACE_block_id",
+              "rows": 28,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Group aggregate: count('29'), min(nearby.distance_m), group_concat(tmp_field order by nearby.distance_m ASC,'EW2' ASC separator ', ')  (actual time=2.43..2.47 rows=100 loops=1)\n    -> Sort: f.flat_id, f.flat_type, f.storey_range, p.town, p.block_number, p.road_name  (actual time=2.42..2.42 rows=100 loops=1)\n        -> Stream results  (cost=35.8 rows=0) (actual time=2.03..2.34 rows=100 loops=1)\n            -> Nested loop inner join  (cost=35.8 rows=0) (actual time=2.03..2.27 rows=100 loops=1)\n                -> Nested loop inner join  (cost=27.5 rows=0) (actual time=2.02..2.19 rows=100 loops=1)\n                    -> Table scan on f  (cost=2.5..2.5 rows=0) (actual time=2.01..2.02 rows=100 loops=1)\n                        -> Materialize  (cost=0..0 rows=0) (actual time=2.01..2.01 rows=100 loops=1)\n                            -> Limit: 100 row(s)  (actual time=1.99..2 rows=100 loops=1)\n                                -> Sort: f.flat_id, limit input to 100 row(s) per chunk  (actual time=1.99..1.99 rows=100 loops=1)\n                                    -> Stream results  (cost=910 rows=2574) (actual time=0.0484..1.89 rows=1080 loops=1)\n                                        -> Nested loop inner join  (cost=910 rows=2574) (actual time=0.0473..1.77 rows=1080 loops=1)\n                                            -> Filter: (n.distance_m <= 500)  (cost=9.45 rows=91) (actual time=0.0203..0.0453 rows=51 loops=1)\n                                                -> Index lookup on n using PRIMARY (STATIONS_station_id='29')  (cost=9.45 rows=273) (actual time=0.017..0.0365 rows=273 loops=1)\n                                            -> Index lookup on f using fk_RESALE_TRANSACTION_BLOCK1_idx (block_id=n.PLACE_block_id)  (cost=7.1 rows=28.3) (actual time=0.0128..0.033 rows=21.2 loops=51)\n                    -> Filter: (n.distance_m <= 500)  (cost=0.25 rows=0.333) (actual time=0.0015..0.00155 rows=1 loops=100)\n                        -> Single-row index lookup on n using PRIMARY (STATIONS_station_id='29', PLACE_block_id=f.block_id)  (cost=0.25 rows=1) (actual time=0.00141..0.00143 rows=1 loops=100)\n                -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.253 rows=1) (actual time=741e-6..761e-6 rows=1 loops=100)\n",
+          "rows_examined": 400,
+          "rows_returned": 100,
+          "result_sha256": "ebe736a8dd9761dcd82617acf74016f85e9546bc831c4070caac2e9c3b3b38db",
+          "median_ms": 1.913,
+          "p95_ms": 2.279
+        },
+        "nearby_count_ew2": {
+          "sql": "SELECT COUNT(*) FROM `flat` AS f WHERE f.block_id IN (SELECT n.PLACE_block_id FROM `nearby` AS n JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id WHERE s.station_code IN (%s) AND n.distance_m <= %s)",
+          "parameters": [
+            "EW2",
+            500
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "s",
+              "partitions": null,
+              "type": "const",
+              "possible_keys": "PRIMARY,station_code_UNIQUE,station_id_UNIQUE",
+              "key": "station_code_UNIQUE",
+              "key_len": "137",
+              "ref": "const",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "n",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_STATIONS_has_PLACE_STATIONS1_idx,fk_STATIONS_has_PLACE_PLACE1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "const",
+              "rows": 273,
+              "filtered": 33.33,
+              "Extra": "Using where"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.n.PLACE_block_id",
+              "rows": 28,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            }
+          ],
+          "explain_analyze": "-> Aggregate: count(0)  (cost=548 rows=1) (actual time=0.27..0.27 rows=1 loops=1)\n    -> Nested loop inner join  (cost=290 rows=2574) (actual time=0.0299..0.247 rows=1080 loops=1)\n        -> Filter: (n.distance_m <= 500)  (cost=9.45 rows=91) (actual time=0.026..0.0464 rows=51 loops=1)\n            -> Index lookup on n using PRIMARY (STATIONS_station_id='29')  (cost=9.45 rows=273) (actual time=0.0231..0.0383 rows=273 loops=1)\n        -> Covering index lookup on f using fk_RESALE_TRANSACTION_BLOCK1_idx (block_id=n.PLACE_block_id)  (cost=0.288 rows=28.3) (actual time=0.00134..0.00323 rows=21.2 loops=51)\n",
+          "rows_examined": 1353,
+          "rows_returned": 1,
+          "result_sha256": "25301066da0654a2967176ea47c26f6735b2cfcbd206f49fe1379f5103bb7b1f",
+          "median_ms": 0.375,
+          "p95_ms": 0.541
+        },
+        "nearest_by_block": {
+          "sql": "SELECT PLACE_block_id, MIN(distance_m) FROM nearby GROUP BY PLACE_block_id",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "nearby",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,fk_STATIONS_has_PLACE_STATIONS1_idx,fk_STATIONS_has_PLACE_PLACE1_idx",
+              "key": "fk_STATIONS_has_PLACE_PLACE1_idx",
+              "key_len": "4",
+              "ref": null,
+              "rows": 28525,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Group aggregate: min(nearby.distance_m)  (cost=5745 rows=9964) (actual time=6.13..23.1 rows=9964 loops=1)\n    -> Index scan on nearby using fk_STATIONS_has_PLACE_PLACE1_idx  (cost=2893 rows=28525) (actual time=6.13..21.9 rows=24178 loops=1)\n",
+          "rows_examined": 24178,
+          "rows_returned": 9964,
+          "result_sha256": "661618585ae57760f71b3e71818a61301a6d1db985b9e4277c331b8cee590229",
+          "median_ms": 22.523,
+          "p95_ms": 26.347
+        },
+        "latest_date": {
+          "sql": "SELECT MAX(transaction_date) FROM `resale_transaction`",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "resale_transaction",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 242536,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Aggregate: max(resale_transaction.transaction_date)  (cost=48659 rows=1) (actual time=28.8..28.8 rows=1 loops=1)\n    -> Table scan on resale_transaction  (cost=24406 rows=242536) (actual time=0.568..20.8 rows=242634 loops=1)\n",
+          "rows_examined": 242634,
+          "rows_returned": 1,
+          "result_sha256": "33db5d408789e8ec40972ae8924ed3c1bcd4ba97587236fd786c2aa0fad971c3",
+          "median_ms": 23.344,
+          "p95_ms": 24.682
+        },
+        "monthly_card": {
+          "sql": "SELECT * FROM (SELECT DATE_FORMAT(rt.transaction_date, '%Y-%m-01') AS sale_month,\n       f.flat_type,\n       ROUND(AVG(rt.resale_price)) AS avg_price\nFROM resale_transaction rt JOIN flat f ON f.flat_id = rt.FLAT_flat_id \nWHERE f.flat_type IN ('3 ROOM', '4 ROOM', '5 ROOM')\nGROUP BY sale_month, f.flat_type\nORDER BY sale_month) AS analytics_q LIMIT 5001",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 72710,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 242369,
+              "filtered": 30.0,
+              "Extra": "Using where; Using temporary; Using filesort"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 5001 row(s)  (cost=0..0 rows=0) (actual time=589..589 rows=354 loops=1)\n    -> Table scan on analytics_q  (cost=2.5..2.5 rows=0) (actual time=589..589 rows=354 loops=1)\n        -> Materialize  (cost=0..0 rows=0) (actual time=589..589 rows=354 loops=1)\n            -> Sort: sale_month, f.flat_type  (actual time=589..589 rows=354 loops=1)\n                -> Table scan on <temporary>  (actual time=589..589 rows=354 loops=1)\n                    -> Aggregate using temporary table  (actual time=589..589 rows=354 loops=1)\n                        -> Nested loop inner join  (cost=49950 rows=72711) (actual time=0.0796..420 rows=220064 loops=1)\n                            -> Filter: (f.flat_type in ('3 ROOM','4 ROOM','5 ROOM'))  (cost=24501 rows=72711) (actual time=0.0688..62.6 rows=220064 loops=1)\n                                -> Table scan on f  (cost=24501 rows=242369) (actual time=0.0672..41.3 rows=242634 loops=1)\n                            -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00114..0.0015 rows=1 loops=220064)\n",
+          "rows_examined": 354,
+          "rows_returned": 354,
+          "result_sha256": "77832bd3e2e6be2d2ef489b5ea3b2b910909807b6ef7a6490b2b69972d0afd8a",
+          "median_ms": 549.958,
+          "p95_ms": 557.848
+        }
+      }
+    },
+    "added": {
+      "mysql": "8.0.45",
+      "schema": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91",
+      "optimizer_switch": "index_merge=on,index_merge_union=on,index_merge_sort_union=on,index_merge_intersection=on,engine_condition_pushdown=on,index_condition_pushdown=on,mrr=on,mrr_cost_based=on,block_nested_loop=on,batched_key_access=off,materialization=on,semijoin=on,loosescan=on,firstmatch=on,duplicateweedout=on,subquery_materialization_cost_based=on,use_index_extensions=on,condition_fanout_filter=on,derived_merge=on,use_invisible_indexes=off,skip_scan=on,hash_join=on,subquery_to_derived=off,prefer_ordering_index=on,hypergraph_optimizer=off,derived_condition_pushdown=on",
+      "warmups": 5,
+      "samples": 30,
+      "index_bytes": {
+        "agents": 32768,
+        "flat": 17350656,
+        "nearby": 1179648,
+        "place": 819200,
+        "resale_transaction": 24723456,
+        "stations": 49152
+      },
+      "queries": {
+        "agent_recent": {
+          "sql": "SELECT rt.FLAT_flat_id AS flat_id, rt.transaction_date, rt.resale_price, f.flat_type, f.flat_model, p.block_number, p.road_name, p.town FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE rt.AGENTS_agent_id = %s ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC LIMIT %s",
+          "parameters": [
+            1,
+            100
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_AGENTS1_idx,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx,ix_rt_agent_date_flat",
+              "key": "ix_rt_agent_date_flat",
+              "key_len": "4",
+              "ref": "const",
+              "rows": 121268,
+              "filtered": 100.0,
+              "Extra": "Backward index scan"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 100 row(s)  (cost=97471 rows=100) (actual time=9.08..9.38 rows=100 loops=1)\n    -> Nested loop inner join  (cost=97471 rows=121268) (actual time=9.08..9.38 rows=100 loops=1)\n        -> Nested loop inner join  (cost=55027 rows=121268) (actual time=9.07..9.29 rows=100 loops=1)\n            -> Index lookup on rt using ix_rt_agent_date_flat (AGENTS_agent_id=1) (reverse)  (cost=12584 rows=121268) (actual time=9.06..9.07 rows=100 loops=1)\n            -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00212..0.00213 rows=1 loops=100)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=832e-6..850e-6 rows=1 loops=100)\n",
+          "rows_examined": 300,
+          "rows_returned": 100,
+          "result_sha256": "f344c8ea3aa86843316cc76261022351f8081965400e5fc7bcfabfdc6ed22267",
+          "median_ms": 6.818,
+          "p95_ms": 8.058
+        },
+        "search_town_type": {
+          "sql": "SELECT rt.transaction_date, rt.resale_price, f.flat_id, f.flat_type, f.flat_model, f.storey_range, f.floor_area_sqm, f.remaining_lease_months, p.block_number, p.road_name, p.town, p.postal FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 AND f.flat_type = %s AND p.town = %s AND rt.resale_price >= %s AND rt.resale_price <= %s AND rt.transaction_date >= %s AND rt.transaction_date <= %s ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT 1000",
+          "parameters": [
+            "4 ROOM",
+            "TAMPINES",
+            "600000.00",
+            "900000.00",
+            "2025-01-01",
+            "2025-12-31"
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE,ix_place_town_address",
+              "key": "ix_place_town_address",
+              "key_len": "137",
+              "ref": "const",
+              "rows": 799,
+              "filtered": 100.0,
+              "Extra": "Using temporary; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx,ix_flat_type_block",
+              "key": "ix_flat_type_block",
+              "key_len": "141",
+              "ref": "const,estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.p.block_id",
+              "rows": 14,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx,ix_rt_date,ix_rt_price",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 10.21,
+              "Extra": "Using where"
+            }
+          ],
+          "explain_analyze": "-> Limit: 1000 row(s)  (actual time=36.5..36.5 rows=790 loops=1)\n    -> Sort: rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC, limit input to 1000 row(s) per chunk  (actual time=36.5..36.5 rows=790 loops=1)\n        -> Stream results  (cost=8336 rows=1194) (actual time=0.317..36 rows=790 loops=1)\n            -> Nested loop inner join  (cost=8336 rows=1194) (actual time=0.313..35.5 rows=790 loops=1)\n                -> Nested loop inner join  (cost=4244 rows=11690) (actual time=0.241..22.7 rows=7024 loops=1)\n                    -> Index lookup on p using ix_place_town_address (town='TAMPINES')  (cost=153 rows=799) (actual time=0.0834..0.81 rows=799 loops=1)\n                    -> Index lookup on f using ix_flat_type_block (flat_type='4 ROOM', block_id=p.block_id)  (cost=3.66 rows=14.6) (actual time=0.0218..0.027 rows=8.79 loops=799)\n                -> Filter: ((rt.resale_price >= 600000.00) and (rt.resale_price <= 900000.00) and (rt.transaction_date >= DATE'2025-01-01') and (rt.transaction_date <= DATE'2025-12-31'))  (cost=0.25 rows=0.102) (actual time=0.00169..0.00174 rows=0.112 loops=7024)\n                    -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00126..0.00153 rows=1 loops=7024)\n",
+          "rows_examined": 15637,
+          "rows_returned": 790,
+          "result_sha256": "17ec12e46a8256ab411ccd217aeb474613537766216da979ef935adf1ae8ad1e",
+          "median_ms": 24.933,
+          "p95_ms": 29.74
+        },
+        "search_date": {
+          "sql": "SELECT rt.transaction_date, rt.resale_price, f.flat_id, f.flat_type, f.flat_model, f.storey_range, f.floor_area_sqm, f.remaining_lease_months, p.block_number, p.road_name, p.town, p.postal FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 AND rt.transaction_date >= %s AND rt.transaction_date <= %s ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT 1000",
+          "parameters": [
+            "2025-01-01",
+            "2025-12-31"
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "range",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx,ix_rt_date",
+              "key": "ix_rt_date",
+              "key_len": "3",
+              "ref": null,
+              "rows": 49550,
+              "filtered": 100.0,
+              "Extra": "Using index condition; Backward index scan"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 1000 row(s)  (cost=56983 rows=1000) (actual time=7.89..10.7 rows=1000 loops=1)\n    -> Nested loop inner join  (cost=56983 rows=49550) (actual time=7.89..10.6 rows=1000 loops=1)\n        -> Nested loop inner join  (cost=39640 rows=49550) (actual time=7.89..9.8 rows=1000 loops=1)\n            -> Index range scan on rt using ix_rt_date over ('2025-01-01' <= transaction_date <= '2025-12-31') (reverse), with index condition: ((rt.transaction_date >= DATE'2025-01-01') and (rt.transaction_date <= DATE'2025-12-31'))  (cost=22298 rows=49550) (actual time=7.87..7.95 rows=1000 loops=1)\n            -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00173..0.00174 rows=1 loops=1000)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=743e-6..758e-6 rows=1 loops=1000)\n",
+          "rows_examined": 3000,
+          "rows_returned": 1000,
+          "result_sha256": "5144841bb35feb51ce581cdeda493665d45b69bf659d09825b44d7dfad3a90d2",
+          "median_ms": 9.811,
+          "p95_ms": 12.226
+        },
+        "search_price": {
+          "sql": "SELECT rt.transaction_date, rt.resale_price, f.flat_id, f.flat_type, f.flat_model, f.storey_range, f.floor_area_sqm, f.remaining_lease_months, p.block_number, p.road_name, p.town, p.postal FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 AND rt.resale_price >= %s AND rt.resale_price <= %s ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT 1000",
+          "parameters": [
+            "1400000.00",
+            "1600000.00"
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "range",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx,ix_rt_price",
+              "key": "ix_rt_price",
+              "key_len": "6",
+              "ref": null,
+              "rows": 293,
+              "filtered": 100.0,
+              "Extra": "Using index condition; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 1000 row(s)  (cost=337 rows=293) (actual time=0.515..1.18 rows=293 loops=1)\n    -> Nested loop inner join  (cost=337 rows=293) (actual time=0.514..1.17 rows=293 loops=1)\n        -> Nested loop inner join  (cost=235 rows=293) (actual time=0.513..0.99 rows=293 loops=1)\n            -> Sort: rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC  (cost=132 rows=293) (actual time=0.505..0.514 rows=293 loops=1)\n                -> Index range scan on rt using ix_rt_price over (1400000.00 <= resale_price <= 1600000.00), with index condition: ((rt.resale_price >= 1400000.00) and (rt.resale_price <= 1600000.00))  (cost=132 rows=293) (actual time=0.357..0.45 rows=293 loops=1)\n            -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00154..0.00155 rows=1 loops=293)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=534e-6..545e-6 rows=1 loops=293)\n",
+          "rows_examined": 1172,
+          "rows_returned": 293,
+          "result_sha256": "204168a3f41c13fc45df9657a55084182fd79bcb2e1fa8b5c0c0e06c2e921cd0",
+          "median_ms": 1.775,
+          "p95_ms": 2.15
+        },
+        "place_list": {
+          "sql": "SELECT block_id, block_number, road_name, town FROM `place` ORDER BY town, road_name, block_number",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "place",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": null,
+              "key": "ix_place_town_address",
+              "key_len": "411",
+              "ref": null,
+              "rows": 9955,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            }
+          ],
+          "explain_analyze": "-> Covering index scan on place using ix_place_town_address  (cost=1020 rows=9955) (actual time=0.0405..1.12 rows=9964 loops=1)\n",
+          "rows_examined": 9964,
+          "rows_returned": 9964,
+          "result_sha256": "b46a8e494b1f0c2bab9ec153d562af88c0f5678706a1fdec89c445c372114928",
+          "median_ms": 7.918,
+          "p95_ms": 8.743
+        },
+        "flat_types": {
+          "sql": "SELECT DISTINCT flat_type FROM `flat` ORDER BY flat_type",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "flat",
+              "partitions": null,
+              "type": "range",
+              "possible_keys": "ix_flat_type_block",
+              "key": "ix_flat_type_block",
+              "key_len": "137",
+              "ref": null,
+              "rows": 7,
+              "filtered": 100.0,
+              "Extra": "Using index for group-by"
+            }
+          ],
+          "explain_analyze": "-> Covering index skip scan for deduplication on flat using ix_flat_type_block  (cost=9.8 rows=7) (actual time=0.0253..0.0497 rows=7 loops=1)\n",
+          "rows_examined": 0,
+          "rows_returned": 7,
+          "result_sha256": "91c3d55eac5f0963ff9614002cea6b3d26bf013bc5b3ddfd5d1419c7dca638ec",
+          "median_ms": 0.175,
+          "p95_ms": 0.217
+        },
+        "top_sales": {
+          "sql": "SELECT rt.transaction_date, p.town, p.block_number, p.road_name, f.flat_type, f.floor_area_sqm, rt.resale_price FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 ORDER BY rt.resale_price DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT %s",
+          "parameters": [
+            10
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "ix_rt_price",
+              "key_len": "6",
+              "ref": null,
+              "rows": 10,
+              "filtered": 100.0,
+              "Extra": "Backward index scan"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 10 row(s)  (cost=121270 rows=10) (actual time=0.0562..0.0903 rows=10 loops=1)\n    -> Nested loop inner join  (cost=121270 rows=10) (actual time=0.0557..0.0893 rows=10 loops=1)\n        -> Nested loop inner join  (cost=60635 rows=10) (actual time=0.0537..0.0783 rows=10 loops=1)\n            -> Index scan on rt using ix_rt_price (reverse)  (cost=0.00632 rows=10) (actual time=0.0473..0.0483 rows=10 loops=1)\n            -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00278..0.00279 rows=1 loops=10)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=970e-6..990e-6 rows=1 loops=10)\n",
+          "rows_examined": 30,
+          "rows_returned": 10,
+          "result_sha256": "180baabb5aa7741d77d7de6352654386ae9eb135cc2afde9f322475b653603da",
+          "median_ms": 0.309,
+          "p95_ms": 0.505
+        },
+        "top_sales_4room": {
+          "sql": "SELECT rt.transaction_date, p.town, p.block_number, p.road_name, f.flat_type, f.floor_area_sqm, rt.resale_price FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 AND f.flat_type = %s ORDER BY rt.resale_price DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT %s",
+          "parameters": [
+            "4 ROOM",
+            10
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "ix_rt_price",
+              "key_len": "6",
+              "ref": null,
+              "rows": 20,
+              "filtered": 100.0,
+              "Extra": "Backward index scan"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx,ix_flat_type_block",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 50.0,
+              "Extra": "Using where"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 10 row(s)  (cost=90954 rows=10) (actual time=0.139..0.636 rows=10 loops=1)\n    -> Nested loop inner join  (cost=90954 rows=10) (actual time=0.139..0.635 rows=10 loops=1)\n        -> Nested loop inner join  (cost=60636 rows=10) (actual time=0.137..0.627 rows=10 loops=1)\n            -> Index scan on rt using ix_rt_price (reverse)  (cost=0.0127 rows=20) (actual time=0.0451..0.315 rows=157 loops=1)\n            -> Filter: (f.flat_type = '4 ROOM')  (cost=0.25 rows=0.5) (actual time=0.00192..0.00193 rows=0.0637 loops=157)\n                -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00179..0.00181 rows=1 loops=157)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=740e-6..740e-6 rows=1 loops=10)\n",
+          "rows_examined": 324,
+          "rows_returned": 10,
+          "result_sha256": "72056526ea9dcce31338def21de30335d354a6579be4c5a063a8e77f69282b83",
+          "median_ms": 0.554,
+          "p95_ms": 0.635
+        },
+        "rank_towns": {
+          "sql": "WITH block_sales AS (SELECT f.block_id, COUNT(*) AS sales, SUM(rt.resale_price) AS price_total, SUM(CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6))) AS psm_total, SUM(CASE WHEN rt.transaction_date > DATE_SUB(m.latest, INTERVAL 12 MONTH) THEN 1 ELSE 0 END) AS recent_sales, SUM(CASE WHEN rt.transaction_date > DATE_SUB(m.latest, INTERVAL 12 MONTH) THEN CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6)) END) AS recent_total, SUM(CASE WHEN rt.transaction_date > DATE_SUB(m.latest, INTERVAL 24 MONTH) AND rt.transaction_date <= DATE_SUB(m.latest, INTERVAL 12 MONTH) THEN 1 ELSE 0 END) AS prior_sales, SUM(CASE WHEN rt.transaction_date > DATE_SUB(m.latest, INTERVAL 24 MONTH) AND rt.transaction_date <= DATE_SUB(m.latest, INTERVAL 12 MONTH) THEN CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6)) END) AS prior_total FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id CROSS JOIN (SELECT MAX(transaction_date) AS latest FROM `resale_transaction`) AS m WHERE 1 = 1 GROUP BY f.block_id) SELECT p.town, CAST(SUM(b.sales) AS UNSIGNED) AS sales, SUM(b.psm_total) / SUM(b.sales) AS avg_psm, SUM(b.price_total) / SUM(b.sales) AS avg_price, SUM(b.recent_sales) AS recent_sales, SUM(b.recent_total) / NULLIF(SUM(b.recent_sales), 0) AS recent_psm, SUM(b.prior_sales) AS prior_sales, SUM(b.prior_total) / NULLIF(SUM(b.prior_sales), 0) AS prior_psm FROM block_sales AS b JOIN `place` AS p ON p.block_id = b.block_id GROUP BY p.town",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "p",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,block_id_UNIQUE,ix_place_town_address",
+              "key": "ix_place_town_address",
+              "key_len": "411",
+              "ref": null,
+              "rows": 9955,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "<auto_key0>",
+              "key": "<auto_key0>",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.p.block_id",
+              "rows": 24,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "<derived3>",
+              "partitions": null,
+              "type": "system",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx,ix_flat_type_block",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 240389,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 3,
+              "select_type": "DERIVED",
+              "table": null,
+              "partitions": null,
+              "type": null,
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": null,
+              "filtered": null,
+              "Extra": "Select tables optimized away"
+            }
+          ],
+          "explain_analyze": "-> Group aggregate: sum(b.prior_sales), sum(b.prior_total), sum(b.recent_sales), sum(b.recent_total), sum(b.sales), sum(b.price_total), sum(b.sales), sum(b.psm_total), sum(b.sales), sum(b.recent_sales), sum(b.prior_sales)  (cost=61117 rows=0) (actual time=705..714 rows=26 loops=1)\n    -> Nested loop inner join  (cost=61117 rows=0) (actual time=704..711 rows=9761 loops=1)\n        -> Covering index scan on p using ix_place_town_address  (cost=1020 rows=9955) (actual time=0.0225..1.2 rows=9964 loops=1)\n        -> Index lookup on b using <auto_key0> (block_id=p.block_id)  (cost=0.25..6.04 rows=24.1) (actual time=0.071..0.0711 rows=0.98 loops=9964)\n            -> Materialize CTE block_sales  (cost=0..0 rows=0) (actual time=704..704 rows=9761 loops=1)\n                -> Table scan on <temporary>  (actual time=700..700 rows=9761 loops=1)\n                    -> Aggregate using temporary table  (actual time=700..700 rows=9761 loops=1)\n                        -> Nested loop inner join  (cost=108439 rows=240389) (actual time=0.0514..428 rows=242634 loops=1)\n                            -> Table scan on f  (cost=24303 rows=240389) (actual time=0.0451..41.9 rows=242634 loops=1)\n                            -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00114..0.00147 rows=1 loops=242634)\n",
+          "rows_examined": 19726,
+          "rows_returned": 26,
+          "result_sha256": "386ef4ab79a02c47d842d018eea83432c0dc2ca5edc8a75dfbcc9efe3d2c13d0",
+          "median_ms": 669.41,
+          "p95_ms": 698.612
+        },
+        "rank_streets": {
+          "sql": "WITH block_sales AS (SELECT f.block_id, COUNT(*) AS sales, SUM(rt.resale_price) AS price_total FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id WHERE 1 = 1 GROUP BY f.block_id) SELECT p.town, p.road_name, CAST(SUM(b.sales) AS UNSIGNED) AS sales, SUM(b.price_total) / SUM(b.sales) AS avg_price FROM block_sales AS b JOIN `place` AS p ON p.block_id = b.block_id GROUP BY p.town, p.road_name HAVING SUM(b.sales) >= %s ORDER BY avg_price DESC LIMIT %s",
+          "parameters": [
+            30,
+            10
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "p",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,block_id_UNIQUE,ix_place_town_address",
+              "key": "ix_place_town_address",
+              "key_len": "411",
+              "ref": null,
+              "rows": 9955,
+              "filtered": 100.0,
+              "Extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "<auto_key0>",
+              "key": "<auto_key0>",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.p.block_id",
+              "rows": 24,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx,ix_flat_type_block",
+              "key": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key_len": "4",
+              "ref": null,
+              "rows": 240389,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 10 row(s)  (actual time=479..479 rows=10 loops=1)\n    -> Sort: avg_price DESC  (actual time=479..479 rows=10 loops=1)\n        -> Filter: (`sum(b.sales)` >= 30)  (actual time=469..479 rows=551 loops=1)\n            -> Stream results  (cost=19.7e+6 rows=764) (actual time=469..479 rows=580 loops=1)\n                -> Group aggregate: sum(b.sales), sum(b.sales), sum(b.price_total), sum(b.sales)  (cost=19.7e+6 rows=764) (actual time=469..479 rows=580 loops=1)\n                    -> Nested loop inner join  (cost=9.89e+6 rows=98.3e+6) (actual time=469..477 rows=9761 loops=1)\n                        -> Covering index scan on p using ix_place_town_address  (cost=1020 rows=9955) (actual time=0.0647..1.56 rows=9964 loops=1)\n                        -> Index lookup on b using <auto_key0> (block_id=p.block_id)  (cost=133466..133472 rows=24.1) (actual time=0.0475..0.0476 rows=0.98 loops=9964)\n                            -> Materialize CTE block_sales  (cost=133466..133466 rows=9875) (actual time=469..469 rows=9761 loops=1)\n                                -> Group aggregate: count(0), sum(rt.resale_price)  (cost=132478 rows=9875) (actual time=0.105..463 rows=9761 loops=1)\n                                    -> Nested loop inner join  (cost=108439 rows=240389) (actual time=0.0305..441 rows=242634 loops=1)\n                                        -> Covering index scan on f using fk_RESALE_TRANSACTION_BLOCK1_idx  (cost=24303 rows=240389) (actual time=0.0202..31.4 rows=242634 loops=1)\n                                        -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00132..0.00157 rows=1 loops=242634)\n",
+          "rows_examined": 19735,
+          "rows_returned": 10,
+          "result_sha256": "6a0a268adbb38f725564d0aad4cb5ecb6444f73e9cb7d6210bfbafc746f52e39",
+          "median_ms": 400.371,
+          "p95_ms": 439.983
+        },
+        "rank_stations": {
+          "sql": "WITH block_sales AS (SELECT f.block_id, COUNT(*) AS sales, SUM(CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6))) AS psm_total FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id WHERE 1 = 1 GROUP BY f.block_id) SELECT ns.station_name, MIN(ns.station_code) AS station_code, CAST(SUM(b.sales) AS UNSIGNED) AS sales, SUM(b.psm_total) / SUM(b.sales) AS avg_psm FROM block_sales AS b JOIN (SELECT n.PLACE_block_id AS block_id, s.station_name, MIN(s.station_code) AS station_code FROM `nearby` AS n JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id WHERE n.distance_m <= %s GROUP BY n.PLACE_block_id, s.station_name) AS ns ON ns.block_id = b.block_id GROUP BY ns.station_name HAVING SUM(b.sales) >= %s",
+          "parameters": [
+            500,
+            200
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived3>",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 13067,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "<auto_key0>",
+              "key": "<auto_key0>",
+              "key_len": "4",
+              "ref": "ns.block_id",
+              "rows": 18,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 3,
+              "select_type": "DERIVED",
+              "table": "s",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,station_id_UNIQUE",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 203,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 3,
+              "select_type": "DERIVED",
+              "table": "n",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_STATIONS_has_PLACE_STATIONS1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.s.station_id",
+              "rows": 193,
+              "filtered": 33.33,
+              "Extra": "Using where"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,fk_RESALE_TRANSACTION_BLOCK1_idx,ix_flat_type_block",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 240389,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Filter: (`sum(b.sales)` >= 200)  (actual time=531..531 rows=110 loops=1)\n    -> Table scan on <temporary>  (actual time=531..531 rows=132 loops=1)\n        -> Aggregate using temporary table  (actual time=531..531 rows=132 loops=1)\n            -> Nested loop inner join  (cost=60100 rows=0) (actual time=524..528 rows=5787 loops=1)\n                -> Table scan on ns  (cost=2.5..2.5 rows=0) (actual time=8.36..8.85 rows=6054 loops=1)\n                    -> Materialize  (cost=0..0 rows=0) (actual time=8.36..8.36 rows=6054 loops=1)\n                        -> Table scan on <temporary>  (actual time=7.06..7.44 rows=6054 loops=1)\n                            -> Aggregate using temporary table  (actual time=7.06..7.06 rows=6054 loops=1)\n                                -> Nested loop inner join  (cost=4006 rows=13068) (actual time=0.0321..4.08 rows=6614 loops=1)\n                                    -> Table scan on s  (cost=20.6 rows=203) (actual time=0.0127..0.073 rows=203 loops=1)\n                                    -> Filter: (n.distance_m <= 500)  (cost=0.353 rows=64.4) (actual time=0.00957..0.0185 rows=32.6 loops=203)\n                                        -> Index lookup on n using PRIMARY (STATIONS_station_id=s.station_id)  (cost=0.353 rows=193) (actual time=0.00816..0.0151 rows=119 loops=203)\n                -> Index lookup on b using <auto_key0> (block_id=ns.block_id)  (cost=0.25..4.6 rows=18.4) (actual time=0.0856..0.0857 rows=0.956 loops=6054)\n                    -> Materialize CTE block_sales  (cost=0..0 rows=0) (actual time=516..516 rows=9761 loops=1)\n                        -> Table scan on <temporary>  (actual time=512..512 rows=9761 loops=1)\n                            -> Aggregate using temporary table  (actual time=512..512 rows=9761 loops=1)\n                                -> Nested loop inner join  (cost=108439 rows=240389) (actual time=0.0677..396 rows=242634 loops=1)\n                                    -> Table scan on f  (cost=24303 rows=240389) (actual time=0.0575..38.3 rows=242634 loops=1)\n                                    -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00107..0.00136 rows=1 loops=242634)\n",
+          "rows_examined": 11841,
+          "rows_returned": 110,
+          "result_sha256": "19a332817da3602760ebe67fcb56f24f882399cce513a3f4a1e9053367e0e0c5",
+          "median_ms": 479.884,
+          "p95_ms": 488.727
+        },
+        "nearby_ew2": {
+          "sql": "SELECT f.flat_id, f.flat_type, f.storey_range, p.town, p.block_number, p.road_name, COUNT(s.station_id) AS station_count, MIN(n.distance_m) AS nearest_m, GROUP_CONCAT(CONCAT(s.station_code, ' ', s.station_name, ' (', n.distance_m, ' m)') ORDER BY n.distance_m, s.station_code SEPARATOR ', ') AS nearby_stations FROM (SELECT f.flat_id, f.flat_type, f.storey_range, f.block_id FROM `flat` AS f WHERE f.block_id IN (SELECT n.PLACE_block_id FROM `nearby` AS n JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id WHERE s.station_code IN (%s) AND n.distance_m <= %s) ORDER BY f.flat_id LIMIT %s OFFSET %s) AS f JOIN `place` AS p ON p.block_id = f.block_id JOIN `nearby` AS n ON n.PLACE_block_id = f.block_id JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id WHERE s.station_code IN (%s) AND n.distance_m <= %s GROUP BY f.flat_id, f.flat_type, f.storey_range, p.town, p.block_number, p.road_name ORDER BY f.flat_id",
+          "parameters": [
+            "EW2",
+            500,
+            100,
+            0,
+            "EW2",
+            500
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "s",
+              "partitions": null,
+              "type": "const",
+              "possible_keys": "PRIMARY,station_code_UNIQUE,station_id_UNIQUE",
+              "key": "station_code_UNIQUE",
+              "key_len": "137",
+              "ref": "const",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": "Using temporary; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 100,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "n",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,fk_STATIONS_has_PLACE_STATIONS1_idx,fk_STATIONS_has_PLACE_PLACE1_idx,ix_nearby_block_distance",
+              "key": "PRIMARY",
+              "key_len": "8",
+              "ref": "const,f.block_id",
+              "rows": 1,
+              "filtered": 33.33,
+              "Extra": "Using where"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,block_id_UNIQUE",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "s",
+              "partitions": null,
+              "type": "const",
+              "possible_keys": "PRIMARY,station_code_UNIQUE,station_id_UNIQUE",
+              "key": "station_code_UNIQUE",
+              "key_len": "137",
+              "ref": "const",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "n",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_STATIONS_has_PLACE_STATIONS1_idx,fk_STATIONS_has_PLACE_PLACE1_idx,ix_nearby_block_distance",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "const",
+              "rows": 273,
+              "filtered": 33.33,
+              "Extra": "Using where"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.n.PLACE_block_id",
+              "rows": 24,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Group aggregate: count('29'), min(nearby.distance_m), group_concat(tmp_field order by nearby.distance_m ASC,'EW2' ASC separator ', ')  (actual time=2.34..2.38 rows=100 loops=1)\n    -> Sort: f.flat_id, f.flat_type, f.storey_range, p.town, p.block_number, p.road_name  (actual time=2.34..2.34 rows=100 loops=1)\n        -> Stream results  (cost=35.8 rows=0) (actual time=1.96..2.26 rows=100 loops=1)\n            -> Nested loop inner join  (cost=35.8 rows=0) (actual time=1.95..2.19 rows=100 loops=1)\n                -> Nested loop inner join  (cost=27.5 rows=0) (actual time=1.95..2.11 rows=100 loops=1)\n                    -> Table scan on f  (cost=2.5..2.5 rows=0) (actual time=1.94..1.95 rows=100 loops=1)\n                        -> Materialize  (cost=0..0 rows=0) (actual time=1.94..1.94 rows=100 loops=1)\n                            -> Limit: 100 row(s)  (actual time=1.92..1.93 rows=100 loops=1)\n                                -> Sort: f.flat_id, limit input to 100 row(s) per chunk  (actual time=1.92..1.93 rows=100 loops=1)\n                                    -> Stream results  (cost=785 rows=2215) (actual time=0.0759..1.81 rows=1080 loops=1)\n                                        -> Nested loop inner join  (cost=785 rows=2215) (actual time=0.0741..1.68 rows=1080 loops=1)\n                                            -> Filter: (n.distance_m <= 500)  (cost=9.45 rows=91) (actual time=0.0284..0.0532 rows=51 loops=1)\n                                                -> Index lookup on n using PRIMARY (STATIONS_station_id='29')  (cost=9.45 rows=273) (actual time=0.0247..0.0436 rows=273 loops=1)\n                                            -> Index lookup on f using fk_RESALE_TRANSACTION_BLOCK1_idx (block_id=n.PLACE_block_id)  (cost=6.11 rows=24.3) (actual time=0.0123..0.0312 rows=21.2 loops=51)\n                    -> Filter: (n.distance_m <= 500)  (cost=0.25 rows=0.333) (actual time=0.0014..0.00146 rows=1 loops=100)\n                        -> Single-row index lookup on n using PRIMARY (STATIONS_station_id='29', PLACE_block_id=f.block_id)  (cost=0.25 rows=1) (actual time=0.00129..0.00131 rows=1 loops=100)\n                -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.253 rows=1) (actual time=727e-6..738e-6 rows=1 loops=100)\n",
+          "rows_examined": 400,
+          "rows_returned": 100,
+          "result_sha256": "ebe736a8dd9761dcd82617acf74016f85e9546bc831c4070caac2e9c3b3b38db",
+          "median_ms": 1.968,
+          "p95_ms": 2.504
+        },
+        "nearby_count_ew2": {
+          "sql": "SELECT COUNT(*) FROM `flat` AS f WHERE f.block_id IN (SELECT n.PLACE_block_id FROM `nearby` AS n JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id WHERE s.station_code IN (%s) AND n.distance_m <= %s)",
+          "parameters": [
+            "EW2",
+            500
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "s",
+              "partitions": null,
+              "type": "const",
+              "possible_keys": "PRIMARY,station_code_UNIQUE,station_id_UNIQUE",
+              "key": "station_code_UNIQUE",
+              "key_len": "137",
+              "ref": "const",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "n",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_STATIONS_has_PLACE_STATIONS1_idx,fk_STATIONS_has_PLACE_PLACE1_idx,ix_nearby_block_distance",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "const",
+              "rows": 273,
+              "filtered": 33.33,
+              "Extra": "Using where"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.n.PLACE_block_id",
+              "rows": 24,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            }
+          ],
+          "explain_analyze": "-> Aggregate: count(0)  (cost=476 rows=1) (actual time=0.282..0.282 rows=1 loops=1)\n    -> Nested loop inner join  (cost=254 rows=2215) (actual time=0.0271..0.259 rows=1080 loops=1)\n        -> Filter: (n.distance_m <= 500)  (cost=9.45 rows=91) (actual time=0.0231..0.043 rows=51 loops=1)\n            -> Index lookup on n using PRIMARY (STATIONS_station_id='29')  (cost=9.45 rows=273) (actual time=0.0203..0.035 rows=273 loops=1)\n        -> Covering index lookup on f using fk_RESALE_TRANSACTION_BLOCK1_idx (block_id=n.PLACE_block_id)  (cost=0.282 rows=24.3) (actual time=0.00121..0.0029 rows=21.2 loops=51)\n",
+          "rows_examined": 1353,
+          "rows_returned": 1,
+          "result_sha256": "25301066da0654a2967176ea47c26f6735b2cfcbd206f49fe1379f5103bb7b1f",
+          "median_ms": 0.409,
+          "p95_ms": 0.523
+        },
+        "nearest_by_block": {
+          "sql": "SELECT PLACE_block_id, MIN(distance_m) FROM nearby GROUP BY PLACE_block_id",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "nearby",
+              "partitions": null,
+              "type": "range",
+              "possible_keys": "PRIMARY,fk_STATIONS_has_PLACE_STATIONS1_idx,fk_STATIONS_has_PLACE_PLACE1_idx,ix_nearby_block_distance",
+              "key": "ix_nearby_block_distance",
+              "key_len": "4",
+              "ref": null,
+              "rows": 9965,
+              "filtered": 100.0,
+              "Extra": "Using index for group-by"
+            }
+          ],
+          "explain_analyze": "-> Covering index skip scan for grouping on nearby using ix_nearby_block_distance  (cost=3040 rows=9965) (actual time=0.0161..12 rows=9964 loops=1)\n",
+          "rows_examined": 0,
+          "rows_returned": 9964,
+          "result_sha256": "661618585ae57760f71b3e71818a61301a6d1db985b9e4277c331b8cee590229",
+          "median_ms": 14.547,
+          "p95_ms": 15.241
+        },
+        "latest_date": {
+          "sql": "SELECT MAX(transaction_date) FROM `resale_transaction`",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": null,
+              "partitions": null,
+              "type": null,
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": null,
+              "filtered": null,
+              "Extra": "Select tables optimized away"
+            }
+          ],
+          "explain_analyze": "-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=200e-6..300e-6 rows=1 loops=1)\n",
+          "rows_examined": 1,
+          "rows_returned": 1,
+          "result_sha256": "33db5d408789e8ec40972ae8924ed3c1bcd4ba97587236fd786c2aa0fad971c3",
+          "median_ms": 0.075,
+          "p95_ms": 0.143
+        },
+        "monthly_card": {
+          "sql": "SELECT * FROM (SELECT DATE_FORMAT(rt.transaction_date, '%Y-%m-01') AS sale_month,\n       f.flat_type,\n       ROUND(AVG(rt.resale_price)) AS avg_price\nFROM resale_transaction rt JOIN flat f ON f.flat_id = rt.FLAT_flat_id \nWHERE f.flat_type IN ('3 ROOM', '4 ROOM', '5 ROOM')\nGROUP BY sale_month, f.flat_type\nORDER BY sale_month) AS analytics_q LIMIT 5001",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 240389,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,transaction_id_UNIQUE,ix_flat_type_block",
+              "key": "ix_flat_type_block",
+              "key_len": "141",
+              "ref": null,
+              "rows": 240389,
+              "filtered": 100.0,
+              "Extra": "Using where; Using index; Using temporary; Using filesort"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_has_AGENTS_RESALE_TRANSACTION1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 5001 row(s)  (cost=0..0 rows=0) (actual time=692..692 rows=354 loops=1)\n    -> Table scan on analytics_q  (cost=2.5..2.5 rows=0) (actual time=692..692 rows=354 loops=1)\n        -> Materialize  (cost=0..0 rows=0) (actual time=692..692 rows=354 loops=1)\n            -> Sort: sale_month, f.flat_type  (actual time=691..691 rows=354 loops=1)\n                -> Table scan on <temporary>  (actual time=691..691 rows=354 loops=1)\n                    -> Aggregate using temporary table  (actual time=691..691 rows=354 loops=1)\n                        -> Nested loop inner join  (cost=108439 rows=240389) (actual time=0.982..517 rows=220064 loops=1)\n                            -> Filter: (f.flat_type in ('3 ROOM','4 ROOM','5 ROOM'))  (cost=24303 rows=240389) (actual time=0.97..78.8 rows=220064 loops=1)\n                                -> Covering index scan on f using ix_flat_type_block  (cost=24303 rows=240389) (actual time=0.0494..57.6 rows=242634 loops=1)\n                            -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.0015..0.00187 rows=1 loops=220064)\n",
+          "rows_examined": 354,
+          "rows_returned": 354,
+          "result_sha256": "77832bd3e2e6be2d2ef489b5ea3b2b910909807b6ef7a6490b2b69972d0afd8a",
+          "median_ms": 604.764,
+          "p95_ms": 627.512
+        }
+      }
+    },
+    "final": {
+      "mysql": "8.0.45",
+      "schema": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91",
+      "optimizer_switch": "index_merge=on,index_merge_union=on,index_merge_sort_union=on,index_merge_intersection=on,engine_condition_pushdown=on,index_condition_pushdown=on,mrr=on,mrr_cost_based=on,block_nested_loop=on,batched_key_access=off,materialization=on,semijoin=on,loosescan=on,firstmatch=on,duplicateweedout=on,subquery_materialization_cost_based=on,use_index_extensions=on,condition_fanout_filter=on,derived_merge=on,use_invisible_indexes=off,skip_scan=on,hash_join=on,subquery_to_derived=off,prefer_ordering_index=on,hypergraph_optimizer=off,derived_condition_pushdown=on",
+      "warmups": 5,
+      "samples": 30,
+      "index_bytes": {
+        "agents": 16384,
+        "flat": 13664256,
+        "nearby": 458752,
+        "place": 704512,
+        "resale_transaction": 15253504,
+        "stations": 32768
+      },
+      "queries": {
+        "agent_recent": {
+          "sql": "SELECT rt.FLAT_flat_id AS flat_id, rt.transaction_date, rt.resale_price, f.flat_type, f.flat_model, p.block_number, p.road_name, p.town FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE rt.AGENTS_agent_id = %s ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC LIMIT %s",
+          "parameters": [
+            1,
+            100
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,ix_rt_agent_date_flat",
+              "key": "ix_rt_agent_date_flat",
+              "key_len": "4",
+              "ref": "const",
+              "rows": 121268,
+              "filtered": 100.0,
+              "Extra": "Backward index scan"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 100 row(s)  (cost=97471 rows=100) (actual time=7.47..7.78 rows=100 loops=1)\n    -> Nested loop inner join  (cost=97471 rows=121268) (actual time=7.47..7.77 rows=100 loops=1)\n        -> Nested loop inner join  (cost=55027 rows=121268) (actual time=7.47..7.68 rows=100 loops=1)\n            -> Index lookup on rt using ix_rt_agent_date_flat (AGENTS_agent_id=1) (reverse)  (cost=12584 rows=121268) (actual time=7.46..7.47 rows=100 loops=1)\n            -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00199..0.002 rows=1 loops=100)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=856e-6..872e-6 rows=1 loops=100)\n",
+          "rows_examined": 300,
+          "rows_returned": 100,
+          "result_sha256": "f344c8ea3aa86843316cc76261022351f8081965400e5fc7bcfabfdc6ed22267",
+          "median_ms": 6.498,
+          "p95_ms": 7.675
+        },
+        "search_town_type": {
+          "sql": "SELECT rt.transaction_date, rt.resale_price, f.flat_id, f.flat_type, f.flat_model, f.storey_range, f.floor_area_sqm, f.remaining_lease_months, p.block_number, p.road_name, p.town, p.postal FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 AND f.flat_type = %s AND p.town = %s AND rt.resale_price >= %s AND rt.resale_price <= %s AND rt.transaction_date >= %s AND rt.transaction_date <= %s ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT 1000",
+          "parameters": [
+            "4 ROOM",
+            "TAMPINES",
+            "600000.00",
+            "900000.00",
+            "2025-01-01",
+            "2025-12-31"
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,ix_place_town_address",
+              "key": "ix_place_town_address",
+              "key_len": "137",
+              "ref": "const",
+              "rows": 799,
+              "filtered": 100.0,
+              "Extra": "Using temporary; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_BLOCK1_idx,ix_flat_type_block",
+              "key": "ix_flat_type_block",
+              "key_len": "141",
+              "ref": "const,estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.p.block_id",
+              "rows": 13,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,ix_rt_date,ix_rt_price",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 10.21,
+              "Extra": "Using where"
+            }
+          ],
+          "explain_analyze": "-> Limit: 1000 row(s)  (actual time=21.6..21.7 rows=790 loops=1)\n    -> Sort: rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC, limit input to 1000 row(s) per chunk  (actual time=21.6..21.7 rows=790 loops=1)\n        -> Stream results  (cost=7944 rows=1137) (actual time=0.138..21.3 rows=790 loops=1)\n            -> Nested loop inner join  (cost=7944 rows=1137) (actual time=0.135..21 rows=790 loops=1)\n                -> Nested loop inner join  (cost=4048 rows=11131) (actual time=0.0991..10.5 rows=7024 loops=1)\n                    -> Index lookup on p using ix_place_town_address (town='TAMPINES')  (cost=153 rows=799) (actual time=0.0759..0.658 rows=799 loops=1)\n                    -> Index lookup on f using ix_flat_type_block (flat_type='4 ROOM', block_id=p.block_id)  (cost=3.48 rows=13.9) (actual time=0.0079..0.012 rows=8.79 loops=799)\n                -> Filter: ((rt.resale_price >= 600000.00) and (rt.resale_price <= 900000.00) and (rt.transaction_date >= DATE'2025-01-01') and (rt.transaction_date <= DATE'2025-12-31'))  (cost=0.25 rows=0.102) (actual time=0.00138..0.00142 rows=0.112 loops=7024)\n                    -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00101..0.00126 rows=1 loops=7024)\n",
+          "rows_examined": 15637,
+          "rows_returned": 790,
+          "result_sha256": "17ec12e46a8256ab411ccd217aeb474613537766216da979ef935adf1ae8ad1e",
+          "median_ms": 24.057,
+          "p95_ms": 25.99
+        },
+        "search_date": {
+          "sql": "SELECT rt.transaction_date, rt.resale_price, f.flat_id, f.flat_type, f.flat_model, f.storey_range, f.floor_area_sqm, f.remaining_lease_months, p.block_number, p.road_name, p.town, p.postal FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 AND rt.transaction_date >= %s AND rt.transaction_date <= %s ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT 1000",
+          "parameters": [
+            "2025-01-01",
+            "2025-12-31"
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "range",
+              "possible_keys": "PRIMARY,ix_rt_date",
+              "key": "ix_rt_date",
+              "key_len": "3",
+              "ref": null,
+              "rows": 49550,
+              "filtered": 100.0,
+              "Extra": "Using index condition; Backward index scan"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 1000 row(s)  (cost=56983 rows=1000) (actual time=6.61..9.13 rows=1000 loops=1)\n    -> Nested loop inner join  (cost=56983 rows=49550) (actual time=6.61..9.09 rows=1000 loops=1)\n        -> Nested loop inner join  (cost=39640 rows=49550) (actual time=6.6..8.29 rows=1000 loops=1)\n            -> Index range scan on rt using ix_rt_date over ('2025-01-01' <= transaction_date <= '2025-12-31') (reverse), with index condition: ((rt.transaction_date >= DATE'2025-01-01') and (rt.transaction_date <= DATE'2025-12-31'))  (cost=22298 rows=49550) (actual time=6.59..6.67 rows=1000 loops=1)\n            -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00152..0.00154 rows=1 loops=1000)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=694e-6..709e-6 rows=1 loops=1000)\n",
+          "rows_examined": 3000,
+          "rows_returned": 1000,
+          "result_sha256": "5144841bb35feb51ce581cdeda493665d45b69bf659d09825b44d7dfad3a90d2",
+          "median_ms": 8.46,
+          "p95_ms": 9.963
+        },
+        "search_price": {
+          "sql": "SELECT rt.transaction_date, rt.resale_price, f.flat_id, f.flat_type, f.flat_model, f.storey_range, f.floor_area_sqm, f.remaining_lease_months, p.block_number, p.road_name, p.town, p.postal FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 AND rt.resale_price >= %s AND rt.resale_price <= %s ORDER BY rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT 1000",
+          "parameters": [
+            "1400000.00",
+            "1600000.00"
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "range",
+              "possible_keys": "PRIMARY,ix_rt_price",
+              "key": "ix_rt_price",
+              "key_len": "6",
+              "ref": null,
+              "rows": 293,
+              "filtered": 100.0,
+              "Extra": "Using index condition; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 1000 row(s)  (cost=337 rows=293) (actual time=0.5..1.17 rows=293 loops=1)\n    -> Nested loop inner join  (cost=337 rows=293) (actual time=0.5..1.16 rows=293 loops=1)\n        -> Nested loop inner join  (cost=235 rows=293) (actual time=0.498..0.98 rows=293 loops=1)\n            -> Sort: rt.transaction_date DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC  (cost=132 rows=293) (actual time=0.491..0.501 rows=293 loops=1)\n                -> Index range scan on rt using ix_rt_price over (1400000.00 <= resale_price <= 1600000.00), with index condition: ((rt.resale_price >= 1400000.00) and (rt.resale_price <= 1600000.00))  (cost=132 rows=293) (actual time=0.349..0.439 rows=293 loops=1)\n            -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00155..0.00156 rows=1 loops=293)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=536e-6..551e-6 rows=1 loops=293)\n",
+          "rows_examined": 1172,
+          "rows_returned": 293,
+          "result_sha256": "204168a3f41c13fc45df9657a55084182fd79bcb2e1fa8b5c0c0e06c2e921cd0",
+          "median_ms": 1.512,
+          "p95_ms": 1.833
+        },
+        "place_list": {
+          "sql": "SELECT block_id, block_number, road_name, town FROM `place` ORDER BY town, road_name, block_number",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "place",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": null,
+              "key": "ix_place_town_address",
+              "key_len": "411",
+              "ref": null,
+              "rows": 10054,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            }
+          ],
+          "explain_analyze": "-> Covering index scan on place using ix_place_town_address  (cost=1030 rows=10054) (actual time=0.0629..1.15 rows=9964 loops=1)\n",
+          "rows_examined": 9964,
+          "rows_returned": 9964,
+          "result_sha256": "b46a8e494b1f0c2bab9ec153d562af88c0f5678706a1fdec89c445c372114928",
+          "median_ms": 6.697,
+          "p95_ms": 7.206
+        },
+        "flat_types": {
+          "sql": "SELECT DISTINCT flat_type FROM `flat` ORDER BY flat_type",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "flat",
+              "partitions": null,
+              "type": "range",
+              "possible_keys": "ix_flat_type_block",
+              "key": "ix_flat_type_block",
+              "key_len": "137",
+              "ref": null,
+              "rows": 7,
+              "filtered": 100.0,
+              "Extra": "Using index for group-by"
+            }
+          ],
+          "explain_analyze": "-> Covering index skip scan for deduplication on flat using ix_flat_type_block  (cost=9.78 rows=7) (actual time=0.0242..0.0483 rows=7 loops=1)\n",
+          "rows_examined": 0,
+          "rows_returned": 7,
+          "result_sha256": "91c3d55eac5f0963ff9614002cea6b3d26bf013bc5b3ddfd5d1419c7dca638ec",
+          "median_ms": 0.083,
+          "p95_ms": 0.229
+        },
+        "top_sales": {
+          "sql": "SELECT rt.transaction_date, p.town, p.block_number, p.road_name, f.flat_type, f.floor_area_sqm, rt.resale_price FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 ORDER BY rt.resale_price DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT %s",
+          "parameters": [
+            10
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY",
+              "key": "ix_rt_price",
+              "key_len": "6",
+              "ref": null,
+              "rows": 10,
+              "filtered": 100.0,
+              "Extra": "Backward index scan"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 10 row(s)  (cost=121270 rows=10) (actual time=0.0553..0.0881 rows=10 loops=1)\n    -> Nested loop inner join  (cost=121270 rows=10) (actual time=0.0549..0.0874 rows=10 loops=1)\n        -> Nested loop inner join  (cost=60635 rows=10) (actual time=0.0528..0.0764 rows=10 loops=1)\n            -> Index scan on rt using ix_rt_price (reverse)  (cost=0.00632 rows=10) (actual time=0.0472..0.0485 rows=10 loops=1)\n            -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00267..0.00269 rows=1 loops=10)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=990e-6..0.00103 rows=1 loops=10)\n",
+          "rows_examined": 30,
+          "rows_returned": 10,
+          "result_sha256": "180baabb5aa7741d77d7de6352654386ae9eb135cc2afde9f322475b653603da",
+          "median_ms": 0.158,
+          "p95_ms": 0.359
+        },
+        "top_sales_4room": {
+          "sql": "SELECT rt.transaction_date, p.town, p.block_number, p.road_name, f.flat_type, f.floor_area_sqm, rt.resale_price FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id JOIN `place` AS p ON p.block_id = f.block_id WHERE 1 = 1 AND f.flat_type = %s ORDER BY rt.resale_price DESC, rt.FLAT_flat_id DESC, rt.AGENTS_agent_id DESC LIMIT %s",
+          "parameters": [
+            "4 ROOM",
+            10
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "rt",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY",
+              "key": "ix_rt_price",
+              "key_len": "6",
+              "ref": null,
+              "rows": 20,
+              "filtered": 100.0,
+              "Extra": "Backward index scan"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_BLOCK1_idx,ix_flat_type_block",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.rt.FLAT_flat_id",
+              "rows": 1,
+              "filtered": 50.0,
+              "Extra": "Using where"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 10 row(s)  (cost=90954 rows=10) (actual time=0.158..0.658 rows=10 loops=1)\n    -> Nested loop inner join  (cost=90954 rows=10) (actual time=0.158..0.657 rows=10 loops=1)\n        -> Nested loop inner join  (cost=60636 rows=10) (actual time=0.156..0.648 rows=10 loops=1)\n            -> Index scan on rt using ix_rt_price (reverse)  (cost=0.0127 rows=20) (actual time=0.0433..0.334 rows=157 loops=1)\n            -> Filter: (f.flat_type = '4 ROOM')  (cost=0.25 rows=0.5) (actual time=0.00194..0.00194 rows=0.0637 loops=157)\n                -> Single-row index lookup on f using PRIMARY (flat_id=rt.FLAT_flat_id)  (cost=0.25 rows=1) (actual time=0.00181..0.00183 rows=1 loops=157)\n        -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.25 rows=1) (actual time=740e-6..750e-6 rows=1 loops=10)\n",
+          "rows_examined": 324,
+          "rows_returned": 10,
+          "result_sha256": "72056526ea9dcce31338def21de30335d354a6579be4c5a063a8e77f69282b83",
+          "median_ms": 0.47,
+          "p95_ms": 0.642
+        },
+        "rank_towns": {
+          "sql": "WITH block_sales AS (SELECT f.block_id, COUNT(*) AS sales, SUM(rt.resale_price) AS price_total, SUM(CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6))) AS psm_total, SUM(CASE WHEN rt.transaction_date > DATE_SUB(m.latest, INTERVAL 12 MONTH) THEN 1 ELSE 0 END) AS recent_sales, SUM(CASE WHEN rt.transaction_date > DATE_SUB(m.latest, INTERVAL 12 MONTH) THEN CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6)) END) AS recent_total, SUM(CASE WHEN rt.transaction_date > DATE_SUB(m.latest, INTERVAL 24 MONTH) AND rt.transaction_date <= DATE_SUB(m.latest, INTERVAL 12 MONTH) THEN 1 ELSE 0 END) AS prior_sales, SUM(CASE WHEN rt.transaction_date > DATE_SUB(m.latest, INTERVAL 24 MONTH) AND rt.transaction_date <= DATE_SUB(m.latest, INTERVAL 12 MONTH) THEN CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6)) END) AS prior_total FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id CROSS JOIN (SELECT MAX(transaction_date) AS latest FROM `resale_transaction`) AS m WHERE 1 = 1 GROUP BY f.block_id) SELECT p.town, CAST(SUM(b.sales) AS UNSIGNED) AS sales, SUM(b.psm_total) / SUM(b.sales) AS avg_psm, SUM(b.price_total) / SUM(b.sales) AS avg_price, SUM(b.recent_sales) AS recent_sales, SUM(b.recent_total) / NULLIF(SUM(b.recent_sales), 0) AS recent_psm, SUM(b.prior_sales) AS prior_sales, SUM(b.prior_total) / NULLIF(SUM(b.prior_sales), 0) AS prior_psm FROM block_sales AS b JOIN `place` AS p ON p.block_id = b.block_id GROUP BY p.town",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "p",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,ix_place_town_address",
+              "key": "ix_place_town_address",
+              "key_len": "411",
+              "ref": null,
+              "rows": 10054,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "<auto_key0>",
+              "key": "<auto_key0>",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.p.block_id",
+              "rows": 23,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "<derived3>",
+              "partitions": null,
+              "type": "system",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_BLOCK1_idx,ix_flat_type_block",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 240754,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 3,
+              "select_type": "DERIVED",
+              "table": null,
+              "partitions": null,
+              "type": null,
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": null,
+              "filtered": null,
+              "Extra": "Select tables optimized away"
+            }
+          ],
+          "explain_analyze": "-> Group aggregate: sum(b.prior_sales), sum(b.prior_total), sum(b.recent_sales), sum(b.recent_total), sum(b.sales), sum(b.price_total), sum(b.sales), sum(b.psm_total), sum(b.sales), sum(b.recent_sales), sum(b.prior_sales)  (cost=61218 rows=0) (actual time=699..710 rows=26 loops=1)\n    -> Nested loop inner join  (cost=61218 rows=0) (actual time=699..706 rows=9761 loops=1)\n        -> Covering index scan on p using ix_place_town_address  (cost=1030 rows=10054) (actual time=0.0203..1.36 rows=9964 loops=1)\n        -> Index lookup on b using <auto_key0> (block_id=p.block_id)  (cost=0.25..5.99 rows=23.9) (actual time=0.0705..0.0706 rows=0.98 loops=9964)\n            -> Materialize CTE block_sales  (cost=0..0 rows=0) (actual time=699..699 rows=9761 loops=1)\n                -> Table scan on <temporary>  (actual time=694..695 rows=9761 loops=1)\n                    -> Aggregate using temporary table  (actual time=694..694 rows=9761 loops=1)\n                        -> Nested loop inner join  (cost=108604 rows=240754) (actual time=0.0487..428 rows=242634 loops=1)\n                            -> Table scan on f  (cost=24340 rows=240754) (actual time=0.0427..42 rows=242634 loops=1)\n                            -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00114..0.00146 rows=1 loops=242634)\n",
+          "rows_examined": 19726,
+          "rows_returned": 26,
+          "result_sha256": "386ef4ab79a02c47d842d018eea83432c0dc2ca5edc8a75dfbcc9efe3d2c13d0",
+          "median_ms": 670.389,
+          "p95_ms": 680.678
+        },
+        "rank_streets": {
+          "sql": "WITH block_sales AS (SELECT f.block_id, COUNT(*) AS sales, SUM(rt.resale_price) AS price_total FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id WHERE 1 = 1 GROUP BY f.block_id) SELECT p.town, p.road_name, CAST(SUM(b.sales) AS UNSIGNED) AS sales, SUM(b.price_total) / SUM(b.sales) AS avg_price FROM block_sales AS b JOIN `place` AS p ON p.block_id = b.block_id GROUP BY p.town, p.road_name HAVING SUM(b.sales) >= %s ORDER BY avg_price DESC LIMIT %s",
+          "parameters": [
+            30,
+            10
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "p",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,ix_place_town_address",
+              "key": "ix_place_town_address",
+              "key_len": "411",
+              "ref": null,
+              "rows": 10054,
+              "filtered": 100.0,
+              "Extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "<auto_key0>",
+              "key": "<auto_key0>",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.p.block_id",
+              "rows": 23,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_BLOCK1_idx,ix_flat_type_block",
+              "key": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key_len": "4",
+              "ref": null,
+              "rows": 240754,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 10 row(s)  (actual time=470..470 rows=10 loops=1)\n    -> Sort: avg_price DESC  (actual time=470..470 rows=10 loops=1)\n        -> Filter: (`sum(b.sales)` >= 30)  (actual time=460..470 rows=551 loops=1)\n            -> Stream results  (cost=18.1e+6 rows=764) (actual time=460..470 rows=580 loops=1)\n                -> Group aggregate: sum(b.sales), sum(b.sales), sum(b.price_total), sum(b.sales)  (cost=18.1e+6 rows=764) (actual time=460..469 rows=580 loops=1)\n                    -> Nested loop inner join  (cost=9.1e+6 rows=90.4e+6) (actual time=460..467 rows=9761 loops=1)\n                        -> Covering index scan on p using ix_place_town_address  (cost=1030 rows=10054) (actual time=0.0357..1.54 rows=9964 loops=1)\n                        -> Index lookup on b using <auto_key0> (block_id=p.block_id)  (cost=133579..133584 rows=23.9) (actual time=0.0466..0.0466 rows=0.98 loops=9964)\n                            -> Materialize CTE block_sales  (cost=133578..133578 rows=8993) (actual time=460..460 rows=9761 loops=1)\n                                -> Group aggregate: count(0), sum(rt.resale_price)  (cost=132679 rows=8993) (actual time=0.108..454 rows=9761 loops=1)\n                                    -> Nested loop inner join  (cost=108604 rows=240754) (actual time=0.0299..433 rows=242634 loops=1)\n                                        -> Covering index scan on f using fk_RESALE_TRANSACTION_BLOCK1_idx  (cost=24340 rows=240754) (actual time=0.0196..31.3 rows=242634 loops=1)\n                                        -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00128..0.00154 rows=1 loops=242634)\n",
+          "rows_examined": 19735,
+          "rows_returned": 10,
+          "result_sha256": "6a0a268adbb38f725564d0aad4cb5ecb6444f73e9cb7d6210bfbafc746f52e39",
+          "median_ms": 397.326,
+          "p95_ms": 408.994
+        },
+        "rank_stations": {
+          "sql": "WITH block_sales AS (SELECT f.block_id, COUNT(*) AS sales, SUM(CAST(rt.resale_price / f.floor_area_sqm AS DECIMAL(20,6))) AS psm_total FROM `resale_transaction` AS rt JOIN `flat` AS f ON f.flat_id = rt.FLAT_flat_id WHERE 1 = 1 GROUP BY f.block_id) SELECT ns.station_name, MIN(ns.station_code) AS station_code, CAST(SUM(b.sales) AS UNSIGNED) AS sales, SUM(b.psm_total) / SUM(b.sales) AS avg_psm FROM block_sales AS b JOIN (SELECT n.PLACE_block_id AS block_id, s.station_name, MIN(s.station_code) AS station_code FROM `nearby` AS n JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id WHERE n.distance_m <= %s GROUP BY n.PLACE_block_id, s.station_name) AS ns ON ns.block_id = b.block_id GROUP BY ns.station_name HAVING SUM(b.sales) >= %s",
+          "parameters": [
+            500,
+            200
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived3>",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 7854,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "<auto_key0>",
+              "key": "<auto_key0>",
+              "key_len": "4",
+              "ref": "ns.block_id",
+              "rows": 30,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 3,
+              "select_type": "DERIVED",
+              "table": "s",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 203,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 3,
+              "select_type": "DERIVED",
+              "table": "n",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.s.station_id",
+              "rows": 116,
+              "filtered": 33.33,
+              "Extra": "Using where"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": "PRIMARY,fk_RESALE_TRANSACTION_BLOCK1_idx,ix_flat_type_block",
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 240754,
+              "filtered": 100.0,
+              "Extra": "Using temporary"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Filter: (`sum(b.sales)` >= 200)  (actual time=530..530 rows=110 loops=1)\n    -> Table scan on <temporary>  (actual time=530..530 rows=132 loops=1)\n        -> Aggregate using temporary table  (actual time=530..530 rows=132 loops=1)\n            -> Nested loop inner join  (cost=60191 rows=0) (actual time=522..527 rows=5787 loops=1)\n                -> Table scan on ns  (cost=2.5..2.5 rows=0) (actual time=8.13..8.6 rows=6054 loops=1)\n                    -> Materialize  (cost=0..0 rows=0) (actual time=8.13..8.13 rows=6054 loops=1)\n                        -> Table scan on <temporary>  (actual time=7.02..7.42 rows=6054 loops=1)\n                            -> Aggregate using temporary table  (actual time=7.02..7.02 rows=6054 loops=1)\n                                -> Nested loop inner join  (cost=2437 rows=7855) (actual time=0.0266..4 rows=6614 loops=1)\n                                    -> Table scan on s  (cost=20.6 rows=203) (actual time=0.0109..0.0559 rows=203 loops=1)\n                                    -> Filter: (n.distance_m <= 500)  (cost=0.312 rows=38.7) (actual time=0.00753..0.0182 rows=32.6 loops=203)\n                                        -> Index lookup on n using PRIMARY (STATIONS_station_id=s.station_id)  (cost=0.312 rows=116) (actual time=0.00618..0.0149 rows=119 loops=203)\n                -> Index lookup on b using <auto_key0> (block_id=ns.block_id)  (cost=0.25..7.66 rows=30.7) (actual time=0.0854..0.0855 rows=0.956 loops=6054)\n                    -> Materialize CTE block_sales  (cost=0..0 rows=0) (actual time=514..514 rows=9761 loops=1)\n                        -> Table scan on <temporary>  (actual time=510..511 rows=9761 loops=1)\n                            -> Aggregate using temporary table  (actual time=510..510 rows=9761 loops=1)\n                                -> Nested loop inner join  (cost=108604 rows=240754) (actual time=0.0484..397 rows=242634 loops=1)\n                                    -> Table scan on f  (cost=24340 rows=240754) (actual time=0.0421..39.2 rows=242634 loops=1)\n                                    -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00107..0.00136 rows=1 loops=242634)\n",
+          "rows_examined": 11841,
+          "rows_returned": 110,
+          "result_sha256": "19a332817da3602760ebe67fcb56f24f882399cce513a3f4a1e9053367e0e0c5",
+          "median_ms": 485.411,
+          "p95_ms": 496.787
+        },
+        "nearby_ew2": {
+          "sql": "SELECT f.flat_id, f.flat_type, f.storey_range, p.town, p.block_number, p.road_name, COUNT(s.station_id) AS station_count, MIN(n.distance_m) AS nearest_m, GROUP_CONCAT(CONCAT(s.station_code, ' ', s.station_name, ' (', n.distance_m, ' m)') ORDER BY n.distance_m, s.station_code SEPARATOR ', ') AS nearby_stations FROM (SELECT f.flat_id, f.flat_type, f.storey_range, f.block_id FROM `flat` AS f WHERE f.block_id IN (SELECT n.PLACE_block_id FROM `nearby` AS n JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id WHERE s.station_code IN (%s) AND n.distance_m <= %s) ORDER BY f.flat_id LIMIT %s OFFSET %s) AS f JOIN `place` AS p ON p.block_id = f.block_id JOIN `nearby` AS n ON n.PLACE_block_id = f.block_id JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id WHERE s.station_code IN (%s) AND n.distance_m <= %s GROUP BY f.flat_id, f.flat_type, f.storey_range, p.town, p.block_number, p.road_name ORDER BY f.flat_id",
+          "parameters": [
+            "EW2",
+            500,
+            100,
+            0,
+            "EW2",
+            500
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "s",
+              "partitions": null,
+              "type": "const",
+              "possible_keys": "PRIMARY,station_code_UNIQUE",
+              "key": "station_code_UNIQUE",
+              "key_len": "137",
+              "ref": "const",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": "Using temporary; Using filesort"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 100,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "n",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY,ix_nearby_block_distance",
+              "key": "PRIMARY",
+              "key_len": "8",
+              "ref": "const,f.block_id",
+              "rows": 1,
+              "filtered": 33.33,
+              "Extra": "Using where"
+            },
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "p",
+              "partitions": null,
+              "type": "eq_ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "f.block_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "s",
+              "partitions": null,
+              "type": "const",
+              "possible_keys": "PRIMARY,station_code_UNIQUE",
+              "key": "station_code_UNIQUE",
+              "key_len": "137",
+              "ref": "const",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": "Using index; Using temporary; Using filesort"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "n",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,ix_nearby_block_distance",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "const",
+              "rows": 273,
+              "filtered": 33.33,
+              "Extra": "Using where"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.n.PLACE_block_id",
+              "rows": 26,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Group aggregate: count('29'), min(nearby.distance_m), group_concat(tmp_field order by nearby.distance_m ASC,'EW2' ASC separator ', ')  (actual time=2.16..2.21 rows=100 loops=1)\n    -> Sort: f.flat_id, f.flat_type, f.storey_range, p.town, p.block_number, p.road_name  (actual time=2.16..2.16 rows=100 loops=1)\n        -> Stream results  (cost=35.8 rows=0) (actual time=1.82..2.11 rows=100 loops=1)\n            -> Nested loop inner join  (cost=35.8 rows=0) (actual time=1.81..2.04 rows=100 loops=1)\n                -> Nested loop inner join  (cost=27.5 rows=0) (actual time=1.81..1.96 rows=100 loops=1)\n                    -> Table scan on f  (cost=2.5..2.5 rows=0) (actual time=1.8..1.81 rows=100 loops=1)\n                        -> Materialize  (cost=0..0 rows=0) (actual time=1.8..1.8 rows=100 loops=1)\n                            -> Limit: 100 row(s)  (actual time=1.78..1.79 rows=100 loops=1)\n                                -> Sort: f.flat_id, limit input to 100 row(s) per chunk  (actual time=1.78..1.78 rows=100 loops=1)\n                                    -> Stream results  (cost=862 rows=2436) (actual time=0.048..1.68 rows=1080 loops=1)\n                                        -> Nested loop inner join  (cost=862 rows=2436) (actual time=0.0468..1.56 rows=1080 loops=1)\n                                            -> Filter: (n.distance_m <= 500)  (cost=9.45 rows=91) (actual time=0.0221..0.0456 rows=51 loops=1)\n                                                -> Index lookup on n using PRIMARY (STATIONS_station_id='29')  (cost=9.45 rows=273) (actual time=0.0188..0.037 rows=273 loops=1)\n                                            -> Index lookup on f using fk_RESALE_TRANSACTION_BLOCK1_idx (block_id=n.PLACE_block_id)  (cost=6.72 rows=26.8) (actual time=0.0118..0.029 rows=21.2 loops=51)\n                    -> Filter: (n.distance_m <= 500)  (cost=0.25 rows=0.333) (actual time=0.00136..0.00141 rows=1 loops=100)\n                        -> Single-row index lookup on n using PRIMARY (STATIONS_station_id='29', PLACE_block_id=f.block_id)  (cost=0.25 rows=1) (actual time=0.00128..0.0013 rows=1 loops=100)\n                -> Single-row index lookup on p using PRIMARY (block_id=f.block_id)  (cost=0.253 rows=1) (actual time=715e-6..734e-6 rows=1 loops=100)\n",
+          "rows_examined": 400,
+          "rows_returned": 100,
+          "result_sha256": "ebe736a8dd9761dcd82617acf74016f85e9546bc831c4070caac2e9c3b3b38db",
+          "median_ms": 1.849,
+          "p95_ms": 2.212
+        },
+        "nearby_count_ew2": {
+          "sql": "SELECT COUNT(*) FROM `flat` AS f WHERE f.block_id IN (SELECT n.PLACE_block_id FROM `nearby` AS n JOIN `stations` AS s ON s.station_id = n.STATIONS_station_id WHERE s.station_code IN (%s) AND n.distance_m <= %s)",
+          "parameters": [
+            "EW2",
+            500
+          ],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "s",
+              "partitions": null,
+              "type": "const",
+              "possible_keys": "PRIMARY,station_code_UNIQUE",
+              "key": "station_code_UNIQUE",
+              "key_len": "137",
+              "ref": "const",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "n",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY,ix_nearby_block_distance",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "const",
+              "rows": 273,
+              "filtered": 33.33,
+              "Extra": "Using where"
+            },
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "f",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key": "fk_RESALE_TRANSACTION_BLOCK1_idx",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.n.PLACE_block_id",
+              "rows": 26,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            }
+          ],
+          "explain_analyze": "-> Aggregate: count(0)  (cost=520 rows=1) (actual time=0.252..0.252 rows=1 loops=1)\n    -> Nested loop inner join  (cost=276 rows=2436) (actual time=0.0285..0.227 rows=1080 loops=1)\n        -> Filter: (n.distance_m <= 500)  (cost=9.45 rows=91) (actual time=0.0242..0.0447 rows=51 loops=1)\n            -> Index lookup on n using PRIMARY (STATIONS_station_id='29')  (cost=9.45 rows=273) (actual time=0.0211..0.0382 rows=273 loops=1)\n        -> Covering index lookup on f using fk_RESALE_TRANSACTION_BLOCK1_idx (block_id=n.PLACE_block_id)  (cost=0.286 rows=26.8) (actual time=0.00124..0.0029 rows=21.2 loops=51)\n",
+          "rows_examined": 1353,
+          "rows_returned": 1,
+          "result_sha256": "25301066da0654a2967176ea47c26f6735b2cfcbd206f49fe1379f5103bb7b1f",
+          "median_ms": 0.395,
+          "p95_ms": 0.532
+        },
+        "nearest_by_block": {
+          "sql": "SELECT PLACE_block_id, MIN(distance_m) FROM nearby GROUP BY PLACE_block_id",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": "nearby",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,ix_nearby_block_distance",
+              "key": "ix_nearby_block_distance",
+              "key_len": "8",
+              "ref": null,
+              "rows": 19620,
+              "filtered": 100.0,
+              "Extra": "Using index"
+            }
+          ],
+          "explain_analyze": "-> Group aggregate: min(nearby.distance_m)  (cost=3964 rows=9964) (actual time=0.0927..3.66 rows=9964 loops=1)\n    -> Covering index scan on nearby using ix_nearby_block_distance  (cost=2002 rows=19620) (actual time=0.0905..2.41 rows=24178 loops=1)\n",
+          "rows_examined": 24178,
+          "rows_returned": 9964,
+          "result_sha256": "661618585ae57760f71b3e71818a61301a6d1db985b9e4277c331b8cee590229",
+          "median_ms": 5.761,
+          "p95_ms": 6.015
+        },
+        "latest_date": {
+          "sql": "SELECT MAX(transaction_date) FROM `resale_transaction`",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "SIMPLE",
+              "table": null,
+              "partitions": null,
+              "type": null,
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": null,
+              "filtered": null,
+              "Extra": "Select tables optimized away"
+            }
+          ],
+          "explain_analyze": "-> Rows fetched before execution  (cost=0..0 rows=1) (actual time=100e-6..100e-6 rows=1 loops=1)\n",
+          "rows_examined": 1,
+          "rows_returned": 1,
+          "result_sha256": "33db5d408789e8ec40972ae8924ed3c1bcd4ba97587236fd786c2aa0fad971c3",
+          "median_ms": 0.099,
+          "p95_ms": 0.203
+        },
+        "monthly_card": {
+          "sql": "SELECT * FROM (SELECT DATE_FORMAT(rt.transaction_date, '%Y-%m-01') AS sale_month,\n       f.flat_type,\n       ROUND(AVG(rt.resale_price)) AS avg_price\nFROM resale_transaction rt JOIN flat f ON f.flat_id = rt.FLAT_flat_id \nWHERE f.flat_type IN ('3 ROOM', '4 ROOM', '5 ROOM')\nGROUP BY sale_month, f.flat_type\nORDER BY sale_month) AS analytics_q LIMIT 5001",
+          "parameters": [],
+          "explain": [
+            {
+              "id": 1,
+              "select_type": "PRIMARY",
+              "table": "<derived2>",
+              "partitions": null,
+              "type": "ALL",
+              "possible_keys": null,
+              "key": null,
+              "key_len": null,
+              "ref": null,
+              "rows": 240754,
+              "filtered": 100.0,
+              "Extra": null
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "f",
+              "partitions": null,
+              "type": "index",
+              "possible_keys": "PRIMARY,ix_flat_type_block",
+              "key": "ix_flat_type_block",
+              "key_len": "141",
+              "ref": null,
+              "rows": 240754,
+              "filtered": 100.0,
+              "Extra": "Using where; Using index; Using temporary; Using filesort"
+            },
+            {
+              "id": 2,
+              "select_type": "DERIVED",
+              "table": "rt",
+              "partitions": null,
+              "type": "ref",
+              "possible_keys": "PRIMARY",
+              "key": "PRIMARY",
+              "key_len": "4",
+              "ref": "estate_evidence_6a7dbcb956b345f78be4dfaec2952f91.f.flat_id",
+              "rows": 1,
+              "filtered": 100.0,
+              "Extra": null
+            }
+          ],
+          "explain_analyze": "-> Limit: 5001 row(s)  (cost=0..0 rows=0) (actual time=649..649 rows=354 loops=1)\n    -> Table scan on analytics_q  (cost=2.5..2.5 rows=0) (actual time=649..649 rows=354 loops=1)\n        -> Materialize  (cost=0..0 rows=0) (actual time=649..649 rows=354 loops=1)\n            -> Sort: sale_month, f.flat_type  (actual time=649..649 rows=354 loops=1)\n                -> Table scan on <temporary>  (actual time=648..648 rows=354 loops=1)\n                    -> Aggregate using temporary table  (actual time=648..648 rows=354 loops=1)\n                        -> Nested loop inner join  (cost=108604 rows=240754) (actual time=0.71..476 rows=220064 loops=1)\n                            -> Filter: (f.flat_type in ('3 ROOM','4 ROOM','5 ROOM'))  (cost=24340 rows=240754) (actual time=0.704..56.5 rows=220064 loops=1)\n                                -> Covering index scan on f using ix_flat_type_block  (cost=24340 rows=240754) (actual time=0.0722..34.9 rows=242634 loops=1)\n                            -> Index lookup on rt using PRIMARY (FLAT_flat_id=f.flat_id)  (cost=0.25 rows=1) (actual time=0.00142..0.00179 rows=1 loops=220064)\n",
+          "rows_examined": 354,
+          "rows_returned": 354,
+          "result_sha256": "77832bd3e2e6be2d2ef489b5ea3b2b910909807b6ef7a6490b2b69972d0afd8a",
+          "median_ms": 571.959,
+          "p95_ms": 629.357
+        }
+      }
+    }
+  },
+  "comparison": {
+    "agent_recent": {
+      "same_rows": true,
+      "median_change_ms": -187.032
+    },
+    "search_town_type": {
+      "same_rows": true,
+      "median_change_ms": -13.926
+    },
+    "search_date": {
+      "same_rows": true,
+      "median_change_ms": -33.412
+    },
+    "search_price": {
+      "same_rows": true,
+      "median_change_ms": -32.763
+    },
+    "place_list": {
+      "same_rows": true,
+      "median_change_ms": -10.254
+    },
+    "flat_types": {
+      "same_rows": true,
+      "median_change_ms": -49.302
+    },
+    "top_sales": {
+      "same_rows": true,
+      "median_change_ms": -91.832
+    },
+    "top_sales_4room": {
+      "same_rows": true,
+      "median_change_ms": -316.491
+    },
+    "rank_towns": {
+      "same_rows": true,
+      "median_change_ms": -37.091
+    },
+    "rank_streets": {
+      "same_rows": true,
+      "median_change_ms": -9.716
+    },
+    "rank_stations": {
+      "same_rows": true,
+      "median_change_ms": 1.902
+    },
+    "nearby_ew2": {
+      "same_rows": true,
+      "median_change_ms": -0.064
+    },
+    "nearby_count_ew2": {
+      "same_rows": true,
+      "median_change_ms": 0.02
+    },
+    "nearest_by_block": {
+      "same_rows": true,
+      "median_change_ms": -16.762
+    },
+    "latest_date": {
+      "same_rows": true,
+      "median_change_ms": -23.245
+    },
+    "monthly_card": {
+      "same_rows": true,
+      "median_change_ms": 22.001
+    }
+  }
+}

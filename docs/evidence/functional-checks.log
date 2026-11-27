@@ -1,0 +1,10 @@
+PASS | Streamlit registration, reserved administrator registration rejection, incorrect password rejection, case-normalized login and salted scrypt storage
+PASS | Streamlit resale create, owner list and update, verified from a separate MySQL connection
+PASS | Streamlit saved-search create, retrieval, edit and rejection of inverted prices and dates, with persisted values unchanged
+PASS | Run saved search restored filters and returned the updated MySQL price, matching direct search
+PASS | Same-session account switch, agent-scoped MySQL read/update/delete, shared market search, MongoDB saved-search ownership and read-only flat catalogue for regular agents
+PASS | Streamlit owner successfully deleted the saved search and resale transaction
+PASS | Analytics card CRUD and cross-agent restrictions on live MongoDB, fresh client and AppTest session persistence, and 8 defaults seeded once with one deleted default restored
+PASS | Provisioned administrator used Streamlit to create and update a shared flat; DECIMAL area persisted in MySQL
+PASS | Live connection rejected four representative unsafe analytics statements and ran a safe SELECT with the configured timeout and rollback
+Functional evidence completed in 3.148 s. Fixtures removed.
