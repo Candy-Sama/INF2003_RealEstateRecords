@@ -195,9 +195,10 @@ def _render_comparable_sales_subview(
         "months": int(months),
         "similar_size": bool(similar_size),
     }
-    rows, truncated, cutoff_date = repository.search_comparable_sales(
-        connection, reference, station_ids, options, row_cap=repository.COMPARABLE_ROW_CAP
-    )
+    with st.spinner("Finding comparable sales…"):
+        rows, truncated, cutoff_date = repository.search_comparable_sales(
+            connection, reference, station_ids, options, row_cap=repository.COMPARABLE_ROW_CAP
+        )
     summary = repository.summarize_comparable_sales(rows, reference.get("price_per_sqm"))
 
     sample_count = summary["sample_count"]
@@ -364,15 +365,17 @@ def render_nearby_stations(connection: Any) -> None:
 
     station_ids: list[int] = []
     if focus is None:
-        total = repository.count_nearby_flats(connection, filters)
+        with st.spinner("Counting flats near the selected stations…"):
+            total = repository.count_nearby_flats(connection, filters)
         if clear_label:
             st.caption(f"{total:,} flat(s) near the selected stations or distance.")
         else:
             st.caption(f"All flat records · {total:,} flat(s).")
     else:
-        selected = repository.search_nearby_flats(
-            connection, {"flat_ids": [focus["flat_id"]]}, 1, 0
-        )
+        with st.spinner("Loading the selected flat…"):
+            selected = repository.search_nearby_flats(
+                connection, {"flat_ids": [focus["flat_id"]]}, 1, 0
+            )
         if not selected:
             st.warning("The selected flat no longer exists.")
             st.session_state.pop("nearby_focus", None)
@@ -407,7 +410,8 @@ def render_nearby_stations(connection: Any) -> None:
             _render_comparable_sales_subview(connection, ref_profile, station_ids, selected[0]["nearest_m"])
             return
 
-        total = repository.count_similar_flats(connection, focus["flat_id"], station_ids)
+        with st.spinner("Counting flats near the same stations…"):
+            total = repository.count_similar_flats(connection, focus["flat_id"], station_ids)
         st.markdown("**Flats near the same stations** · most shared stations first")
 
     signature = repr((
@@ -433,14 +437,15 @@ def render_nearby_stations(connection: Any) -> None:
         return
 
     offset = (page - 1) * NEARBY_PAGE_SIZE
-    if focus is None:
-        rows = repository.search_nearby_flats(
-            connection, filters, NEARBY_PAGE_SIZE, offset, matching_flat_count=total,
-        )
-    else:
-        rows = repository.search_similar_flats(
-            connection, focus["flat_id"], station_ids, NEARBY_PAGE_SIZE, offset
-        )
+    with st.spinner("Loading nearby flats…"):
+        if focus is None:
+            rows = repository.search_nearby_flats(
+                connection, filters, NEARBY_PAGE_SIZE, offset, matching_flat_count=total,
+            )
+        else:
+            rows = repository.search_similar_flats(
+                connection, focus["flat_id"], station_ids, NEARBY_PAGE_SIZE, offset
+            )
     if not rows:
         st.info("No flats to show.")
         return

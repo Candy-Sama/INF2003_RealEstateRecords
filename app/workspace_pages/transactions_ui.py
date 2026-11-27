@@ -85,7 +85,7 @@ def render_transaction_batch(agent_id: int) -> None:
 
     committed = 0
     try:
-        with closing(get_mysql_connection()) as connection:
+        with st.spinner("Saving transaction batch…"), closing(get_mysql_connection()) as connection:
             committed = repository.create_agent_transactions_batch(connection, agent_id, drafts)
     except ValueError as error:
         st.error(f"The batch could not be saved. {error} Your drafts were kept.")
@@ -134,7 +134,8 @@ def render_agent_transactions(agent_id: int) -> None:
 def render_recorded_transactions(connection: Any, agent_id: int, action: str) -> None:
     feedback_page = f"recorded_transactions_{agent_id}"
     show_feedback(feedback_page)
-    transactions = repository.list_agent_transactions(connection, agent_id)
+    with st.spinner("Loading your transactions…"):
+        transactions = repository.list_agent_transactions(connection, agent_id)
     if transactions:
         st.caption("Showing up to 100 of your most recent transactions.")
         st.dataframe(transactions, width="stretch", hide_index=True, column_config=RESALE_COLUMNS)
@@ -162,14 +163,16 @@ def render_recorded_transactions(connection: Any, agent_id: int, action: str) ->
             )
             submitted = st.form_submit_button("Create transaction", type="primary")
         if submitted:
-            flat = repository.get_flat(connection, int(flat_id))
+            with st.spinner("Checking flat record…"):
+                flat = repository.get_flat(connection, int(flat_id))
             if flat is None:
                 st.error("No flat record exists with that ID.")
             else:
                 try:
-                    repository.create_agent_transaction(
-                        connection, agent_id, int(flat_id), transaction_date, resale_price
-                    )
+                    with st.spinner("Creating transaction…"):
+                        repository.create_agent_transaction(
+                            connection, agent_id, int(flat_id), transaction_date, resale_price
+                        )
                     queue_feedback(feedback_page, "Transaction created.")
                     st.rerun()
                 except mysql.connector.IntegrityError:
@@ -192,9 +195,10 @@ def render_recorded_transactions(connection: Any, agent_id: int, action: str) ->
     selected_flat_id = st.session_state.get("selected_transaction_flat_id")
     if selected_flat_id is None:
         return
-    selected_transaction = repository.get_agent_transaction(
-        connection, agent_id, selected_flat_id
-    )
+    with st.spinner("Looking up your transaction…"):
+        selected_transaction = repository.get_agent_transaction(
+            connection, agent_id, selected_flat_id
+        )
     if selected_transaction is None:
         st.warning("That transaction no longer exists in your account.")
         return
@@ -223,18 +227,21 @@ def render_recorded_transactions(connection: Any, agent_id: int, action: str) ->
             )
             submitted = st.form_submit_button("Save transaction", type="primary")
         if submitted:
-            if repository.get_flat(connection, int(new_flat_id)) is None:
+            with st.spinner("Checking flat record…"):
+                flat = repository.get_flat(connection, int(new_flat_id))
+            if flat is None:
                 st.error("No flat record exists with that ID.")
             else:
                 try:
-                    updated = repository.update_agent_transaction(
-                        connection,
-                        agent_id,
-                        selected_flat_id,
-                        int(new_flat_id),
-                        transaction_date,
-                        resale_price,
-                    )
+                    with st.spinner("Saving transaction…"):
+                        updated = repository.update_agent_transaction(
+                            connection,
+                            agent_id,
+                            selected_flat_id,
+                            int(new_flat_id),
+                            transaction_date,
+                            resale_price,
+                        )
                 except mysql.connector.IntegrityError:
                     st.error("You already have a transaction recorded for that flat.")
                 else:
@@ -251,7 +258,9 @@ def render_recorded_transactions(connection: Any, agent_id: int, action: str) ->
             f'{selected_transaction["road_name"]}, {selected_transaction["town"]}'
         )
         if st.button("Delete transaction", type="primary", key="danger_delete_transaction"):
-            if repository.delete_agent_transaction(connection, agent_id, selected_flat_id):
+            with st.spinner("Deleting transaction…"):
+                deleted = repository.delete_agent_transaction(connection, agent_id, selected_flat_id)
+            if deleted:
                 st.session_state.pop("selected_transaction_flat_id", None)
                 queue_feedback(feedback_page, "Transaction deleted.")
                 st.rerun()

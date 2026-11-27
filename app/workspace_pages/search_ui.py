@@ -95,31 +95,35 @@ def render_search(connection: Any, mongo_database: Any, agent_id: int) -> None:
             results = repository.search_transactions(connection, filters)
         st.session_state["last_search_filters"] = filters
         st.session_state["last_search_results"] = results
+        st.session_state["search_results_revision"] = st.session_state.get("search_results_revision", 0) + 1
 
     if "last_search_results" in st.session_state:
         results = st.session_state["last_search_results"]
-        if results:
-            count = len(results)
-            if count >= 1000:
-                st.caption(f"Showing the first {count:,} matching transactions.")
+        with st.container(key=f'search_results_{st.session_state.get("search_results_revision", 0)}'):
+            if results:
+                count = len(results)
+                if count >= 1000:
+                    st.caption(f"Showing the first {count:,} matching transactions.")
+                else:
+                    noun = "transaction" if count == 1 else "transactions"
+                    st.caption(f"{count:,} matching {noun}.")
+                st.dataframe(results, width="stretch", hide_index=True, column_config=RESALE_COLUMNS)
             else:
-                noun = "transaction" if count == 1 else "transactions"
-                st.caption(f"{count:,} matching {noun}.")
-            st.dataframe(results, width="stretch", hide_index=True, column_config=RESALE_COLUMNS)
-        else:
-            st.info("No transactions match these filters.")
+                st.info("No transactions match these filters.")
         with st.form("save_search_form"):
             search_name = st.text_input("Name this search", placeholder="e.g. 4-room flats in Tampines")
             save_submitted = st.form_submit_button("Save search", type="primary")
         if save_submitted:
             try:
-                store.create_search(
-                    mongo_database,
-                    agent_id,
-                    search_name,
-                    st.session_state["last_search_filters"],
-                )
+                with st.spinner("Saving search…"):
+                    store.create_search(
+                        mongo_database,
+                        agent_id,
+                        search_name,
+                        st.session_state["last_search_filters"],
+                    )
             except ValueError as error:
                 st.error(str(error))
             else:
-                st.success("Search saved.")
+                with st.container(key="action_success_save_search"):
+                    st.success("Search saved.")

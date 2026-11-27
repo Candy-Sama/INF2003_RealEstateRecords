@@ -63,7 +63,10 @@ def render_authentication() -> None:
                         st.error("Enter a valid email address and password.")
                     else:
                         try:
-                            with closing(get_mysql_connection()) as connection:
+                            with (
+                                st.spinner("Checking your account…"),
+                                closing(get_mysql_connection()) as connection,
+                            ):
                                 agent = repository.find_agent_by_email(
                                     connection, email.strip().lower()
                                 )
@@ -103,7 +106,10 @@ def render_authentication() -> None:
                         st.error("The passwords do not match.")
                     else:
                         try:
-                            with closing(get_mysql_connection()) as connection:
+                            with (
+                                st.spinner("Creating your account…"),
+                                closing(get_mysql_connection()) as connection,
+                            ):
                                 agent_id = repository.create_agent(
                                     connection,
                                     name.strip(),

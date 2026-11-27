@@ -50,7 +50,8 @@ def render_addresses(connection: Any) -> None:
                 f'`nearby` was empty, so it was filled automatically: '
                 f'{filled["total_rows"]:,} rows in {filled["seconds"]} s.'
             )
-    check = nearby_function.coverage(connection)
+    with st.spinner("Checking station coverage…"):
+        check = nearby_function.coverage(connection)
     if check["stations_total"] == 0:
         st.warning(
             "The `stations` table is empty. From the repository root, run "
@@ -73,7 +74,8 @@ def render_addresses(connection: Any) -> None:
     else:
         st.success("Every address has at least one nearby station.")
 
-    rows = repository.list_address_stations(connection)
+    with st.spinner("Loading addresses…"):
+        rows = repository.list_address_stations(connection)
     st.caption(f"{len(rows):,} addresses")
     st.dataframe(
         rows,

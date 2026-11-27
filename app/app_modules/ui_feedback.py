@@ -19,7 +19,11 @@ def show_feedback(page: str) -> None:
     """Display and clear the message queued for this page."""
     if feedback := st.session_state.pop(f"feedback_{page}", None):
         kind, message = feedback
-        getattr(st, kind)(message)
+        if kind == "success":
+            with st.container(key=f"action_success_{page}"):
+                st.success(message)
+        else:
+            getattr(st, kind)(message)
 
 
 def show_database_error(error: Exception) -> None:

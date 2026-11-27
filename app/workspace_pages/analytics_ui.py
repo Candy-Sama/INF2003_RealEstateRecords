@@ -144,7 +144,8 @@ def render_analytics(db: Any, agent_id: int) -> None:
         st.rerun(scope="fragment")
     if restore_col.button("Restore defaults", width="stretch",
                           help="Re-add any default card you have deleted."):
-        added = analytics_store.restore_defaults(db, agent_id)
+        with st.spinner("Restoring default cards…"):
+            added = analytics_store.restore_defaults(db, agent_id)
         if added:
             noun = "card" if added == 1 else "cards"
             queue_feedback("analytics", f"Restored {added} default {noun}.")
@@ -161,7 +162,8 @@ def render_analytics(db: Any, agent_id: int) -> None:
     if st.session_state.get("an_editor") is not None:
         render_editor(db, agent_id)
 
-    cards = analytics_store.list_cards(db, agent_id)
+    with st.spinner("Loading analytics cards…"):
+        cards = analytics_store.list_cards(db, agent_id)
     if not cards:
         st.info("No cards yet. Create one, or use **Restore defaults**.")
         return
@@ -224,7 +226,8 @@ def render_card(card: dict[str, Any], db: Any, agent_id: int) -> None:
                       on_click=open_editor, args=(card,))
             if st.button("Duplicate", key=f"an_dup_{card_id}", width="stretch"):
                 try:
-                    analytics_store.duplicate_card(db, agent_id, card_id)
+                    with st.spinner("Duplicating card…"):
+                        analytics_store.duplicate_card(db, agent_id, card_id)
                 except ValueError as error:
                     queue_feedback("analytics", escape_markdown(str(error)), kind="warning")
                 else:
@@ -238,7 +241,9 @@ def render_card(card: dict[str, Any], db: Any, agent_id: int) -> None:
             yes, no = st.columns(2)
             if yes.button("Yes, delete", key=f"an_yes_{card_id}", type="primary",
                           width="stretch"):
-                if analytics_store.delete_card(db, agent_id, card_id):
+                with st.spinner("Deleting card…"):
+                    deleted = analytics_store.delete_card(db, agent_id, card_id)
+                if deleted:
                     queue_feedback("analytics", "Card deleted.")
                 else:
                     queue_feedback("analytics", "That card no longer exists.", kind="warning")
@@ -250,7 +255,8 @@ def render_card(card: dict[str, Any], db: Any, agent_id: int) -> None:
             st.caption(escape_markdown(card["description"]))
 
         try:
-            frame, truncated = run_card_query(card["sql"])
+            with st.spinner("Fetching analytics results…"):
+                frame, truncated = run_card_query(card["sql"])
             analytics_charts.render_card_body(frame, card)
             note = f"{len(frame):,} row(s) · {TYPE_LABELS.get(card['display_type'], '')}"
             if truncated:
@@ -370,7 +376,8 @@ def use_builder() -> None:
 def run_preview(sql: str) -> None:
     sql = sql.strip()
     try:
-        frame, _ = run_card_query(sql)
+        with st.spinner("Running analytics preview…"):
+            frame, _ = run_card_query(sql)
         st.session_state["an_preview"] = {
             "sql": sql, "columns": list(frame.columns), "error": None,
         }
@@ -573,7 +580,8 @@ def effective_mode(mode: str, compiled: Any, sql_text: str) -> str:
 def _show_preview(preview: dict[str, Any], draft: dict[str, Any]) -> bool:
     """Draw the preview. Returns False if it can't be shown, which blocks saving."""
     try:
-        frame, _ = run_card_query(preview["sql"])
+        with st.spinner("Loading preview results…"):
+            frame, _ = run_card_query(preview["sql"])
         st.markdown("**Preview**")
         analytics_charts.render_card_body(frame, draft)
         return True
@@ -727,10 +735,11 @@ def render_editor(db: Any, agent_id: int) -> None:
                 else:
                     data["sql"] = sql_text
                 try:
-                    if editing_id:
-                        analytics_store.update_card(db, agent_id, editing_id, data)
-                    else:
-                        analytics_store.create_card(db, agent_id, data)
+                    with st.spinner("Saving analytics card…"):
+                        if editing_id:
+                            analytics_store.update_card(db, agent_id, editing_id, data)
+                        else:
+                            analytics_store.create_card(db, agent_id, data)
                 except ValueError as error:
                     st.error(escape_markdown(str(error)))
                 else:

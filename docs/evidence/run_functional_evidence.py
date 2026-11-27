@@ -133,6 +133,10 @@ def verify_saved_search_ui(app, db, agent_a):
     click(app, "Save changes")
     edited, = searches.list_searches(db, agent_a)
     assert edited["name"] == "Fixture search edited" and edited["filters"]["max_price"] == 600000
+
+    # Older AppTest versions can retain duplicate form widgets after an internal rerun.
+    app.run()
+    assert not app.exception and not app.error
     app.number_input(key=f"{prefix}_min_price").set_value(650000)
     click(app, "Save changes")
     assert any("Minimum price" in item.value for item in app.error)
@@ -184,7 +188,7 @@ def verify_isolation(app, db, agent_a, search_id):
         assert not repository.delete_agent_transaction(connection, agent_b, 1)
         assert repository.get_agent_transaction(connection, agent_a, 1)["resale_price"] == Decimal("560000.35")
     page(app, "Flat records")
-    assert any("read-only" in item.value for item in app.info)
+    assert any("read-only" in item.value for item in app.caption)
     assert any(button.label == "Find flat" for button in app.button)
     assert not any(button.label in {"Create flat", "Save changes"} for button in app.button)
     click(app, "Find flat")

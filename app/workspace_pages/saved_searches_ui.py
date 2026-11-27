@@ -13,7 +13,8 @@ from .search_ui import render_filter_fields, seed_filter_widgets
 def render_saved_searches(connection: Any, mongo_database: Any, agent_id: int) -> None:
     st.subheader("Saved searches")
     show_feedback("saved_searches")
-    saved_searches = store.list_searches(mongo_database, agent_id)
+    with st.spinner("Loading saved searches…"):
+        saved_searches = store.list_searches(mongo_database, agent_id)
     if not saved_searches:
         st.info("You have no saved searches yet. Run a transaction search and save it.")
         return
@@ -56,7 +57,8 @@ def render_saved_searches(connection: Any, mongo_database: Any, agent_id: int) -
     with delete_col:
         if st.button("Delete saved search", key="danger_delete_saved_search"):
             try:
-                deleted = store.delete_search(mongo_database, agent_id, selected["_id"])
+                with st.spinner("Deleting saved search…"):
+                    deleted = store.delete_search(mongo_database, agent_id, selected["_id"])
             except ValueError as error:
                 st.error(str(error))
             else:
@@ -77,7 +79,8 @@ def render_saved_searches(connection: Any, mongo_database: Any, agent_id: int) -
 
     if submitted:
         try:
-            changed = store.update_search(mongo_database, agent_id, selected["_id"], name, filters)
+            with st.spinner("Updating saved search…"):
+                changed = store.update_search(mongo_database, agent_id, selected["_id"], name, filters)
         except ValueError as error:
             st.error(str(error))
         else:

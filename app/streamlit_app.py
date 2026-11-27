@@ -39,6 +39,7 @@ st.set_page_config(
 )
 
 st.html(Path(__file__).with_name("styles.css"))
+WORKSPACE_MOTION = Path(__file__).with_name("workspace_motion.js").read_text(encoding="utf-8")
 
 
 def render_workspace(agent: dict[str, Any]) -> None:
@@ -90,6 +91,15 @@ def render_workspace(agent: dict[str, Any]) -> None:
         width="stretch",
     )
 
+    page_index = pages.index(page) if page in pages else len(pages)
+    with st.container(key="workspace_stage"):
+        # This script is supplied by the app, with no interpolated user input.
+        st.html(f'<script class="workspace-motion-script">{WORKSPACE_MOTION}</script>', unsafe_allow_javascript=True)
+        with st.container(key=f"workspace_page_{page_index}"):
+            render_workspace_page(page, agent)
+
+
+def render_workspace_page(page: str, agent: dict[str, Any]) -> None:
     try:
         if page == "My transactions":
             render_agent_transactions(agent["agent_id"])

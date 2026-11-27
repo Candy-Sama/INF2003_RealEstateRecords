@@ -96,7 +96,8 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
     else:
         st.caption("Flat records are read-only for agent accounts.")
     show_feedback("flat_records")
-    total_flats = repository.count_flats(connection)
+    with st.spinner("Counting flat records…"):
+        total_flats = repository.count_flats(connection)
     page_size = 100
     page_count = max(1, (total_flats + page_size - 1) // page_size)
     if st.session_state.get("flat_records_page", 1) > page_count:
@@ -109,9 +110,10 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
         step=1,
         key="flat_records_page",
     )
-    flats = repository.list_flats(
-        connection, limit=page_size, offset=(int(page) - 1) * page_size
-    )
+    with st.spinner("Loading flat records…"):
+        flats = repository.list_flats(
+            connection, limit=page_size, offset=(int(page) - 1) * page_size
+        )
     st.session_state.setdefault("mf_nonce", 0)
     if flats:
         details.caption(f"{total_flats:,} flat records · Page {page:,} of {page_count:,}")
@@ -144,7 +146,8 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
             st.session_state["view_flat_selected_id"] = int(flat_search_id)
         selected_id = st.session_state.get("view_flat_selected_id")
         if selected_id is not None:
-            selected_flat = repository.get_flat(connection, selected_id)
+            with st.spinner("Looking up flat…"):
+                selected_flat = repository.get_flat(connection, selected_id)
             if selected_flat is None:
                 st.warning("No flat record exists with that ID.")
             else:
@@ -162,8 +165,9 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
         key="flat_management_action",
     )
     if action == "Create":
-        places = repository.list_places(connection)
-        flat_options = repository.list_flat_options(connection)
+        with st.spinner("Loading flat form options…"):
+            places = repository.list_places(connection)
+            flat_options = repository.list_flat_options(connection)
         if not places:
             st.warning("Add records to the `place` table before creating a flat.")
             return
@@ -176,7 +180,8 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
             ):
                 st.error("Complete the flat type, model, and storey range.")
             else:
-                repository.create_flat(connection, values)
+                with st.spinner("Creating flat record…"):
+                    repository.create_flat(connection, values)
                 queue_feedback("flat_records", "Flat record created.")
                 st.rerun()
         return
@@ -196,12 +201,14 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
     if selected_id is None:
         st.info("Enter a flat record ID to load its editable fields.")
         return
-    selected_flat = repository.get_flat(connection, selected_id)
+    with st.spinner("Looking up flat…"):
+        selected_flat = repository.get_flat(connection, selected_id)
     if selected_flat is None:
         st.warning("No flat record exists with that ID.")
         return
-    places = repository.list_places(connection)
-    flat_options = repository.list_flat_options(connection)
+    with st.spinner("Loading flat form options…"):
+        places = repository.list_places(connection)
+        flat_options = repository.list_flat_options(connection)
     if not places:
         st.warning("No place records are available.")
         return
@@ -216,6 +223,7 @@ def render_flat_management(connection: Any, is_admin: bool) -> None:
         ):
             st.error("Complete the flat type, model, and storey range.")
         else:
-            repository.update_flat(connection, selected_id, values)
+            with st.spinner("Saving flat record…"):
+                repository.update_flat(connection, selected_id, values)
             queue_feedback("flat_records", "Flat record updated.")
             st.rerun()
