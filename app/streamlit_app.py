@@ -41,7 +41,8 @@ st.markdown(
     """
     <style>
     .stApp {
-        /* Streamlit sets color-scheme from the active app theme. */
+        /* Streamlit uses its theme background for canvas table cells. */
+        background-color: light-dark(#f6f8f5, #18191b);
         --estate-accent: light-dark(#176b52, #87d3b7);
         --estate-muted: light-dark(#52635e, #c5c8cf);
         --estate-button: light-dark(#176b52, #308267);
@@ -52,6 +53,10 @@ st.markdown(
     .stApp [data-testid="stCaptionContainer"] {
         color: light-dark(rgb(23 43 42 / 60%), var(--estate-muted));
         opacity: 1;
+    }
+    .stApp [data-testid="stDataFrame"] {
+        border-radius: .5rem;
+        box-shadow: 0 .5rem 1.25rem light-dark(transparent, rgb(0 0 0 / 35%));
     }
     [data-testid="stHeader"] { background: transparent; }
     .block-container { max-width: 1180px; padding-top: 1.4rem; padding-bottom: 3rem; }

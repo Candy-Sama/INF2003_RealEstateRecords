@@ -10,10 +10,10 @@ borderColor = "#6a837a"
 
 [theme.dark]
 primaryColor = "#308267"
-backgroundColor = "#18191b"
+backgroundColor = "#2a2c30"
 secondaryBackgroundColor = "#242528"
 textColor = "#f2f3f5"
 borderColor = "#7c7f87"
 dataframeBorderColor = "#70737a"
-dataframeHeaderBackgroundColor = "#292a2d"
+dataframeHeaderBackgroundColor = "#393c43"
 linkColor = "#87d3b7"
