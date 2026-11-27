@@ -1,6 +1,7 @@
 import re
+import statistics
 from collections.abc import Sequence
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any, TypedDict
 
@@ -624,3 +625,226 @@ def top_sales(
     with connection.cursor(dictionary=True) as cursor:
         cursor.execute(query, (*parameters, int(limit)))
         return cursor.fetchall()
+
+COMPARABLE_ROW_CAP = 2000
+SMALL_SAMPLE_THRESHOLD = 5
+SIMILAR_SIZE_TOLERANCE_SQM = Decimal("10.0")
+CATCHMENT_RADII_M: dict[str, int] = {
+    "300 m": 300,
+    "500 m": 500,
+    "1,000 m": 1000,
+}
+
+_RESALE_DETAIL_VIEW_SQL = (
+    "CREATE OR REPLACE VIEW `v_resale_detail` AS "
+    "SELECT "
+    "rt.`FLAT_flat_id` AS `flat_id`, "
+    "rt.`transaction_date` AS `transaction_date`, "
+    "rt.`resale_price` AS `resale_price`, "
+    "ROUND(rt.`resale_price` / NULLIF(f.`floor_area_sqm`, 0), 2) AS `price_per_sqm`, "
+    "f.`flat_type` AS `flat_type`, "
+    "f.`flat_model` AS `flat_model`, "
+    "f.`storey_range` AS `storey_range`, "
+    "f.`floor_area_sqm` AS `floor_area_sqm`, "
+    "f.`lease_commence_date` AS `lease_commence_date`, "
+    "f.`remaining_lease_months` AS `remaining_lease_months`, "
+    "p.`block_id` AS `block_id`, "
+    "p.`block_number` AS `block_number`, "
+    "p.`road_name` AS `road_name`, "
+    "p.`postal` AS `postal`, "
+    "p.`town` AS `town`, "
+    "p.`latitude` AS `latitude`, "
+    "p.`longtitude` AS `longtitude` "
+    "FROM `resale_transaction` AS rt "
+    "JOIN `flat` AS f ON f.`flat_id` = rt.`FLAT_flat_id` "
+    "JOIN `place` AS p ON p.`block_id` = f.`block_id`"
+)
+
+
+def ensure_resale_detail_view(connection: Any) -> None:
+    """Create or replace `v_resale_detail` if it does not exist yet."""
+    with connection.cursor(buffered=True) as cursor:
+        cursor.execute(
+            "SELECT COUNT(*) FROM information_schema.VIEWS "
+            "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'v_resale_detail'"
+        )
+        exists = cursor.fetchone()[0] > 0
+        if not exists:
+            cursor.execute(_RESALE_DETAIL_VIEW_SQL)
+    connection.commit()
+
+
+def get_reference_flat_profile(connection: Any, flat_id: int) -> dict[str, Any] | None:
+    """Return reference flat details, address, and price per sqm if a sale exists."""
+    with connection.cursor(dictionary=True, buffered=True) as cursor:
+        cursor.execute(
+            "SELECT f.flat_id, f.flat_type, f.flat_model, f.storey_range, "
+            "f.floor_area_sqm, f.block_id, f.lease_commence_date, "
+            "f.remaining_lease_months, p.block_number, p.road_name, p.postal, p.town, "
+            "rt.transaction_date, rt.resale_price, "
+            "CASE WHEN f.floor_area_sqm > 0 AND rt.resale_price IS NOT NULL "
+            "THEN ROUND(rt.resale_price / f.floor_area_sqm, 2) ELSE NULL END AS price_per_sqm "
+            "FROM `flat` AS f "
+            "JOIN `place` AS p ON p.block_id = f.block_id "
+            "LEFT JOIN `resale_transaction` AS rt ON rt.FLAT_flat_id = f.flat_id "
+            "WHERE f.flat_id = %s "
+            "ORDER BY rt.transaction_date DESC LIMIT 1",
+            (flat_id,),
+        )
+        return cursor.fetchone()
+
+
+def _percentile(values: list[float], pct: float) -> float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    if len(ordered) == 1:
+        return float(ordered[0])
+    pos = (len(ordered) - 1) * (pct / 100.0)
+    lower = int(pos)
+    upper = min(lower + 1, len(ordered) - 1)
+    frac = pos - lower
+    return float(ordered[lower] + (ordered[upper] - ordered[lower]) * frac)
+
+
+def summarize_comparable_sales(
+    rows: list[dict[str, Any]],
+    reference_psm: float | Decimal | None = None,
+) -> dict[str, Any]:
+    """Compute sample count, medians, 25th-75th percentiles, and ref % diff."""
+    prices: list[float] = []
+    psms: list[float] = []
+    for row in rows:
+        price_val = row.get("resale_price")
+        area_val = row.get("floor_area_sqm")
+        psm_val = row.get("price_per_sqm")
+        if price_val is not None:
+            prices.append(float(price_val))
+        if psm_val is not None:
+            psms.append(float(psm_val))
+        elif price_val is not None and area_val is not None and float(area_val) > 0:
+            psms.append(float(price_val) / float(area_val))
+
+    sample_count = len(rows)
+    median_price = float(statistics.median(prices)) if prices else None
+    median_psm = float(statistics.median(psms)) if psms else None
+    price_p25 = _percentile(prices, 25)
+    price_p75 = _percentile(prices, 75)
+    psm_p25 = _percentile(psms, 25)
+    psm_p75 = _percentile(psms, 75)
+
+    ref_psm_float = float(reference_psm) if reference_psm is not None else None
+    diff_pct = None
+    if ref_psm_float is not None and median_psm is not None and median_psm > 0:
+        diff_pct = ((ref_psm_float - median_psm) / median_psm) * 100.0
+
+    return {
+        "sample_count": sample_count,
+        "is_small_sample": 0 < sample_count < SMALL_SAMPLE_THRESHOLD,
+        "median_price": median_price,
+        "median_psm": median_psm,
+        "price_p25": price_p25,
+        "price_p75": price_p75,
+        "psm_p25": psm_p25,
+        "psm_p75": psm_p75,
+        "reference_psm": ref_psm_float,
+        "diff_vs_median_pct": diff_pct,
+    }
+
+
+def _period_cutoff_date(latest_sale_date: date | None, months: int) -> date:
+    anchor = latest_sale_date or date.today()
+    return anchor - timedelta(days=int(months) * 30)
+
+
+def build_comparable_sales_query(
+    reference: dict[str, Any],
+    station_ids: list[int],
+    options: dict[str, Any],
+    cutoff_date: date,
+    row_cap: int = COMPARABLE_ROW_CAP,
+) -> tuple[str, tuple[Any, ...]]:
+    """Build parameterized SQL against `v_resale_detail` for comparable sales."""
+    catchment = options.get("catchment", "500 m")
+    similar_size = bool(options.get("similar_size", True))
+    ref_flat_id = int(reference["flat_id"])
+    ref_flat_type = reference["flat_type"]
+
+    conditions = ["v.flat_type = %s", "v.flat_id <> %s", "v.transaction_date >= %s"]
+    parameters: list[Any] = [ref_flat_type, ref_flat_id, cutoff_date]
+    joins: list[str] = []
+    nearest_expr = (
+        "(SELECT MIN(n_min.distance_m) FROM `nearby` AS n_min "
+        "WHERE n_min.PLACE_block_id = v.block_id)"
+    )
+
+    if catchment == "Same block":
+        conditions.append("v.block_id = %s")
+        parameters.append(int(reference["block_id"]))
+    elif catchment == "Same town":
+        conditions.append("v.town = %s")
+        parameters.append(reference["town"])
+    else:
+        radius_m = CATCHMENT_RADII_M.get(catchment, 500)
+        if not station_ids:
+            # Force zero matching rows cleanly while keeping valid SQL syntax.
+            conditions.append("1 = 0")
+        else:
+            marks = ", ".join(["%s"] * len(station_ids))
+            joins.append(
+                f"JOIN `nearby` AS n_ref ON n_ref.PLACE_block_id = v.block_id "
+                f"AND n_ref.STATIONS_station_id IN ({marks}) AND n_ref.distance_m <= %s"
+            )
+            parameters.extend(station_ids)
+            parameters.append(int(radius_m))
+
+    if similar_size and reference.get("floor_area_sqm") is not None:
+        ref_area = Decimal(str(reference["floor_area_sqm"]))
+        conditions.append("v.floor_area_sqm BETWEEN %s AND %s")
+        parameters.append(ref_area - SIMILAR_SIZE_TOLERANCE_SQM)
+        parameters.append(ref_area + SIMILAR_SIZE_TOLERANCE_SQM)
+
+    join_sql = (" " + " ".join(joins)) if joins else ""
+    query = (
+        "SELECT DISTINCT v.flat_id, v.transaction_date, v.resale_price, "
+        "v.price_per_sqm, v.flat_type, v.flat_model, v.storey_range, "
+        "v.floor_area_sqm, v.lease_commence_date, v.remaining_lease_months, "
+        "v.block_id, v.block_number, v.road_name, v.postal, v.town, "
+        f"{nearest_expr} AS nearest_station_m "
+        f"FROM `v_resale_detail` AS v{join_sql} "
+        f"WHERE {' AND '.join(conditions)} "
+        "ORDER BY v.transaction_date DESC, v.flat_id DESC "
+        "LIMIT %s"
+    )
+    parameters.append(int(row_cap) + 1)
+    return query, tuple(parameters)
+
+
+def search_comparable_sales(
+    connection: Any,
+    reference: dict[str, Any],
+    station_ids: list[int],
+    options: dict[str, Any],
+    row_cap: int = COMPARABLE_ROW_CAP,
+) -> tuple[list[dict[str, Any]], bool, date]:
+    """Return (rows, truncated, cutoff_date) for comparable sales."""
+    months = int(options.get("months", 12))
+    latest_date = latest_transaction_date(connection)
+    cutoff_date = _period_cutoff_date(latest_date, months)
+
+    if catchment_needs_stations(options.get("catchment", "500 m")) and not station_ids:
+        return [], False, cutoff_date
+
+    query, parameters = build_comparable_sales_query(
+        reference, station_ids, options, cutoff_date, row_cap=row_cap
+    )
+    with connection.cursor(dictionary=True, buffered=True) as cursor:
+        cursor.execute(query, parameters)
+        fetched = cursor.fetchall()
+
+    truncated = len(fetched) > row_cap
+    return fetched[:row_cap], truncated, cutoff_date
+
+
+def catchment_needs_stations(catchment: str) -> bool:
+    return catchment not in ("Same block", "Same town")

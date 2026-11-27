@@ -133,4 +133,33 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
 
+-- -----------------------------------------------------
+-- View `estateRecordsDB`.`v_resale_detail`
+-- Joins resale_transaction, flat, and place without exposing agent columns.
+-- -----------------------------------------------------
+CREATE OR REPLACE VIEW `estateRecordsDB`.`v_resale_detail` AS
+SELECT
+  rt.`FLAT_flat_id` AS `flat_id`,
+  rt.`transaction_date` AS `transaction_date`,
+  rt.`resale_price` AS `resale_price`,
+  ROUND(rt.`resale_price` / NULLIF(f.`floor_area_sqm`, 0), 2) AS `price_per_sqm`,
+  f.`flat_type` AS `flat_type`,
+  f.`flat_model` AS `flat_model`,
+  f.`storey_range` AS `storey_range`,
+  f.`floor_area_sqm` AS `floor_area_sqm`,
+  f.`lease_commence_date` AS `lease_commence_date`,
+  f.`remaining_lease_months` AS `remaining_lease_months`,
+  p.`block_id` AS `block_id`,
+  p.`block_number` AS `block_number`,
+  p.`road_name` AS `road_name`,
+  p.`postal` AS `postal`,
+  p.`town` AS `town`,
+  p.`latitude` AS `latitude`,
+  p.`longtitude` AS `longtitude`
+FROM `estateRecordsDB`.`resale_transaction` AS rt
+JOIN `estateRecordsDB`.`flat` AS f
+  ON f.`flat_id` = rt.`FLAT_flat_id`
+JOIN `estateRecordsDB`.`place` AS p
+  ON p.`block_id` = f.`block_id`;
+
 SET SQL_MODE=@OLD_SQL_MODE;
