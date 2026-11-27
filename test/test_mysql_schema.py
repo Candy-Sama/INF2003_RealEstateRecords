@@ -2,12 +2,14 @@
 
 import os
 import unittest
+from contextlib import closing
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
 
 import mysql.connector
+from mysql.connector import errorcode
 
 from app import repository
 from app.app_modules.analytics.analytics_sql import run_query
@@ -60,6 +62,60 @@ class MySQLSchemaTests(unittest.TestCase):
             self.execute(sql)
         self.assertEqual(context.exception.errno, number)
         self.connection.rollback()
+
+    def load_batch_fixture(self, transaction_date):
+        self.load_fixture()
+        self.execute(
+            "INSERT INTO flat VALUES "
+            "(2, '4 ROOM', 'Model', '01 TO 03', 80.20, 2, 1982, 780), "
+            "(3, '4 ROOM', 'Model', '01 TO 03', 80.50, 2, 1982, 780)"
+        )
+        self.connection.commit()
+        repository.create_agent_transaction(self.connection, 1, 1, transaction_date, Decimal("500000.19"))
+
+    def committed_transactions(self):
+        # Read from a separate session to verify committed state.
+        with closing(get_mysql_connection()) as observer:
+            observer.database = self.schema
+            with observer.cursor() as cursor:
+                cursor.execute(
+                    "SELECT FLAT_flat_id, AGENTS_agent_id, transaction_date, resale_price "
+                    "FROM resale_transaction ORDER BY FLAT_flat_id, AGENTS_agent_id"
+                )
+                return cursor.fetchall()
+
+    def test_transaction_batch_commit_is_visible_to_a_new_session(self):
+        saved_on = date(2027, 1, 15)
+        self.load_batch_fixture(saved_on)
+        items: list[repository.PlannedTransaction] = [
+            {"flat_id": 2, "transaction_date": saved_on, "resale_price": Decimal("520000.23")},
+            {"flat_id": 3, "transaction_date": saved_on, "resale_price": Decimal("550000.47")},
+        ]
+
+        self.assertEqual(repository.create_agent_transactions_batch(self.connection, 1, items), 2)
+        self.assertFalse(self.connection.in_transaction)
+        self.assertEqual(self.committed_transactions(), [
+            (1, 1, saved_on, Decimal("500000.19")),
+            (2, 1, saved_on, Decimal("520000.23")),
+            (3, 1, saved_on, Decimal("550000.47")),
+        ])
+
+    def test_transaction_batch_rolls_back_a_valid_first_row_when_the_next_row_fails(self):
+        saved_on = date(2027, 1, 15)
+        self.load_batch_fixture(saved_on)
+
+        for invalid_flat_id, errno in ((1, errorcode.ER_DUP_ENTRY), (99, errorcode.ER_NO_REFERENCED_ROW_2)):
+            with self.subTest(errno=errno):
+                items: list[repository.PlannedTransaction] = [
+                    {"flat_id": 2, "transaction_date": saved_on, "resale_price": Decimal("520000.23")},
+                    {"flat_id": invalid_flat_id, "transaction_date": saved_on, "resale_price": Decimal("550000.47")},
+                ]
+                with self.assertRaises(mysql.connector.IntegrityError) as raised:
+                    repository.create_agent_transactions_batch(self.connection, 1, items)
+
+                self.assertEqual(raised.exception.errno, errno)
+                self.assertFalse(self.connection.in_transaction)
+                self.assertEqual(self.committed_transactions(), [(1, 1, saved_on, Decimal("500000.19"))])
 
     def test_exact_types_and_owner_key(self):
         self.assertEqual(migrate_schema(self.connection), [])

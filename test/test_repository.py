@@ -1,10 +1,16 @@
 import unittest
+from datetime import date
 from decimal import Decimal
 from typing import Any
+from unittest.mock import patch
+
+from mysql.connector import IntegrityError, errorcode
 
 from app.repository import (
+    PlannedTransaction,
     count_flats,
     create_agent_transaction,
+    create_agent_transactions_batch,
     delete_agent_transaction,
     list_agent_transactions,
     list_flats,
@@ -44,9 +50,16 @@ class FakeCursor:
 class FakeConnection:
     def __init__(self) -> None:
         self.cursor_instance = FakeCursor()
+        self.transaction_calls: list[str] = []
+
+    def start_transaction(self) -> None:
+        self.transaction_calls.append("start")
 
     def commit(self) -> None:
-        return None
+        self.transaction_calls.append("commit")
+
+    def rollback(self) -> None:
+        self.transaction_calls.append("rollback")
 
     def cursor(
         self, dictionary: bool = False, buffered: bool = False
@@ -177,6 +190,55 @@ class FlatAndTransactionAccessTests(unittest.TestCase):
             connection.cursor_instance.query,
         )
         self.assertEqual(connection.cursor_instance.parameters, (42, 17))
+
+
+class TransactionBatchTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.connection = FakeConnection()
+        self.transaction_date = date(2027, 1, 15)
+        self.items: list[PlannedTransaction] = [
+            {"flat_id": 42, "transaction_date": self.transaction_date, "resale_price": 500000.19},
+            {"flat_id": 43, "transaction_date": self.transaction_date, "resale_price": Decimal("600000.21")},
+        ]
+
+    def test_all_rows_commit_in_one_transaction(self):
+        count = create_agent_transactions_batch(self.connection, 17, self.items)
+
+        self.assertEqual(count, 2)
+        self.assertEqual(self.connection.transaction_calls, ["start", "commit"])
+        calls = self.connection.cursor_instance.calls
+        self.assertEqual([parameters for _, parameters in calls], [
+            (42, 17, self.transaction_date, Decimal("500000.19")),
+            (43, 17, self.transaction_date, Decimal("600000.21")),
+        ])
+        for query, _ in calls:
+            self.assertIn("VALUES (%s, %s, %s, %s)", query)
+
+    def test_database_error_on_second_insert_rolls_back(self):
+        error = IntegrityError("Duplicate agent and flat", errno=errorcode.ER_DUP_ENTRY)
+        with patch.object(self.connection.cursor_instance, "execute", side_effect=[None, error]) as insert:
+            with self.assertRaises(IntegrityError) as raised:
+                create_agent_transactions_batch(self.connection, 17, self.items)
+
+        self.assertIs(raised.exception, error)
+        self.assertEqual(insert.call_count, 2)
+        self.assertEqual(self.connection.transaction_calls, ["start", "rollback"])
+
+    def test_invalid_second_draft_rolls_back_the_first_insert(self):
+        self.items[1]["resale_price"] = Decimal("0.00")
+
+        with self.assertRaisesRegex(ValueError, "Draft 2 needs a positive resale price"):
+            create_agent_transactions_batch(self.connection, 17, self.items)
+
+        self.assertEqual(len(self.connection.cursor_instance.calls), 1)
+        self.assertEqual(self.connection.transaction_calls, ["start", "rollback"])
+
+    def test_empty_batch_does_not_start_a_transaction(self):
+        with self.assertRaisesRegex(ValueError, "Add at least one draft"):
+            create_agent_transactions_batch(self.connection, 17, [])
+
+        self.assertEqual(self.connection.transaction_calls, [])
+        self.assertEqual(self.connection.cursor_instance.calls, [])
 
 
 if __name__ == "__main__":

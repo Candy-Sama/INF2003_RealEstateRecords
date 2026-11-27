@@ -1,6 +1,8 @@
 import re
-from decimal import Decimal
-from typing import Any
+from collections.abc import Sequence
+from datetime import date
+from decimal import Decimal, InvalidOperation
+from typing import Any, TypedDict
 
 
 def find_agent_by_email(connection: Any, email: str) -> dict[str, Any] | None:
@@ -162,6 +164,19 @@ def get_agent_transaction(
         return cursor.fetchone()
 
 
+class PlannedTransaction(TypedDict):
+    flat_id: int
+    transaction_date: date
+    resale_price: int | float | Decimal
+
+
+_INSERT_AGENT_TRANSACTION = (
+    "INSERT INTO `resale_transaction` "
+    "(FLAT_flat_id, AGENTS_agent_id, transaction_date, resale_price) "
+    "VALUES (%s, %s, %s, %s)"
+)
+
+
 def create_agent_transaction(
     connection: Any,
     agent_id: int,
@@ -171,12 +186,60 @@ def create_agent_transaction(
 ) -> None:
     with connection.cursor() as cursor:
         cursor.execute(
-            "INSERT INTO `resale_transaction` "
-            "(FLAT_flat_id, AGENTS_agent_id, transaction_date, resale_price) "
-            "VALUES (%s, %s, %s, %s)",
+            _INSERT_AGENT_TRANSACTION,
             (flat_id, agent_id, transaction_date, Decimal(str(resale_price))),
         )
     connection.commit()
+
+
+def _draft_insert_parameters(
+    draft: PlannedTransaction, agent_id: int, number: int
+) -> tuple[int, int, date, Decimal]:
+    flat_id = draft.get("flat_id")
+    if type(flat_id) is not int or not 1 <= flat_id <= 2_147_483_647:
+        raise ValueError(f"Draft {number} needs a valid positive flat ID.")
+
+    transaction_date = draft.get("transaction_date")
+    if type(transaction_date) is not date or transaction_date.year < 1000:
+        raise ValueError(f"Draft {number} needs a valid transaction date.")
+
+    price_error = (
+        f"Draft {number} needs a positive resale price up to S$9,999,999,999.99 "
+        "with at most two decimal places."
+    )
+    try:
+        price = Decimal(str(draft.get("resale_price")))
+    except InvalidOperation as error:
+        raise ValueError(price_error) from error
+    if (
+        not price.is_finite()
+        or not Decimal("0.01") <= price <= Decimal("9999999999.99")
+        or price != price.quantize(Decimal("0.01"))
+    ):
+        raise ValueError(price_error)
+
+    return flat_id, agent_id, transaction_date, price
+
+
+def create_agent_transactions_batch(
+    connection: Any, agent_id: int, items: Sequence[PlannedTransaction]
+) -> int:
+    """Insert the entire batch on a dedicated connection and return the committed count."""
+    if not items:
+        raise ValueError("Add at least one draft before committing.")
+
+    connection.start_transaction()
+    try:
+        with connection.cursor() as cursor:
+            for number, draft in enumerate(items, start=1):
+                parameters = _draft_insert_parameters(draft, agent_id, number)
+                cursor.execute(_INSERT_AGENT_TRANSACTION, parameters)
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
+
+    return len(items)
 
 
 def update_agent_transaction(

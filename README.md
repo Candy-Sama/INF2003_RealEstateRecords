@@ -122,9 +122,9 @@ The scripts in `data/scripts/data_prep/` inspect the raw CSVs, clean the HDB and
 
 | Path | Contents |
 | --- | --- |
-| [app/streamlit_app.py](app/streamlit_app.py) | Login, registration, page navigation, flat and transaction management, and saved search UI. |
+| [app/streamlit_app.py](app/streamlit_app.py) | Streamlit entry point, shared styling, and workspace navigation. |
 | [app/repository.py](app/repository.py) | SQL access for agent, flat, transaction, address, nearby, and ranking queries. |
-| [app/app_modules/](app/app_modules/) | Database connections, password helpers, station distance generation, ranking, and analytics. The analytics package includes the query builder, validation, storage, default cards, and charts. |
+| [app/app_modules/](app/app_modules/) | Page renderers, login and registration UI, database connections, and password helpers. The nearby, ranking, and analytics directories group those pages with their feature logic. |
 | [setup/](setup/) | MySQL schema, migration and benchmark commands, import module, and the full dataset. |
 | [data/](data/) | Preparation scripts, committed samples, and working folders for raw, cleaned, and geocoded CSVs. |
 | [test/](test/) | Unit tests for the SQL repository, password handling, rankings, and analytics, plus opt-in MySQL integration tests. |
