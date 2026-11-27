@@ -1,0 +1,519 @@
+{
+  "rail": {
+    "files": {
+      "kaggle_b_v1_TrainStationLocation.csv": {
+        "sha256": "83711ff0c82f043c28c9f1c595d74e566a9e695603ae1cbf9dfd06641c1c451e",
+        "bytes": 6028,
+        "rows": 172,
+        "columns": [
+          "station_name",
+          "type",
+          "lat",
+          "lng"
+        ]
+      },
+      "kaggle_c_v3_mrt_lrt_stations.csv": {
+        "sha256": "df523d9853921cd33b3c0dd31cc1d45eb4f391bd5538dd3bf5945c44cb4c1cac",
+        "bytes": 60391,
+        "rows": 203,
+        "columns": [
+          "",
+          "ALPHANUMERIC_CODE",
+          "STATION_NAME_ENGLISH",
+          "STATION_NAME_CHINESE",
+          "LINE_ENGLISH",
+          "LINE_CHINESE",
+          "LINE_COLOR",
+          "OPENING_DATE",
+          "TRANSPORT_TYPE",
+          "SEARCHVAL",
+          "BLK_NO",
+          "ROAD_NAME",
+          "BUILDING",
+          "ADDRESS",
+          "POSTAL",
+          "X",
+          "Y",
+          "LATITUDE",
+          "LONGITUDE"
+        ]
+      },
+      "kaggle_c_v3_mrt_lrt_stations_2025-01-14.csv": {
+        "sha256": "281f1d7134d56ac4efdf346a797190512f5576ba6975ee45e4519255aa54b8a3",
+        "bytes": 57042,
+        "rows": 211,
+        "columns": [
+          "",
+          "code",
+          "station_name",
+          "line",
+          "color",
+          "opening",
+          "type",
+          "blk_no",
+          "road_name",
+          "building",
+          "address",
+          "postal",
+          "x",
+          "y",
+          "latitude",
+          "longitude",
+          "planning_area_ura",
+          "region_ura"
+        ]
+      },
+      "team_raw_mrt_lrt_full_list.csv": {
+        "sha256": "f18a80aef457431198ddf8d1678a7cfa6777473d7a3e753f8ffa65353638b5c5",
+        "bytes": 60595,
+        "rows": 203,
+        "columns": [
+          "",
+          "ALPHANUMERIC_CODE",
+          "STATION_NAME_ENGLISH",
+          "STATION_NAME_CHINESE",
+          "LINE_ENGLISH",
+          "LINE_CHINESE",
+          "LINE_COLOR",
+          "OPENING_DATE",
+          "TRANSPORT_TYPE",
+          "SEARCHVAL",
+          "BLK_NO",
+          "ROAD_NAME",
+          "BUILDING",
+          "ADDRESS",
+          "POSTAL",
+          "X",
+          "Y",
+          "LATITUDE",
+          "LONGITUDE"
+        ]
+      },
+      "team_raw_mrt_station_locations.csv": {
+        "sha256": "83711ff0c82f043c28c9f1c595d74e566a9e695603ae1cbf9dfd06641c1c451e",
+        "bytes": 6028,
+        "rows": 172,
+        "columns": [
+          "station_name",
+          "type",
+          "lat",
+          "lng"
+        ]
+      },
+      "team_cleaned_mrt_stations_cleaned.csv": {
+        "sha256": "fe88a5d035131a76b37c17c2febb39176a81e6ae484b53f077bb49c7782978a3",
+        "bytes": 6045,
+        "rows": 172,
+        "columns": [
+          "station_name",
+          "transport_type",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "tracked_mrt_stations_sample.csv": {
+        "sha256": "fe88a5d035131a76b37c17c2febb39176a81e6ae484b53f077bb49c7782978a3",
+        "bytes": 6045,
+        "rows": 172,
+        "columns": [
+          "station_name",
+          "transport_type",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "bundled_mrt_lrt_full_list.csv": {
+        "sha256": "3a3504e5cead57ddd48902cc63fb52ff4e8c6108991142f3bd4b13e1cf1a867c",
+        "bytes": 54809,
+        "rows": 203,
+        "columns": [
+          "",
+          "ALPHANUMERIC_CODE",
+          "STATION_NAME_ENGLISH",
+          "LINE_ENGLISH",
+          "LINE_COLOR",
+          "OPENING_DATE",
+          "TRANSPORT_TYPE",
+          "SEARCHVAL",
+          "BLK_NO",
+          "ROAD_NAME",
+          "BUILDING",
+          "ADDRESS",
+          "POSTAL",
+          "X",
+          "Y",
+          "LATITUDE",
+          "LONGITUDE",
+          "Town",
+          "block_id"
+        ]
+      }
+    },
+    "B_archive_bytes_equal": true,
+    "B_cleaned_matches_by_order_name_type_and_coordinates": 172,
+    "cleaned_and_tracked_rail_sample_bytes_equal": true,
+    "B_station_codes_joinable_by_normalized_name_type": 199,
+    "B_unmatched_station_codes": [
+      "BP1",
+      "BP6",
+      "PTC",
+      "STC"
+    ],
+    "B_exact_coordinate_pairs_in_C_legacy_by_name_type": 0,
+    "B_exact_coordinate_pairs_in_bundled_rail_by_name_type": 0,
+    "C_legacy_archive_parsed_rows_equal": true,
+    "C_legacy_archive_bytes_equal_after_newline_normalization": true,
+    "C_legacy_line_endings": {
+      "archived_CRLF": 204,
+      "downloaded_LF": 204
+    },
+    "C_legacy_and_bundled_same_codes_and_order": true,
+    "C_legacy_unique_names": 171,
+    "C_legacy_to_bundled_text_differences_per_shared_column": {
+      "(unnamed index)": 0,
+      "ALPHANUMERIC_CODE": 0,
+      "STATION_NAME_ENGLISH": 0,
+      "LINE_ENGLISH": 0,
+      "LINE_COLOR": 0,
+      "OPENING_DATE": 203,
+      "TRANSPORT_TYPE": 0,
+      "SEARCHVAL": 0,
+      "BLK_NO": 0,
+      "ROAD_NAME": 0,
+      "BUILDING": 0,
+      "ADDRESS": 0,
+      "POSTAL": 23,
+      "X": 203,
+      "Y": 203,
+      "LATITUDE": 203,
+      "LONGITUDE": 203
+    },
+    "C_legacy_removed_columns": [
+      "STATION_NAME_CHINESE",
+      "LINE_CHINESE"
+    ],
+    "bundled_added_columns": [
+      "Town",
+      "block_id"
+    ],
+    "bundled_coordinate_values_matching_C_legacy_at_10_significant_digits": {
+      "LATITUDE": 203,
+      "LONGITUDE": 203,
+      "X": 203,
+      "Y": 203
+    },
+    "max_absolute_numeric_coordinate_delta": {
+      "LATITUDE": "4.9656E-10",
+      "LONGITUDE": "4.9947E-8",
+      "X": "0.0000049509",
+      "Y": "0.0000049737"
+    },
+    "bundled_opening_dates_matching_C_legacy_after_reformat": 203,
+    "bundled_postal_values_matching_C_legacy_after_padding_to_six": 203,
+    "bundled_station_postal_string_lengths": {
+      "6": 180,
+      "5": 23
+    },
+    "bundled_station_town_equals_uppercase_station_name": 203,
+    "bundled_station_ids_match_source_order_starting_at_9762": 203,
+    "station_place_field_mismatches": {
+      "block_number": 0,
+      "road_name": 0,
+      "postal": 0,
+      "latitude": 0,
+      "longitude": 0,
+      "town": 0
+    },
+    "C_dated_codes_added": [
+      "NE18",
+      "TE23",
+      "TE24",
+      "TE25",
+      "TE26",
+      "TE27",
+      "TE28",
+      "TE29"
+    ],
+    "C_dated_codes_missing_from_legacy": [],
+    "C_dated_text_differences_from_legacy_for_shared_codes": {
+      "STATION_NAME_ENGLISH": 0,
+      "LINE_ENGLISH": 0,
+      "LINE_COLOR": 0,
+      "OPENING_DATE": 0,
+      "TRANSPORT_TYPE": 0,
+      "BLK_NO": 0,
+      "ROAD_NAME": 0,
+      "BUILDING": 0,
+      "ADDRESS": 0,
+      "POSTAL": 0,
+      "X": 0,
+      "Y": 0,
+      "LATITUDE": 0,
+      "LONGITUDE": 0
+    },
+    "C_dated_planning_area_matches_bundled_Town_ignoring_case": 33,
+    "representative_records": [
+      {
+        "code": "NS1",
+        "name": "Jurong East",
+        "line": "North-South Line",
+        "color": "Red",
+        "type": "MRT",
+        "place_id": 9762,
+        "B_lat_lon": [
+          "1.333207",
+          "103.742308"
+        ],
+        "C_legacy_lat_lon": [
+          "1.33315281585758",
+          "103.742286332403"
+        ],
+        "bundled_lat_lon": [
+          "1.333152816",
+          "103.7422863"
+        ],
+        "C_legacy_postal": "609690",
+        "bundled_postal": "609690",
+        "bundled_town": "JURONG EAST",
+        "C_dated_planning_area": "JURONG EAST"
+      },
+      {
+        "code": "EW24",
+        "name": "Jurong East",
+        "line": "East-West Line",
+        "color": "Green",
+        "type": "MRT",
+        "place_id": 9812,
+        "B_lat_lon": [
+          "1.333207",
+          "103.742308"
+        ],
+        "C_legacy_lat_lon": [
+          "1.33315281585758",
+          "103.742286332403"
+        ],
+        "bundled_lat_lon": [
+          "1.333152816",
+          "103.7422863"
+        ],
+        "C_legacy_postal": "609690",
+        "bundled_postal": "609690",
+        "bundled_town": "JURONG EAST",
+        "C_dated_planning_area": "JURONG EAST"
+      },
+      {
+        "code": "NE1",
+        "name": "HarbourFront",
+        "line": "North East Line",
+        "color": "Purple",
+        "type": "MRT",
+        "place_id": 9824,
+        "B_lat_lon": [
+          "1.265453",
+          "103.820514"
+        ],
+        "C_legacy_lat_lon": [
+          "1.26538938374901",
+          "103.821530157095"
+        ],
+        "bundled_lat_lon": [
+          "1.265389384",
+          "103.8215302"
+        ],
+        "C_legacy_postal": "098867",
+        "bundled_postal": "98867",
+        "bundled_town": "HARBOURFRONT",
+        "C_dated_planning_area": "BUKIT MERAH"
+      },
+      {
+        "code": "PE1",
+        "name": "Cove",
+        "line": "Punggol LRT",
+        "color": "Grey",
+        "type": "LRT",
+        "place_id": 9952,
+        "B_lat_lon": [
+          "1.399534",
+          "103.905792"
+        ],
+        "C_legacy_lat_lon": [
+          "1.39928198837342",
+          "103.905961941214"
+        ],
+        "bundled_lat_lon": [
+          "1.399281988",
+          "103.9059619"
+        ],
+        "C_legacy_postal": "828858",
+        "bundled_postal": "828858",
+        "bundled_town": "COVE",
+        "C_dated_planning_area": "PUNGGOL"
+      },
+      {
+        "code": "TE1",
+        "name": "Woodlands North",
+        "line": "Thomson-East Coast Line",
+        "color": "Brown",
+        "type": "MRT",
+        "place_id": 9904,
+        "B_lat_lon": [
+          "1.4482",
+          "103.7851"
+        ],
+        "C_legacy_lat_lon": [
+          "1.44829245259621",
+          "103.785692682441"
+        ],
+        "bundled_lat_lon": [
+          "1.448292453",
+          "103.7856927"
+        ],
+        "C_legacy_postal": "737668",
+        "bundled_postal": "737668",
+        "bundled_town": "WOODLANDS NORTH",
+        "C_dated_planning_area": "WOODLANDS"
+      }
+    ]
+  },
+  "hdb": {
+    "sha256": {
+      "hdb_resale_transactions.csv": "bfa36790b89d192b9fc75fe8e22a73c72ce4c0dba87171c403b9120e3dc5a002",
+      "cleaned_v2/hdb_resale_cleaned.csv": "eba41cc00d94133f0066dc2ddccb808535675aedcc56aadd65b6e82d9a5eb0b3",
+      "cleaned_v2/hdb_resale_enriched.csv": "f4d02ad3cbc42b0dd35b3c062eeec74b80ae65c6309f198483ce98d7bd03695b",
+      "hdb_resale_enriched_block_id.csv": "5bec778da2fd65cd46ac038c6415f6e68791b1d4764ac7bbbc35bb9e9dd30176"
+    },
+    "rows_in_each_stage": 242634,
+    "distinct_hdb_addresses": 9761,
+    "difference_counts": {
+      "raw_to_cleaned_text": 238793,
+      "raw_to_cleaned_text_after_expected_normalization": 0,
+      "raw_to_cleaned_money_or_area": 0,
+      "raw_to_cleaned_month": 0,
+      "block_street_address": 0,
+      "cleaned_to_enriched_cells": 0,
+      "enriched_to_bundled_cells_excluding_dates_and_coordinates": 0,
+      "enriched_to_bundled_month": 0,
+      "latitude_changed": 24815,
+      "latitude_changed_not_10_significant_digits": 0,
+      "longitude_changed": 24281,
+      "longitude_changed_not_10_significant_digits": 0,
+      "inconsistent_block_id_for_sale_address": 0,
+      "hdb_block_id_differs_from_sorted_address_ordinal": 0,
+      "hdb_place_projected_cells": 0
+    },
+    "max_absolute_coordinate_delta": {
+      "latitude": "4.9997E-10",
+      "longitude": "4.9988E-8"
+    },
+    "hdb_place_postal_string_lengths": {
+      "6": 9664,
+      "5": 97
+    }
+  },
+  "team_exports": {
+    "file_sha256": {
+      "hdb_resale_enriched.csv": "a6c98240c7e8f3c2e14a6bb3498a72fbc422ea4d7ef3f4a12c3fdd155c6cdbe8",
+      "hdb_resale_enriched_with_postal.csv": "1adbad1ed0f39c334475efb73086edf9a1cdd7feb4b19dfa5fef87d789742811",
+      "hdb_resale_enriched_with_postal_v2.csv": "2a621c49f83e4920dcfb4494972239d4d0243492b4355d2fba4fa5993427b1e1",
+      "hdb_resale_enriched__postal_v2_cleanup.csv": "b0100e50109088b7e067864230c49c2e23322c25716f7206af3a53fcdf5fe0f5",
+      "hdb_resale_enriched_block_id.csv": "5bec778da2fd65cd46ac038c6415f6e68791b1d4764ac7bbbc35bb9e9dd30176",
+      "places_for_mysql.csv": "88b3e43454afd7b077e533cd2dc8e1835e3debe8a93e3b34cc43917bdbc77cde",
+      "mrt_lrt_full_list.csv": "3a3504e5cead57ddd48902cc63fb52ff4e8c6108991142f3bd4b13e1cf1a867c",
+      "postal.py": "ff7c4967211f9bbfced9adec9a10f42469700171b14028328ea5066b21c00947",
+      "postal_cleanup.py": "56955956ccb6c43bb60fef5a63a689a8a31419e46980c978d7eb4ca7dae8514c",
+      "blocks.py": "0a17befd7e46eac2cbd3efd32f70d9311030032a8625fe52f9fb6194f731fcb3",
+      "blocks_check.py": "498d9413bd9703c7477d8915233613080af8976584daa1b0b13004f5667486d6",
+      "place.py": "f0ffd5598dcfdfb69306b3dd568e5ad7533c75496df1fcbd5984380f7828923e",
+      "import.py": "2a0dbf8ce96cb57db521b69ec712b4fbfb04237d479d99ba038b7e4203d509d2"
+    },
+    "hdb_rows_in_each_stage": 242634,
+    "hdb_sample_date_by_stage": {
+      "hdb_resale_enriched.csv": "01/2017",
+      "hdb_resale_enriched_with_postal.csv": "01/2017",
+      "hdb_resale_enriched_with_postal_v2.csv": "01/2017",
+      "hdb_resale_enriched__postal_v2_cleanup.csv": "01-2017",
+      "hdb_resale_enriched_block_id.csv": "01-2017"
+    },
+    "hdb_NIL_sale_rows_by_stage": {
+      "hdb_resale_enriched_with_postal.csv": 241538,
+      "hdb_resale_enriched_with_postal_v2.csv": 8639,
+      "hdb_resale_enriched__postal_v2_cleanup.csv": 0,
+      "hdb_resale_enriched_block_id.csv": 0
+    },
+    "hdb_distinct_addresses_with_NIL_by_stage": {
+      "hdb_resale_enriched_with_postal.csv": 9761,
+      "hdb_resale_enriched_with_postal_v2.csv": 294,
+      "hdb_resale_enriched__postal_v2_cleanup.csv": 0,
+      "hdb_resale_enriched_block_id.csv": 0
+    },
+    "hdb_changes": {
+      "hdb_stage_address_mismatch": 0,
+      "first_to_v2_NIL_rows_filled": 232935,
+      "first_to_v2_existing_postals_changed": 36,
+      "v2_to_cleanup_NIL_rows_filled": 8639,
+      "v2_to_cleanup_existing_postals_changed": 0,
+      "cleanup_to_final_postal_text_changes": 2813,
+      "original_block_id_differs_from_final": 242633,
+      "cleanup_to_final_postals_only_lose_leading_zero": 2813
+    },
+    "hdb_addresses_with_leading_postal_zero_lost": 97,
+    "team_sales_and_bundle_bytes_equal": true,
+    "team_rail_and_bundle_bytes_equal": true,
+    "team_place_rows": 9761,
+    "team_places_is_literal_prefix_of_bundled_places": true,
+    "team_places_is_parsed_prefix_of_bundled_places": true,
+    "rail_intermediate": {
+      "sha256": "2a3280534a0c788511960077478243fa0bb5306992efe1f1f6dc70ab6fa6d19a",
+      "bytes": 51721,
+      "rows": 203,
+      "columns": [
+        "",
+        "ALPHANUMERIC_CODE",
+        "STATION_NAME_ENGLISH",
+        "LINE_ENGLISH",
+        "LINE_COLOR",
+        "OPENING_DATE",
+        "TRANSPORT_TYPE",
+        "SEARCHVAL",
+        "BLK_NO",
+        "ROAD_NAME",
+        "BUILDING",
+        "ADDRESS",
+        "POSTAL",
+        "X",
+        "Y",
+        "LATITUDE",
+        "LONGITUDE"
+      ],
+      "bundled_columns_added": [
+        "Town",
+        "block_id"
+      ],
+      "bundled_text_differences": {
+        "(unnamed index)": 0,
+        "ALPHANUMERIC_CODE": 0,
+        "STATION_NAME_ENGLISH": 0,
+        "LINE_ENGLISH": 0,
+        "LINE_COLOR": 0,
+        "OPENING_DATE": 0,
+        "TRANSPORT_TYPE": 0,
+        "SEARCHVAL": 0,
+        "BLK_NO": 0,
+        "ROAD_NAME": 0,
+        "BUILDING": 0,
+        "ADDRESS": 0,
+        "POSTAL": 23,
+        "X": 0,
+        "Y": 0,
+        "LATITUDE": 0,
+        "LONGITUDE": 0
+      },
+      "intermediate_to_bundled_postals_recoverable_by_padding": 203
+    }
+  },
+  "places": {
+    "rows": 9964,
+    "sha256": "71ad1080d10364af5fe95a16acf08edc3a4d3b88e0b7a563f88ce63349cfaee7",
+    "ids_are_consecutive_in_file_order": true
+  }
+}

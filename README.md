@@ -128,11 +128,11 @@ Market rankings and comparables use the shared resale table, which contains the 
 
 The HDB registration data is published by the Housing & Development Board. The optional geocoding workflow uses the Singapore Land Authority’s OneMap Search API. [HDB resale dataset](https://data.gov.sg/collections/189/datasets/d_8b84c4ee58e3cfc0ece0d773c8ca6abc/view) · [OneMap Search API](https://www.onemap.gov.sg/apidocs/search)
 
-The rail input is the `mrt_lrt_full_list.csv` in the team's `raw_data.zip` snapshot. The bundled rail file retains the same 203 station codes and adds a town and a `block_id` for each. The original rail publisher and download URL still need confirmation.
+The rail input in the team's `raw_data.zip` matches Timothy Lim's legacy `mrt_lrt_stations.csv` after line-ending normalization. The bundled file retains all 203 station codes and rounds the legacy coordinates to 10 significant digits. Each code gets a `block_id` and an uppercased station-name label in the `Town` column. CZTanData's separate coordinate file supplied the 172-row station sample. [Railway source verification](docs/rail-data-provenance.md)
 
 For optional data preparation, put `hdb_resale_transactions.csv` and `mrt_lrt_full_list.csv` in the local `data/raw/` directory. Run `00_inspect.py`, `03_clean_hdb.py`, `04_clean_mrt.py`, and `05_make_samples.py` from `data/scripts/data_prep/` to inspect and clean the inputs and produce sample files. The station cleaner produces a station-name-level output. With a valid OneMap token, run `06_geocode_hdb.py` followed by `07_merge_geo.py` to attach coordinates and produce `data/cleaned/hdb_resale_enriched.csv`.
 
-The team prepared the bundled HDB file by adding postal codes from OneMap and assigning a `block_id` to each unique address. The final station export adds station towns and distinct place IDs to the original station codes. The MySQL importer starts from the three bundled files in the table above. [Dataset preparation and verified links](setup/import_data_script/ImportInstructions.md#how-the-import-files-were-prepared)
+The team prepared the bundled HDB file by adding postal codes from OneMap and assigning a `block_id` to each unique address. The MySQL importer starts from the three bundled files in the table above. [Dataset preparation and verified links](setup/import_data_script/ImportInstructions.md#how-the-import-files-were-prepared)
 
 ## Repository map
 

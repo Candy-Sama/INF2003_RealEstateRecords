@@ -1,0 +1,10 @@
+Offline replay of two team scripts. pandas 3.1.1
+Loading dataset from hdb_resale_enriched__postal_v2_cleanup.csv...
+Successfully updated block IDs!
+Total rows: 242634
+Total unique blocks/addresses: 9761
+Saved new file to: hdb_resale_enriched_block_id.csv
+Byte-identical team export: hdb_resale_enriched_block_id.csv 5bec778da2fd65cd46ac038c6415f6e68791b1d4764ac7bbbc35bb9e9dd30176
+Loading dataset from hdb_resale_enriched_block_id.csv...
+Successfully generated 'places_for_mysql.csv' with exactly 9761 unique rows!
+Byte-identical team export: places_for_mysql.csv 88b3e43454afd7b077e533cd2dc8e1835e3debe8a93e3b34cc43917bdbc77cde
